@@ -1,0 +1,94 @@
+{% extends "_base.html" %}
+{% block title %}Open Loops — pa-agent{% endblock %}
+{% block content %}
+<h1 style="margin-top:0;">Open loops <span class="pill">{{ total }}</span></h1>
+<p style="color:var(--muted);max-width:680px">
+  Items waar nog actie verwacht wordt — inkomende vragen die jij moet beantwoorden,
+  uitgaande verzoeken waar jij op iemand wacht, of meeting-actiepunten van Plaud.
+  Sluiten gebeurt automatisch wanneer er een reply in dezelfde thread komt;
+  manueel kan via de knoppen rechts.
+</p>
+
+{% if message %}
+  <p class="pill ok" style="display:inline-block;padding:6px 10px;">{{ message }}</p>
+{% endif %}
+
+<div class="filters">
+  {% set known_kinds = [
+    ("incoming_question", "📨 Vraag aan jou"),
+    ("incoming_task",     "✅ Task voor jou"),
+    ("outgoing_request",  "⏳ Wachtend op anderen"),
+    ("meeting_action_self",  "🎙️ Meeting-actie (jij)"),
+    ("meeting_action_other", "🎙️ Meeting-actie (anderen)")
+  ] %}
+  <span style="color:var(--muted)">filter:</span>
+  <a href="/loops" class="pill" style="{% if not kind %}background:var(--accent);color:white{% endif %}">alle</a>
+  {% for k, label in known_kinds %}
+    <a href="/loops?kind={{ k }}" class="pill" style="{% if kind == k %}background:var(--accent);color:white{% endif %}">{{ label }}</a>
+  {% endfor %}
+  <form method="get" action="/loops" style="margin-left:auto;display:flex;gap:6px;">
+    <input type="hidden" name="kind" value="{{ kind }}">
+    <input name="who" value="{{ who }}" placeholder="who-substring..."
+           style="padding:4px 8px;border:1px solid var(--bd);border-radius:4px;background:var(--bg);color:var(--fg);font-size:12px;">
+    <button type="submit">filter</button>
+  </form>
+</div>
+
+{% if total == 0 %}
+  <p style="color:var(--muted);font-style:italic;margin-top:24px">
+    Geen open loops {% if kind or who %}met huidige filters{% endif %}.
+    Goed nieuws — of <a href="/loops">filters resetten</a>.
+  </p>
+{% endif %}
+
+{% for kind_key, label in known_kinds %}
+  {% set rows = by_kind.get(kind_key, []) %}
+  {% if rows %}
+    <h2 style="margin-top:24px">{{ label }} <span class="pill">{{ rows|length }}</span></h2>
+    <table>
+      <thead>
+        <tr>
+          <th>id</th>
+          <th>who</th>
+          <th>action</th>
+          <th>title / subject</th>
+          <th>age</th>
+          <th>actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td><span class="pill">#{{ r.id }}</span></td>
+          <td style="color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ r.who or "" }}</td>
+          <td style="max-width:380px">
+            {% if r.action_summary %}
+              <strong>{{ r.action_summary }}</strong>
+            {% else %}
+              <em style="color:var(--muted)">{{ r.body_excerpt[:120] if r.body_excerpt else "—" }}</em>
+            {% endif %}
+          </td>
+          <td style="color:var(--muted);max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ r.title }}</td>
+          <td>
+            {% if r.age_days == 0 %}<span class="pill">vandaag</span>
+            {% elif r.age_days < 7 %}<span class="pill">{{ r.age_days }}d</span>
+            {% elif r.age_days < 30 %}<span class="pill warn">{{ r.age_days }}d</span>
+            {% else %}<span class="pill err">{{ r.age_days }}d</span>{% endif %}
+          </td>
+          <td style="white-space:nowrap;">
+            <form method="post" action="/loops/{{ r.id }}/close" style="display:inline;">
+              <button type="submit" style="padding:2px 8px;font-size:12px;border:1px solid var(--bd);border-radius:3px;background:var(--bg);color:var(--fg);cursor:pointer;">close</button>
+            </form>
+            <form method="post" action="/loops/{{ r.id }}/snooze" style="display:inline;">
+              <input type="number" name="days" value="7" min="1" max="365"
+                     style="width:48px;padding:2px 4px;font-size:12px;border:1px solid var(--bd);border-radius:3px;background:var(--bg);color:var(--fg);">
+              <button type="submit" style="padding:2px 8px;font-size:12px;border:1px solid var(--bd);border-radius:3px;background:var(--bg);color:var(--fg);cursor:pointer;">snooze</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+{% endfor %}
+{% endblock %}

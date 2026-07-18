@@ -1,0 +1,73 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rosa"
+version = "0.1.0"
+description = "Rosa — privacy-first personal AI assistant for macOS. Local-first, privacy-gated, iMessage-driven."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["core*", "integrations*", "models*", "privacy*", "extensions*", "web*"]
+
+[tool.setuptools.package-data]
+"*" = ["py.typed"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E", "F", "W",     # pycodestyle + pyflakes
+    "I",               # isort
+    "B",               # bugbear
+    "UP",              # pyupgrade
+    "SIM",             # simplify
+    "RUF",             # ruff-specific
+    "ARG",             # unused arguments
+    "PTH",             # pathlib over os.path
+]
+ignore = [
+    "E501",  # long lines — handled by formatter
+    "B008",  # function call in default arg (common with Pydantic-style code)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["ARG"]   # pytest fixtures often look unused
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+disallow_untyped_defs = true
+disallow_any_generics = true
+no_implicit_optional = true
+files = ["src", "tests"]
+
+[[tool.mypy.overrides]]
+# Third-party libs without type stubs — silence module-level errors only.
+module = [
+    "faster_whisper.*",
+    "google.auth.*",
+    "google.oauth2.*",
+    "google_auth_oauthlib.*",
+    "googleapiclient.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = "-q --strict-markers --strict-config"
+filterwarnings = ["error"]
+markers = [
+    "slow: tests that hit the disk or load big models",
+    "integration: tests that touch external services (skip in CI by default)",
+]

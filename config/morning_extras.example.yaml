@@ -1,0 +1,58 @@
+# Weer + nieuws voor de ochtendbriefing.
+#
+# Locatie: gebruikt in de Open-Meteo weer-call (gratis, geen API-key).
+# Coördinaten kun je vinden op https://open-meteo.com/en/docs.
+
+location:
+  name: "your-home-city"
+  latitude: YOUR_LAT
+  longitude: YOUR_LON
+  timezone: "Europe/Amsterdam"
+
+# RSS-bronnen die elke ochtend worden opgehaald. Lokaal Llama selecteert
+# uit alle headlines de top-N op basis van `interests` hieronder.
+news_feeds:
+  - name: "NOS Binnenland"
+    url: "https://feeds.nos.nl/nosnieuwsbinnenland"
+    domain: "nl_nieuws"
+  - name: "NRC"
+    url: "https://www.nrc.nl/rss/"
+    domain: "nl_diepgang"
+  - name: "Volkskrant"
+    url: "https://www.volkskrant.nl/voorpagina/rss.xml"
+    domain: "nl_diepgang"
+  - name: "BNR Nieuws"
+    url: "https://www.bnr.nl/rss"
+    domain: "nl_zakelijk"
+  - name: "NOS Buitenland"
+    url: "https://feeds.nos.nl/nosnieuwsbuitenland"
+    domain: "wereld"
+  - name: "BBC World"
+    url: "http://feeds.bbci.co.uk/news/world/rss.xml"
+    domain: "wereld"
+  - name: "BBC Middle East"
+    url: "http://feeds.bbci.co.uk/news/world/middle_east/rss.xml"
+    domain: "iran_oorlog"
+  - name: "BBC US & Canada"
+    url: "http://feeds.bbci.co.uk/news/world/us_and_canada/rss.xml"
+    domain: "amerika"
+  - name: "Reuters World"
+    url: "https://feeds.reuters.com/Reuters/worldNews"
+    domain: "wereld"
+  - name: "ISW Ukraine"
+    url: "https://www.understandingwar.org/backgrounder/feed"
+    domain: "oekraine_oorlog"
+
+news:
+  # Hoeveel headlines uiteindelijk in de briefing.
+  top_n: 5
+  # yous interesses — Llama gebruikt dit om te ranken.
+  interests:
+    - "Nederlandse politiek"
+    - "wereldwijde politiek"
+    - "Verenigde Staten"
+    - "oorlog en geopolitiek"
+    - "Iran"
+    - "Oekraïne"
+  # Alleen items van afgelopen N uur (filter oude RSS-content uit).
+  max_age_hours: 24

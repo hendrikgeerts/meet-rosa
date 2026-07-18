@@ -1,0 +1,33 @@
+# TenderNed-monitor configuratie (optioneel).
+#
+# Rosa pollt de publieke JSON-feed van TenderNed.nl elke 30 min en
+# alerteert via iMessage bij nieuwe aanbestedingen die match maken op
+# AV/narrowcasting/digital signage. Geen API-key, geen auth.
+#
+# Heel dit blok is optioneel — defaults uit src/core/config.py:
+# Settings worden gebruikt als settings.yaml geen `tenders`-sectie
+# heeft. Filter-trefwoorden + CPV-codes zelf zitten hard-coded in
+# src/extensions/tenders/matcher.py (DEFAULT_FILTER); wijzig daar
+# als je de scope wilt aanpassen.
+
+tenders:
+  enabled: true
+
+  # Polling-interval in seconden. 1800 = 30 min. TenderNed publiceert
+  # ~100-200 items/dag, met size=100 mis je niets bij 30 min interval.
+  poll_interval_seconds: 1800
+
+  # Aantal recente publicaties per fetch (1-500). Hoger = meer head-
+  # room als er kort een publicatie-burst is.
+  page_size: 100
+
+  # Skip alerts voor publicaties waarvan de sluitingsdatum al voorbij
+  # is — je kunt er toch niet meer op inschrijven. Schakel uit als je
+  # ALLES wilt zien, ook voor research-doeleinden.
+  skip_expired: true
+
+  # Stuur per aanbesteding-keten (kenmerk) MAXIMAAL één alert. Latere
+  # rectificaties of gunnings-aankondigingen worden opgeslagen maar
+  # niet opnieuw gepingd. Schakel uit als je elk publicatie-update
+  # wilt zien.
+  skip_rectifications: true

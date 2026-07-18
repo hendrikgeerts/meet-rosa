@@ -1,0 +1,9 @@
+# Developer / CI tools — install on top of requirements.txt:
+#   pip install -r requirements.txt -r requirements-dev.txt
+
+ruff>=0.6.0
+mypy>=1.11.0
+pytest>=8.3.0
+pytest-cov>=5.0.0
+respx>=0.21.0          # HTTP mocking for httpx-based clients (Anthropic SDK)
+types-PyYAML>=6.0      # mypy stubs for pyyaml

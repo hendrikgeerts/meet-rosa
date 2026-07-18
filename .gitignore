@@ -1,0 +1,51 @@
+# Python build / venv / cache
+venv/
+venv-*/
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Secrets — NEVER commit
+.env
+secrets.env
+google_credentials.json
+
+# Per-user config (only the .example.yaml siblings are tracked)
+config/settings.yaml
+config/config.yaml
+config/vip_contacts.yaml
+config/confidential_domains.yaml
+config/imap_accounts.yaml
+config/slack_workspaces.yaml
+config/morning_extras.yaml
+config/uptime.yaml
+config/tenders.yaml
+config/user_profile.yaml
+config/okrs.yaml
+config/news_sources.yaml
+# Script-generated backups of any of the above (e.g. enrich_vip_names
+# writes vip_contacts.yaml.bak before --apply).
+config/*.bak
+config/*.bak.*
+
+# Wizard-generated per-installation state (also generated in ROSA_HOME
+# but check here defensively for anyone using ROSA_HOME=<repo> setups)
+.wizard_state.json
+google_token.json
+google_credentials.json
+data/research/*.xlsx
+
+# Runtime data — all derived state lives here
+data/
+
+# Legacy locations from the pre-refactor scaffolding (kept defensively)
+db/
+logs/
+
+# macOS junk
+.DS_Store
+okrs.yaml

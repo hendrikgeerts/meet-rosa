@@ -1,0 +1,288 @@
+/* Rosa Setup Wizard — huisstijl afgeleid van hge-ventures.com/rosa/.
+   Zie docs/DESIGN.md voor alle tokens. */
+
+:root {
+  --rosa-navy: #0f172a;
+  --rosa-charcoal: #1e293b;
+  --rosa-text: #334155;
+  --rosa-green: #10b981;
+  --rosa-green-hover: #059669;
+  --rosa-red: #dc2626;
+  --rosa-cream: #fafaf5;
+  --rosa-white: #ffffff;
+  --rosa-border: #e2e8f0;
+  --rosa-muted: #94a3b8;
+  --rosa-muted-bg: #f1f5f9;
+
+  --rosa-font-heading: 'Inter', -apple-system, BlinkMacSystemFont,
+                       'SF Pro Display', sans-serif;
+  --rosa-font-body: 'Inter', -apple-system, BlinkMacSystemFont,
+                    'SF Pro Text', sans-serif;
+  --rosa-font-mono: 'SF Mono', 'JetBrains Mono', 'Menlo', monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--rosa-font-body);
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--rosa-text);
+  background: var(--rosa-cream);
+  min-height: 100vh;
+}
+
+/* --- layout --------------------------------------------------------- */
+
+.rosa-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+}
+
+.rosa-header {
+  margin-bottom: 2.5rem;
+}
+
+.rosa-header h1 {
+  font-family: var(--rosa-font-heading);
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--rosa-navy);
+  margin: 0 0 0.5rem;
+}
+
+.rosa-header .subtitle {
+  color: var(--rosa-muted);
+  font-size: 0.9375rem;
+}
+
+/* --- progress-bar --------------------------------------------------- */
+
+.rosa-wizard-progress {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.rosa-wizard-progress-step {
+  flex: 1;
+  height: 4px;
+  background: var(--rosa-border);
+  border-radius: 2px;
+  transition: background 200ms ease;
+}
+
+.rosa-wizard-progress-step.done { background: var(--rosa-green); }
+.rosa-wizard-progress-step.active { background: var(--rosa-navy); }
+
+/* --- card ----------------------------------------------------------- */
+
+.rosa-card {
+  background: var(--rosa-white);
+  border: 1px solid var(--rosa-border);
+  border-radius: 6px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.rosa-card h2 {
+  font-family: var(--rosa-font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--rosa-navy);
+  margin: 0 0 0.75rem;
+}
+
+.rosa-card .lead {
+  color: var(--rosa-text);
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* --- form ----------------------------------------------------------- */
+
+.rosa-field {
+  margin-bottom: 1.5rem;
+}
+
+.rosa-label {
+  display: block;
+  font-weight: 500;
+  font-size: 0.9375rem;
+  color: var(--rosa-navy);
+  margin-bottom: 0.5rem;
+}
+
+.rosa-label .required {
+  color: var(--rosa-red);
+  margin-left: 0.25rem;
+}
+
+.rosa-hint {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--rosa-muted);
+  margin-top: 0.375rem;
+  line-height: 1.5;
+}
+
+.rosa-input,
+.rosa-select,
+.rosa-textarea {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--rosa-border);
+  border-radius: 4px;
+  font-size: 0.9375rem;
+  font-family: var(--rosa-font-body);
+  background: var(--rosa-white);
+  color: var(--rosa-text);
+  transition: border-color 120ms ease;
+}
+
+.rosa-input:focus,
+.rosa-select:focus,
+.rosa-textarea:focus {
+  outline: none;
+  border-color: var(--rosa-navy);
+}
+
+.rosa-input.error {
+  border-color: var(--rosa-red);
+}
+
+.rosa-textarea {
+  min-height: 6rem;
+  font-family: var(--rosa-font-mono);
+  font-size: 0.875rem;
+}
+
+.rosa-checkbox {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 1rem;
+  background: var(--rosa-muted-bg);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.rosa-checkbox input { margin-top: 0.15rem; }
+
+.rosa-checkbox span {
+  font-size: 0.9375rem;
+  color: var(--rosa-text);
+  line-height: 1.5;
+}
+
+/* --- callouts ------------------------------------------------------- */
+
+.rosa-callout {
+  padding: 1rem 1.25rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  margin: 1rem 0;
+  line-height: 1.55;
+}
+
+.rosa-callout.info {
+  background: var(--rosa-muted-bg);
+  border-left: 3px solid var(--rosa-green);
+  color: var(--rosa-text);
+}
+
+.rosa-callout.warn {
+  background: #fef3c7;
+  border-left: 3px solid #d97706;
+  color: #78350f;
+}
+
+.rosa-callout.error {
+  background: #fef2f2;
+  border-left: 3px solid var(--rosa-red);
+  color: #7f1d1d;
+}
+
+/* --- buttons -------------------------------------------------------- */
+
+.rosa-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 2rem;
+}
+
+.rosa-actions .spacer { flex: 1; }
+
+.rosa-btn {
+  padding: 0.625rem 1.25rem;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.9375rem;
+  font-family: var(--rosa-font-body);
+  border: 1px solid transparent;
+  transition: background 120ms ease, border-color 120ms ease;
+  cursor: pointer;
+}
+
+.rosa-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rosa-btn.primary {
+  background: var(--rosa-navy);
+  color: var(--rosa-cream);
+}
+.rosa-btn.primary:hover:not(:disabled) { background: var(--rosa-charcoal); }
+
+.rosa-btn.cta {
+  background: var(--rosa-green);
+  color: var(--rosa-white);
+}
+.rosa-btn.cta:hover:not(:disabled) { background: var(--rosa-green-hover); }
+
+.rosa-btn.secondary {
+  background: transparent;
+  color: var(--rosa-navy);
+  border-color: var(--rosa-border);
+}
+.rosa-btn.secondary:hover:not(:disabled) { background: var(--rosa-muted-bg); }
+
+.rosa-btn.ghost {
+  background: transparent;
+  color: var(--rosa-muted);
+  border-color: transparent;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+.rosa-btn.ghost:hover:not(:disabled) { color: var(--rosa-navy); }
+
+/* --- misc ----------------------------------------------------------- */
+
+.rosa-footer {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rosa-border);
+  font-size: 0.8125rem;
+  color: var(--rosa-muted);
+  text-align: center;
+}
+
+.rosa-status-tag {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+
+.rosa-status-tag.optional {
+  background: var(--rosa-muted-bg);
+  color: var(--rosa-muted);
+}

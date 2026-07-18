@@ -1,0 +1,58 @@
+{% extends "_base.html" %}
+{% block title %}Projects — pa-agent{% endblock %}
+{% block content %}
+<h2>Projects</h2>
+
+<div class="filters">
+  <form method="get" action="/projects" style="display: flex; gap: 8px;">
+    <label>status
+      <select name="status">
+        <option value="">all</option>
+        {% for s in ['active','paused','done','abandoned'] %}
+        <option value="{{ s }}" {% if status == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>company
+      <input type="text" name="company" value="{{ company or '' }}" placeholder="DST / HGE / ...">
+    </label>
+    <button type="submit">filter</button>
+  </form>
+  <a href="/projects/new" style="margin-left: auto;">+ new project</a>
+</div>
+
+{% if message %}
+  <p class="ok">{{ message }}</p>
+{% endif %}
+
+<table>
+  <thead>
+    <tr>
+      <th>title</th>
+      <th>slug</th>
+      <th>status</th>
+      <th>company</th>
+      <th>owner</th>
+      <th>deadline</th>
+      <th>updated</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in projects %}
+    <tr>
+      <td><a href="/projects/{{ p.slug }}">{{ p.title }}</a></td>
+      <td><span class="pill">{{ p.slug }}</span></td>
+      <td>
+        <span class="label label-{{ 'public' if p.status == 'active' else ('confidential' if p.status == 'abandoned' else 'internal') }}">{{ p.status }}</span>
+      </td>
+      <td>{{ p.company or '—' }}</td>
+      <td>{{ p.owner or '—' }}</td>
+      <td>{{ p.deadline or '—' }}</td>
+      <td>{{ p.updated }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" style="text-align:center; color: var(--muted); padding: 20px;">No projects yet — <a href="/projects/new">create one</a>.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

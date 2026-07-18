@@ -1,0 +1,92 @@
+{% extends "_base.html" %}
+{% block title %}{{ 'Edit' if account else 'New' }} IMAP account — pa-agent{% endblock %}
+{% block content %}
+<h2>{{ 'Edit' if account else 'New' }} IMAP account</h2>
+
+{% if error %}
+  <p class="err">{{ error }}</p>
+{% endif %}
+
+<p style="color: var(--muted); font-size: 12px; max-width: 700px;">
+  Wachtwoord wordt direct in macOS Keychain opgeslagen (service
+  <code>pa-agent-imap</code>) — komt niet in yaml of logfile. Bij
+  edit: laat het wachtwoord-veld leeg om het bestaande Keychain-
+  wachtwoord te behouden.
+</p>
+
+<form method="post" action="{{ '/imap-accounts/' + account.name + '/edit' if account else '/imap-accounts/new' }}"
+      autocomplete="off"
+      style="display: grid; grid-template-columns: 220px 1fr; gap: 10px 12px; max-width: 800px;">
+  <label for="name">Name * <small style="color: var(--muted);">(unique key)</small></label>
+  <input id="name" name="name" type="text" required value="{{ account.name if account else '' }}"
+         placeholder="hendrikdpm"
+         {% if account %}readonly style="opacity: 0.6;"{% endif %}>
+
+  <label for="label">Label</label>
+  <input id="label" name="label" type="text" value="{{ account.label if account else '' }}"
+         placeholder="DPM mailbox">
+
+  <label for="host">IMAP host *</label>
+  <input id="host" name="host" type="text" required value="{{ account.host if account else '' }}"
+         placeholder="mail.example.nl">
+
+  <label for="port">Port</label>
+  <input id="port" name="port" type="number" value="{{ account.port if account else 993 }}" min="1" max="65535">
+
+  <label for="ssl">SSL/TLS</label>
+  <input id="ssl" name="ssl" type="checkbox" value="1" {% if (not account) or account.ssl %}checked{% endif %} style="width: auto; justify-self: start;">
+
+  <label for="username">Username *</label>
+  <input id="username" name="username" type="text" required value="{{ account.username if account else '' }}"
+         placeholder="hendrik@example.nl"
+         autocomplete="off">
+
+  <label for="password">Password{% if not account %} *{% endif %} <small style="color: var(--muted);">{% if account %}leeg laten = behouden{% endif %}</small></label>
+  <input id="password" name="password" type="password" {% if not account %}required{% endif %}
+         autocomplete="new-password">
+
+  <label for="folder_inbox">Inbox folder</label>
+  <input id="folder_inbox" name="folder_inbox" type="text"
+         value="{{ account.folders.inbox if account else 'INBOX' }}">
+
+  <label for="folder_sent">Sent folder <small style="color: var(--muted);">(check via test)</small></label>
+  <input id="folder_sent" name="folder_sent" type="text"
+         value="{{ account.folders.sent if account else 'Sent' }}"
+         placeholder="Sent / Sent Messages / Verzonden items">
+
+  <label for="enabled">Enabled</label>
+  <input id="enabled" name="enabled" type="checkbox" value="1" {% if (not account) or account.enabled %}checked{% endif %} style="width: auto; justify-self: start;">
+
+  <h3 style="grid-column: 1 / -1; margin: 16px 0 0 0; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;">SMTP (optional — for sending replies)</h3>
+
+  <label for="smtp_host">SMTP host</label>
+  <input id="smtp_host" name="smtp_host" type="text" value="{{ account.smtp_host or '' if account else '' }}"
+         placeholder="mail.example.nl (zelfde als IMAP, vaak)">
+
+  <label for="smtp_port">SMTP port</label>
+  <input id="smtp_port" name="smtp_port" type="number" value="{{ account.smtp_port if account else 587 }}" min="1" max="65535">
+
+  <label for="smtp_starttls">STARTTLS</label>
+  <input id="smtp_starttls" name="smtp_starttls" type="checkbox" value="1" {% if (not account) or account.smtp_use_starttls %}checked{% endif %} style="width: auto; justify-self: start;">
+
+  <label for="from_address">From address</label>
+  <input id="from_address" name="from_address" type="text" value="{{ account.from_address or '' if account else '' }}"
+         placeholder="(default: username)">
+
+  <label for="from_name">From name</label>
+  <input id="from_name" name="from_name" type="text" value="{{ account.from_name or '' if account else '' }}"
+         placeholder="Hendrik Geerts">
+
+  <div></div>
+  <div style="display: flex; gap: 12px; align-items: center; margin-top: 16px;">
+    <button type="submit" style="padding: 6px 16px; background: var(--accent); color: white; border: none; border-radius: 4px; cursor: pointer;">Save</button>
+    <a href="/imap-accounts">Cancel</a>
+  </div>
+</form>
+
+<p style="color: var(--muted); font-size: 11px; margin-top: 20px; max-width: 700px;">
+  Na opslaan wordt automatisch een test-connectie gedaan. Als die faalt
+  blijft de yaml-entry intact maar zie je de error — fix host/poort/
+  username/password en sla opnieuw op.
+</p>
+{% endblock %}

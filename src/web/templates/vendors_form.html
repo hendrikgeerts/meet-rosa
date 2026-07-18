@@ -1,0 +1,91 @@
+{% extends "_base.html" %}
+{% block title %}{{ 'Edit' if vendor else 'New' }} vendor strategy — pa-agent{% endblock %}
+{% block content %}
+<h2>{{ 'Edit' if vendor else 'New' }} vendor strategy</h2>
+
+{% if error %}<p class="err">{{ error }}</p>{% endif %}
+
+{% if prefill_amount or prefill_date %}
+<p style="background: var(--code-bg); padding: 8px 12px; border-radius: 4px; font-size: 13px;">
+  Voorbeeld-transactie uit run: €{{ prefill_amount }} op {{ prefill_date }}
+</p>
+{% endif %}
+
+<form method="post" action="{{ '/vendors/' + vendor.id|string + '/edit' if vendor else '/vendors/new' }}"
+      style="display: grid; grid-template-columns: 200px 1fr; gap: 10px 12px; max-width: 800px;">
+  <label for="name">Canonical name *</label>
+  <input id="name" name="name" type="text" required value="{{ vendor.name if vendor else (prefill_name or '') }}"
+         placeholder="bv. Amazon / Datadog / DocuSign">
+
+  <label for="source_kind">Source *</label>
+  <select id="source_kind" name="source_kind" required>
+    <option value="email"  {% if vendor and vendor.source_kind == 'email' %}selected{% endif %}>email — Rosa zoekt automatisch</option>
+    <option value="portal" {% if vendor and vendor.source_kind == 'portal' %}selected{% endif %}>portal — handmatig downloaden</option>
+    <option value="manual" {% if vendor and vendor.source_kind == 'manual' %}selected{% endif %}>manual — andere bron (kassabon, geen factuur)</option>
+  </select>
+
+  <label for="aliases">Aliases (comma-separated)</label>
+  <input id="aliases" name="aliases" type="text"
+         value="{{ vendor.aliases | join(', ') if vendor else (prefill_alias or '') }}"
+         placeholder="bv. amazon, aws, amazon web services">
+  <small style="grid-column: 2 / 3; color: var(--muted); margin-top: -6px;">
+    Match-tekst die in de Excel-vendor-kolom kan staan (case-insensitive substring).
+  </small>
+
+  <label for="email_query_hint">Email hint <small style="color: var(--muted);">(als source=email)</small></label>
+  <div style="display: flex; gap: 8px;">
+    <input id="email_query_hint" name="email_query_hint" type="text" style="flex: 1;"
+           value="{{ vendor.email_query_hint or '' if vendor else '' }}"
+           placeholder="bv. from:billing@aws.amazon.com">
+    <button type="button" id="suggest-email-btn"
+            style="padding: 4px 10px; background: var(--code-bg); border: 1px solid var(--bd); border-radius: 4px; cursor: pointer; font-size: 12px;"
+            title="Llama gokt het waarschijnlijke from-pattern voor deze vendor">💡 Suggest</button>
+  </div>
+  <small style="grid-column: 2 / 3; color: var(--muted); margin-top: -6px;">
+    Gmail-syntax. Tip: probeer eerst <code>from:domeinnaam.com</code> als je de exact mailadres niet weet.
+  </small>
+
+  <label for="portal_url">Portal URL <small style="color: var(--muted);">(als source=portal)</small></label>
+  <input id="portal_url" name="portal_url" type="text"
+         value="{{ vendor.portal_url or '' if vendor else '' }}"
+         placeholder="https://admin.example.com">
+
+  <label for="portal_notes">Portal notes</label>
+  <textarea id="portal_notes" name="portal_notes" rows="3" style="resize: vertical;"
+            placeholder="Stappen om de factuur te downloaden, bv. 'Login → Billing → Invoices → laatste maand'">{{ vendor.portal_notes or '' if vendor else '' }}</textarea>
+
+  <div></div>
+  <div style="display: flex; gap: 12px; align-items: center; margin-top: 16px;">
+    <button type="submit" style="padding: 6px 16px; background: var(--accent); color: white; border: none; border-radius: 4px; cursor: pointer;">Save</button>
+    <a href="/vendors">Cancel</a>
+  </div>
+</form>
+
+<script>
+document.getElementById('suggest-email-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('suggest-email-btn');
+  const name = document.getElementById('name').value.trim();
+  if (!name) { alert('Vul eerst een naam in'); return; }
+  btn.disabled = true; btn.textContent = '⏳ Llama denkt na (~25s)...';
+  try {
+    const resp = await fetch('/api/suggest/vendor-email-hint', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({name}),
+    });
+    const data = await resp.json();
+    if (data.hint) {
+      document.getElementById('email_query_hint').value = data.hint;
+      // Schakel automatisch source naar 'email' als dat zinvol is
+      const sk = document.getElementById('source_kind');
+      if (sk.value !== 'email') sk.value = 'email';
+    } else {
+      alert('Llama wist geen suggestie: ' + (data.note || data.error || '?'));
+    }
+  } catch (e) {
+    alert('Suggest faalde: ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = '💡 Suggest';
+  }
+});
+</script>
+{% endblock %}

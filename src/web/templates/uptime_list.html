@@ -1,0 +1,137 @@
+{% extends "_base.html" %}
+{% block title %}Uptime — pa-agent{% endblock %}
+{% block content %}
+<h1 style="margin-top:0;">Uptime <span class="pill">{{ targets|length }}</span></h1>
+<p style="color:var(--muted);max-width:680px">
+  Periodieke HTTP-checks op je SaaS-platforms. Bij {{ fail_threshold_hint }}
+  opeenvolgende fails stuurt Rosa een alert via iMessage + voice-bubble
+  + Ntfy push. Recovery wordt automatisch gemeld zodra het platform terug online is.
+</p>
+
+{% if not targets %}
+  <p style="color:var(--muted);font-style:italic;margin-top:24px">
+    Geen targets geconfigureerd. Voeg ze toe in <code>config/uptime.yaml</code>.
+  </p>
+{% else %}
+
+<table style="margin-top:18px">
+  <thead>
+    <tr>
+      <th>Target</th>
+      <th>Status</th>
+      <th>Laatste check</th>
+      <th>HTTP</th>
+      <th>Latency</th>
+      <th>Failures</th>
+      <th>Down sinds</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for t in targets %}
+    <tr>
+      <td>
+        <strong>{{ t.name }}</strong><br>
+        <a href="{{ t.url }}" target="_blank" rel="noopener"
+           style="font-size:12px;color:var(--muted)">{{ t.url }}</a>
+      </td>
+      <td>
+        {% if t.silence_until and t.silence_until > now_ts %}
+          <span class="pill" style="background:#888;color:white">🤫 silenced</span>
+        {% elif t.is_down %}
+          <span class="pill" style="background:var(--bad,#a32a2a);color:white">🔴 DOWN</span>
+        {% elif t.last_check_at %}
+          <span class="pill ok">✅ UP</span>
+        {% else %}
+          <span class="pill" style="color:var(--muted)">⏳ pending</span>
+        {% endif %}
+      </td>
+      <td>
+        {% if t.last_check_at %}
+          {{ t.last_check_at | format_ts }}
+        {% else %}
+          —
+        {% endif %}
+      </td>
+      <td>
+        {% if t.last_status_code %}
+          {{ t.last_status_code }}
+        {% elif t.last_error %}
+          <span style="color:var(--bad,#a32a2a)" title="{{ t.last_error }}">network</span>
+        {% else %}
+          —
+        {% endif %}
+      </td>
+      <td>
+        {% if t.last_latency_ms is not none %}
+          {{ t.last_latency_ms }}ms
+        {% else %}
+          —
+        {% endif %}
+      </td>
+      <td>
+        {% if t.consecutive_failures > 0 %}
+          <span style="color:var(--bad,#a32a2a)">{{ t.consecutive_failures }}</span>
+        {% else %}
+          0
+        {% endif %}
+      </td>
+      <td>
+        {% if t.is_down and t.down_since %}
+          {{ t.down_since | format_ts }}
+        {% else %}
+          —
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h2 style="margin-top:32px">Recente events <span class="pill">{{ events|length }}</span></h2>
+{% if events %}
+<table style="margin-top:8px">
+  <thead>
+    <tr>
+      <th>Wanneer</th>
+      <th>Target</th>
+      <th>Event</th>
+      <th>Detail</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for e in events %}
+    <tr>
+      <td>{{ e.at | format_ts }}</td>
+      <td>{{ e.target_name }}</td>
+      <td>
+        {% if e.kind == "down" %}
+          <span style="color:var(--muted)">▼ fail</span>
+        {% elif e.kind == "up" %}
+          <span style="color:var(--good,#1f7a4d)">▲ ok</span>
+        {% elif e.kind == "alert" %}
+          <span style="color:var(--bad,#a32a2a)">🔴 alert</span>
+        {% elif e.kind == "realert" %}
+          <span style="color:var(--bad,#a32a2a)">🔁 re-alert</span>
+        {% elif e.kind == "recovery" %}
+          <span style="color:var(--good,#1f7a4d)">✅ recovery</span>
+        {% else %}
+          {{ e.kind }}
+        {% endif %}
+      </td>
+      <td style="font-size:12px;color:var(--muted)">
+        {% if e.status_code %}HTTP {{ e.status_code }} · {% endif %}
+        {% if e.latency_ms %}{{ e.latency_ms }}ms · {% endif %}
+        {% if e.error %}{{ e.error }}{% elif e.detail %}{{ e.detail }}{% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+  <p style="color:var(--muted);font-style:italic">
+    Nog geen events — worker draait nu eerst een paar checks.
+  </p>
+{% endif %}
+
+{% endif %}
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends "_base.html" %}
+{% block title %}Sales — pa-agent{% endblock %}
+{% block content %}
+<h2>Sales pipeline</h2>
+
+{# Pipeline summary per target #}
+<div class="pipeline-summary" style="display:flex; gap:14px; flex-wrap:wrap; margin: 16px 0;">
+  {% for t, data in pipeline.items() %}
+  <div class="card" style="border:1px solid var(--line); padding:12px; min-width:220px;">
+    <div style="font-weight:600; margin-bottom:6px;">
+      {{ target_labels[t][0] if t in target_labels else t }}
+      <span style="color:var(--muted); font-weight:400; font-size:12px;">
+        {{ target_labels[t][1] if t in target_labels else t }}
+      </span>
+    </div>
+    <table style="margin:0; font-size:13px;">
+      {% for status, info in data.items() %}
+      <tr>
+        <td><a href="/sales?target={{ t }}&status={{ status }}">{{ status }}</a></td>
+        <td style="text-align:right; font-weight:600;">{{ info.count }}</td>
+        <td style="text-align:right; color:var(--muted);">
+          {% if info.value > 0 %}€{{ '{:,}'.format(info.value).replace(',', '.') }}{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  {% else %}
+  <p style="color:var(--muted);">Nog geen accounts.</p>
+  {% endfor %}
+</div>
+
+<div class="filters" style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
+  <form method="get" action="/sales" style="display:flex; gap:8px; flex-wrap:wrap;">
+    <label>target
+      <select name="target">
+        <option value="">all</option>
+        {% for t in all_targets %}
+        <option value="{{ t }}" {% if target == t %}selected{% endif %}>{{ t }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>status
+      <select name="status">
+        <option value="">all</option>
+        {% for s in all_statuses %}
+        <option value="{{ s }}" {% if status == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>sector
+      <select name="sector">
+        <option value="">all</option>
+        {% for s in all_sectors %}
+        <option value="{{ s }}" {% if sector == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button type="submit">filter</button>
+    {% if target or status or sector %}
+    <a href="/sales" style="align-self:center;">reset</a>
+    {% endif %}
+  </form>
+  <a href="/sales/top3" style="margin-left:auto; font-weight:600;">→ vandaag's top-3</a>
+</div>
+
+{% if message %}<p class="ok">{{ message }}</p>{% endif %}
+
+<p style="color:var(--muted); font-size:13px;">{{ total_shown }} accounts</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>naam</th>
+      <th>target</th>
+      <th>status</th>
+      <th>sector</th>
+      <th>plaats</th>
+      <th>next touch</th>
+      <th>last touch</th>
+      <th>value</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for a in accounts %}
+    <tr {% if a.next_touch_overdue %}style="background: #fff4f4;"{% endif %}>
+      <td><a href="/sales/{{ a.id }}">{{ a.naam }}</a></td>
+      <td><span class="pill" title="{{ a.target_title }}">{{ a.target_label }}</span></td>
+      <td>
+        <span class="label label-{% if a.status == 'offerte' %}confidential{% elif a.status in ('kansrijk','won') %}public{% else %}internal{% endif %}">{{ a.status }}</span>
+      </td>
+      <td>{{ a.sector or '—' }}</td>
+      <td>{{ a.plaats or '—' }}</td>
+      <td {% if a.next_touch_overdue %}style="color:#b1231b; font-weight:600;"{% endif %}>{{ a.next_touch_human }}</td>
+      <td style="color:var(--muted);">{{ a.last_touch_human }}</td>
+      <td style="text-align:right; color:var(--muted);">
+        {% if a.estimated_value_eur %}€{{ '{:,}'.format(a.estimated_value_eur).replace(',', '.') }}{% endif %}
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="8" style="text-align:center; color:var(--muted); padding:20px;">
+      Geen accounts gevonden{% if target or status or sector %} met deze filters{% endif %}.
+    </td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

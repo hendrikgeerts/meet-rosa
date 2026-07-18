@@ -1,0 +1,38 @@
+# User-profile that Rosa knows about you. Automatically loaded into the
+# SYSTEM_PROMPT so she can give person-aware answers.
+#
+# Copy to user_profile.yaml (which is .gitignored) and edit. You can
+# also update it via iMessage:
+#   "add to my profile: I'm good at <X>"
+#   "my working style is: <Y>"
+#
+# Fields:
+#   name, role                   — scalar
+#   companies                    — list
+#   expertise_areas              — list (strengths)
+#   growth_areas                 — list (growth goals)
+#   working_style                — scalar (free text)
+#   communication_preferences    — scalar
+#   energy_patterns              — scalar
+#   goals                        — list
+#   notes                        — scalar
+
+name: "Your Name"
+role: "Your role — e.g. Founder / CEO / Engineer"
+companies:
+  - "Your company (short description)"
+expertise_areas:
+  - "Domain 1"
+  - "Domain 2"
+growth_areas:
+  - "What you want to get better at"
+working_style: >
+  How you like to work — analytical, iterative, deep-focus, etc. Rosa
+  uses this to calibrate her tone and pace.
+communication_preferences: >
+  How Rosa should address you. Concise vs verbose, English or your
+  language, iMessage vs email preference.
+energy_patterns: >
+  When you're sharp vs low. Rosa can time briefings/reminders around it.
+goals: []
+notes: ""

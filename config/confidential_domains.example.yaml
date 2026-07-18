@@ -1,0 +1,26 @@
+# Domeinen waarvan inkomende mail standaard 'confidential' wordt gelabeld
+# (en dus nooit naar Claude wordt gestuurd, alleen lokaal verwerkt).
+#
+# Categorie is informatief — de classifier kijkt alleen naar de domain-match.
+# Kopieer naar confidential_domains.yaml — de .yaml staat in .gitignore.
+
+domains:
+  # legal:
+  #   - "juristenkantoor-x.nl"
+  # finance:
+  #   - "accountantskantoor.nl"
+  # medical:
+  #   - "huisartsenpraktijk.nl"
+  # security:
+  #   - "csirt.example.nl"
+
+# Keywords die altijd 'confidential' triggeren (ongeacht afzender).
+keywords:
+  - "vertrouwelijk"
+  - "geheim"
+  - "NDA"
+  - "salaris"
+  - "wachtwoord"
+  - "incident"
+  - "breach"
+  - "datalek"

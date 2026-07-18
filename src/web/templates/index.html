@@ -1,0 +1,28 @@
+{% extends "_base.html" %}
+{% block content %}
+  <h2>Beschikbare datums</h2>
+  {% if dates %}
+    <ul>
+    {% for d in dates %}
+      <li><a href="/audit?date={{ d }}">{{ d }}</a>{% if d == latest %} <span class="pill">nieuwste</span>{% endif %}</li>
+    {% endfor %}
+    </ul>
+  {% else %}
+    <p>Nog geen audit-records.</p>
+  {% endif %}
+
+  <h2>Wat zie je hier?</h2>
+  <p>
+    Per externe LLM-call ziet de dashboard twee records:
+    een <strong>egress-record</strong> (alleen metadata: task, label, model, tokens)
+    en — indien <code>privacy.log_payloads: true</code> in <code>settings.yaml</code> —
+    een <strong>payload-record</strong> met de <em>geredacteerde</em> system-prompt,
+    messages en Claude's response.
+  </p>
+  <p>
+    Mappings (placeholder → echte naam) worden <strong>nooit gelogd</strong>.
+    Wat je ziet is exact wat Claude zag. Klik op een record om te checken
+    of er PII door de redactor is geglipt — een rood waarschuwingsbanner
+    boven aan toont automatische heuristieken.
+  </p>
+{% endblock %}

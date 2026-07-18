@@ -1,0 +1,153 @@
+{% extends "_base.html" %}
+{% block title %}CEO Dashboard — pa-agent{% endblock %}
+{% block content %}
+<style>
+  .ceo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .card { background: var(--code-bg); border-radius: 6px; padding: 14px 16px; }
+  .card h2 { margin: 0 0 10px 0; }
+  .stat-row { display: flex; gap: 20px; flex-wrap: wrap; margin: 8px 0; }
+  .stat { display: flex; flex-direction: column; }
+  .stat .num { font-size: 22px; font-weight: 600; }
+  .stat .lbl { color: var(--muted); font-size: 11px; text-transform: uppercase; }
+  .delta-up { color: var(--warn); }
+  .delta-down { color: var(--ok); }
+  .delta-flat { color: var(--muted); }
+  .age-bar { display: flex; gap: 4px; margin: 8px 0; }
+  .age-cell { padding: 4px 8px; border-radius: 4px; font-size: 12px; text-align: center; }
+  .age-today { background: #dcfce7; color: #166534; }
+  .age-week  { background: #dbeafe; color: #1e40af; }
+  .age-mid   { background: #fef3c7; color: #92400e; }
+  .age-month { background: #fed7aa; color: #9a3412; }
+  .age-old   { background: #fee2e2; color: #991b1b; }
+  @media (prefers-color-scheme: dark) {
+    .age-today { background: #14532d; color: #bbf7d0; }
+    .age-week  { background: #1e3a8a; color: #bfdbfe; }
+    .age-mid   { background: #78350f; color: #fde68a; }
+    .age-month { background: #7c2d12; color: #fed7aa; }
+    .age-old   { background: #7f1d1d; color: #fecaca; }
+  }
+  ul.compact { margin: 6px 0; padding-left: 18px; }
+  ul.compact li { margin: 2px 0; }
+</style>
+
+<h1 style="margin-top:0;">CEO Dashboard <span class="pill" style="font-weight:400">{{ snap.now }}</span></h1>
+
+<div class="ceo-grid">
+
+  <div class="card">
+    <h2>📊 Volumes deze week</h2>
+    <div class="stat-row">
+      <div class="stat">
+        <div class="num">{{ snap.volumes.week_in }}</div>
+        <div class="lbl">inkomend
+          {% if snap.volumes.delta_in > 0 %}<span class="delta-up">+{{ snap.volumes.delta_in }}</span>
+          {% elif snap.volumes.delta_in < 0 %}<span class="delta-down">{{ snap.volumes.delta_in }}</span>
+          {% else %}<span class="delta-flat">=</span>{% endif %}
+        </div>
+      </div>
+      <div class="stat">
+        <div class="num">{{ snap.volumes.week_out }}</div>
+        <div class="lbl">uitgaand
+          {% if snap.volumes.delta_out > 0 %}<span class="delta-up">+{{ snap.volumes.delta_out }}</span>
+          {% elif snap.volumes.delta_out < 0 %}<span class="delta-down">{{ snap.volumes.delta_out }}</span>
+          {% else %}<span class="delta-flat">=</span>{% endif %}
+        </div>
+      </div>
+    </div>
+    {% if snap.volumes.top_correspondents %}
+      <h3 style="margin-top:14px;color:var(--muted);font-size:11px;text-transform:uppercase">Top correspondents</h3>
+      <ul class="compact">
+        {% for c in snap.volumes.top_correspondents %}
+          <li><span class="pill">{{ c.n }}</span> {{ c.person[:60] }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h2>⚠️ Open loops <span class="pill">{{ snap.loops.total_open }}</span></h2>
+    <div class="age-bar">
+      <div class="age-cell age-today" title="vandaag">{{ snap.loops.buckets.today }} vandaag</div>
+      <div class="age-cell age-week" title="1-7 dagen">{{ snap.loops.buckets["1-7d"] }} 1-7d</div>
+      <div class="age-cell age-mid" title="8-14 dagen">{{ snap.loops.buckets["8-14d"] }} 8-14d</div>
+      <div class="age-cell age-month" title="15-30 dagen">{{ snap.loops.buckets["15-30d"] }} 15-30d</div>
+      <div class="age-cell age-old" title="ouder dan 30 dagen">{{ snap.loops.buckets[">30d"] }} &gt;30d</div>
+    </div>
+    {% if snap.loops.overdue %}
+      <p style="color:var(--err);margin:8px 0 0 0">🔴 <strong>{{ snap.loops.overdue }} overdue</strong></p>
+    {% endif %}
+    {% if snap.loops.waiting_count %}
+      <p style="margin:6px 0 0 0">⏳ Wachtend op anderen: {{ snap.loops.waiting_count }}</p>
+    {% endif %}
+    {% if snap.loops.top_oldest %}
+      <h3 style="margin-top:14px;color:var(--muted);font-size:11px;text-transform:uppercase">Oudste 5</h3>
+      <ul class="compact">
+        {% for l in snap.loops.top_oldest %}
+          <li>
+            {% if l.overdue %}🔴 {% endif %}
+            <span class="pill">{{ l.age_days }}d</span>
+            <strong>{{ l.who[:40] if l.who else "" }}</strong> —
+            {{ l.action[:80] if l.action else "(geen samenvatting)" }}
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h2>📓 Decisions deze week <span class="pill">{{ snap.decisions.count }}</span></h2>
+    {% if snap.decisions.recent %}
+      <ul class="compact">
+        {% for d in snap.decisions.recent %}
+          <li><span class="pill">{{ d.decided }}</span> <strong>{{ d.title[:80] }}</strong>{% if d.context %} — <span style="color:var(--muted)">{{ d.context[:140] }}</span>{% endif %}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p style="color:var(--muted);font-style:italic">Geen decisions deze week.</p>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h2>📅 Todoist <span class="pill">{{ snap.todoist.open_count }} open</span></h2>
+    {% if snap.todoist.upcoming %}
+      <h3 style="margin-top:6px;color:var(--muted);font-size:11px;text-transform:uppercase">Komende deadlines</h3>
+      <ul class="compact">
+        {% for t in snap.todoist.upcoming %}
+          <li><span class="pill">{{ t.due }}</span> {{ t.title }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p style="color:var(--muted);font-style:italic">Geen toekomstige deadlines gelinkt.</p>
+    {% endif %}
+  </div>
+
+  {% if snap.okrs %}
+  <div class="card">
+    <h2>🎯 OKRs</h2>
+    <ul class="compact">
+      {% for o in snap.okrs %}
+        <li><strong>{{ o.objective }}</strong>
+          <ul class="compact">
+            {% for kr in o.key_results %}
+              <li>{{ kr.label }}: {{ kr.current }} / {{ kr.target }} <span style="color:var(--muted)">({{ kr.unit }})</span></li>
+            {% endfor %}
+          </ul>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  {% if snap.patterns %}
+  <div class="card">
+    <h2>🔍 Patterns</h2>
+    <ul class="compact">
+      {% for p in snap.patterns %}
+        <li><span class="pill">{{ p.detected }}</span> <strong>{{ p.title }}</strong>{% if p.body %} — <span style="color:var(--muted)">{{ p.body }}</span>{% endif %}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

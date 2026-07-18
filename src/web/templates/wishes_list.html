@@ -1,0 +1,73 @@
+{% extends "_base.html" %}
+{% block title %}Config Wishes — pa-agent{% endblock %}
+{% block content %}
+<h1 style="margin-top:0;">Config wishes</h1>
+<p style="color:var(--muted);max-width:680px">
+  Hendrik's structurele preferences. Hier verschijnt elke wens die je
+  aan Rosa hebt verteld via "kun je voortaan ..." / "ik wil dat je ...".
+  Markeer als <em>wip</em> wanneer Rosa eraan werkt, <em>done</em>
+  wanneer afgerond, <em>dismissed</em> wanneer je 'm intrekt.
+</p>
+
+{% if message %}
+  <p class="pill ok" style="display:inline-block;padding:6px 10px;">{{ message }}</p>
+{% endif %}
+
+<div class="filters">
+  <span style="color:var(--muted)">filter:</span>
+  <a href="/wishes" class="pill" style="{% if not status %}background:var(--accent);color:white{% endif %}">alle</a>
+  {% for s in valid_statuses %}
+    <a href="/wishes?status={{ s }}" class="pill" style="{% if status == s %}background:var(--accent);color:white{% endif %}">{{ s }}</a>
+  {% endfor %}
+  <span style="color:var(--muted);margin-left:auto">{{ wishes|length }} item(s)</span>
+</div>
+
+{% if wishes %}
+<table style="margin-top:12px">
+  <thead>
+    <tr>
+      <th>id</th>
+      <th>created</th>
+      <th>title</th>
+      <th>body</th>
+      <th>status</th>
+      <th>actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for w in wishes %}
+    <tr>
+      <td><span class="pill">#{{ w.id }}</span></td>
+      <td style="white-space:nowrap;color:var(--muted)">{{ w.created or "" }}</td>
+      <td><strong>{{ w.title }}</strong></td>
+      <td style="max-width:480px;color:var(--muted)">{{ w.body or "" }}</td>
+      <td>
+        {% if w.status == "open" %}<span class="pill warn">open</span>
+        {% elif w.status == "wip" %}<span class="pill" style="background:#fef3c7;color:#92400e">wip</span>
+        {% elif w.status == "done" %}<span class="pill ok">done</span>
+        {% elif w.status == "dismissed" %}<span class="pill" style="background:#e5e5e5;color:#525252">dismissed</span>
+        {% endif %}
+      </td>
+      <td>
+        <form method="post" action="/wishes/{{ w.id }}/status" style="display:inline;">
+          <select name="new_status" onchange="this.form.submit()" style="padding:2px 6px;font-size:12px;">
+            <option value="">→</option>
+            {% for s in valid_statuses %}
+              {% if s != w.status %}
+              <option value="{{ s }}">{{ s }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p style="color:var(--muted);font-style:italic;margin-top:24px">
+  Nog geen wishes. Test door tegen Rosa te zeggen "voortaan elke briefing in
+  het Engels" — ze hoort 'm op te slaan via add_config_wish.
+</p>
+{% endif %}
+{% endblock %}

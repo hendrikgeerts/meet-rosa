@@ -1,0 +1,43 @@
+# VIP-lijst — afzenders/contacten waarvan mail/iMessage minimaal 'internal' krijgt.
+# Wordt door classifier en redactor gelezen om consistente pseudonymisering te garanderen
+# (bv. eenzelfde persoon krijgt steeds [PERSON_001] binnen een sessie).
+#
+# Kopieer naar vip_contacts.yaml voor je eigen lijst — de .yaml staat in .gitignore.
+
+people:
+  # Voorbeeld:
+  # - name: "Voorbeeld Persoon"
+  #   aliases: ["Voorbeeld P", "V. Persoon"]
+  #   emails: ["voorbeeld@klant.nl"]
+  #   phones: ["+31612345678"]
+  #   tier: "A"                        # A=strategisch, B=actief, C=incidenteel
+  #   relationship: "long_term_client"
+  #   communication_style: "direct_no_pleasantries"
+  #   birthday: "1985-06-12"           # YYYY-MM-DD; voor birthday-tracker in briefing
+  #   jubilea:                         # work-anniversaries / partner-data — optioneel
+  #     - { date: "2018-09-01", label: "Begin samenwerking DST Templates" }
+  #     - { date: "2020-04-15", label: "Promotie tot CTO" }
+
+organizations:
+  # - name: "Voorbeeld B.V."
+  #   aliases: ["Voorbeeld", "VBV"]
+  #   domains: ["voorbeeld.nl", "vbv.com"]
+  #   tier: "A"
+  #   relationship: "long_term_client"
+  #   founded: "2015-01-01"            # voor org-anniversary in briefing
+
+projects:
+  # Interne projectcodes die NER zelden goed pakt — voeg ze hier toe.
+  # - code: "DST-INC-2026-04"
+  #   name: "Incident-onderzoek april 2026"
+
+# Safe-terms: strings die NIET geredacteerd mogen worden, ook al markeert
+# spaCy NER ze als LOC/GPE/PERSON. Voor jouw woonplaats/kantoorplaats die
+# context-relevant blijft in briefings (weather-context, travel-alerts).
+# Anders zou "Het wordt morgen 21°C in your-home-city" terugkomen als
+# "Het wordt morgen 21°C in [ADDRESS_001]" — of erger: hallucinated als
+# "Hasselt".
+safe_terms:
+  # - "your-home-city"
+  # - "Tilburg"
+  # - "Nederland"

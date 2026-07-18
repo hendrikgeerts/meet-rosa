@@ -1,0 +1,71 @@
+{% extends "_base.html" %}
+{% block title %}Vendor strategies — pa-agent{% endblock %}
+{% block content %}
+<h2>Vendor strategies</h2>
+
+<p style="color: var(--muted); font-size: 12px; max-width: 700px;">
+  Geheugen waar Rosa bonnen voor elke vendor vandaan kan halen. Email-vendors:
+  Rosa zoekt automatisch via Gmail/IMAP met de hint. Portal-vendors:
+  status=needs_portal in de run, jij downloadt handmatig met de instructie
+  als geheugensteuntje.
+</p>
+
+<div class="filters">
+  {% if unknowns_count %}
+    <a href="/vendors/import-unknowns" class="warn"
+       style="background: var(--warn); color: white; padding: 4px 10px; border-radius: 4px; text-decoration: none;">
+      📥 Importeer {{ unknowns_count }} unknown vendor(s) uit laatste run
+    </a>
+  {% endif %}
+  <a href="/vendors/new" style="margin-left: auto;">+ new vendor</a>
+</div>
+
+{% if message %}<p class="ok">{{ message }}</p>{% endif %}
+{% if error %}<p class="err">{{ error }}</p>{% endif %}
+
+<table>
+  <thead>
+    <tr>
+      <th>name</th>
+      <th>kind</th>
+      <th>aliases</th>
+      <th>email hint / portal</th>
+      <th>last used</th>
+      <th>actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for v in vendors %}
+    <tr>
+      <td><a href="/vendors/{{ v.id }}/edit"><strong>{{ v.name }}</strong></a></td>
+      <td>
+        <span class="label label-{{ 'public' if v.source_kind == 'email' else ('confidential' if v.source_kind == 'manual' else 'internal') }}">{{ v.source_kind }}</span>
+      </td>
+      <td>{{ v.aliases | join(', ') if v.aliases else '—' }}</td>
+      <td style="font-family: monospace; font-size: 12px;">
+        {% if v.source_kind == 'email' %}
+          {{ v.email_query_hint or '—' }}
+        {% elif v.source_kind == 'portal' %}
+          {{ v.portal_url or '—' }}
+          {% if v.portal_notes %}<br><small style="color: var(--muted);">{{ v.portal_notes }}</small>{% endif %}
+        {% else %}
+          —
+        {% endif %}
+      </td>
+      <td style="font-size: 12px; color: var(--muted);">{{ v.last_used_date or '—' }}</td>
+      <td>
+        <form method="post" action="/vendors/{{ v.id }}/delete" style="display:inline;"
+              onsubmit="return confirm('Delete vendor {{ v.name }}?');">
+          <button type="submit" style="padding: 2px 6px; font-size: 11px; background: var(--err); color: white; border: none; border-radius: 3px; cursor: pointer;">remove</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" style="text-align:center; color: var(--muted); padding: 20px;">
+      Nog geen vendor strategies — <a href="/vendors/new">add een</a>
+      {% if unknowns_count %}of <a href="/vendors/import-unknowns">importeer unknowns uit laatste run</a>{% endif %}.
+    </td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

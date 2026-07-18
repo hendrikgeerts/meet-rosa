@@ -1,0 +1,23 @@
+# Uptime monitor — Rosa kijkt of je SaaS-platforms up zijn en
+# stuurt high-priority alerts wanneer ze down gaan.
+#
+# Per target: HTTP GET op `url`. Status_code != expected_status OF
+# timeout = fail. Bij `fail_threshold` opeenvolgende fails: alert.
+# Recovery-alert wanneer terug up.
+#
+# Kanalen per target:
+#   - imessage  : tekst-bericht naar primary_handle
+#   - voice     : voice-bubble (Rosa's stem via lokale TTS, m4a-attachment)
+#   - ntfy      : Ntfy.sh push (breakt iOS Do-Not-Disturb met Priority: 5)
+#                 vereist NTFY_TOPIC in .env
+
+targets:
+  - name: "Example platform"
+    url: "https://example.com/"
+    expected_status: 200
+    check_interval_seconds: 60        # hoe vaak een check
+    timeout_seconds: 10
+    fail_threshold: 2                 # opeenvolgende fails vóór alert
+    re_alert_interval_seconds: 900    # 15 min tussen re-alerts bij langdurige downtime
+    alert_channels: [imessage, voice]
+    expect_text: null                 # optioneel: substring die in body moet voorkomen

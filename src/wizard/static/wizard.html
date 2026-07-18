@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="rosa-wizard-token" content="__WIZARD_TOKEN__">
+  <title>Rosa — Setup</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="/static/wizard.css">
+</head>
+<body>
+  <main class="rosa-page">
+    <header class="rosa-header">
+      <h1>Set up Rosa</h1>
+      <p class="subtitle">
+        A one-time, local setup. Nothing you enter here leaves your Mac
+        unless you explicitly connect a third-party service (Anthropic,
+        Google, Slack, Todoist).
+      </p>
+    </header>
+
+    <div id="progress" class="rosa-wizard-progress"></div>
+
+    <section id="stage" aria-live="polite"></section>
+
+    <footer class="rosa-footer">
+      Rosa runs locally on your Mac. Setup wizard is bound to
+      <code>127.0.0.1:8765</code> and will close itself as soon as the
+      required steps are complete.
+    </footer>
+  </main>
+
+  <!-- ============================================================
+       Step templates. wizard.js clones the matching <template>
+       into #stage and wires up the form.
+       ============================================================ -->
+
+  <template id="tpl-welcome">
+    <article class="rosa-card">
+      <h2>Welcome</h2>
+      <p class="lead">
+        Rosa is your privacy-first personal assistant. She reads your
+        mail and calendar, keeps track of what matters, and chats with
+        you over iMessage. Before she can help, you need to give her
+        keys to a few services — you keep control of every one of them.
+      </p>
+
+      <div class="rosa-callout info">
+        <strong>Everything stays on your Mac.</strong> Your API keys are
+        written to <code>~/Library/Application Support/Rosa/secrets.env</code>
+        with <code>chmod 0600</code>. Nothing is sent to Rosa's authors
+        — there is no telemetry.
+      </div>
+
+      <label class="rosa-checkbox">
+        <input type="checkbox" id="consent">
+        <span>
+          I understand that Rosa will store API keys locally on this
+          Mac, and that connecting a service (e.g. Gmail, Anthropic)
+          will send data to that specific provider only.
+        </span>
+      </label>
+
+      <div class="rosa-actions">
+        <div class="spacer"></div>
+        <button class="rosa-btn primary" data-action="submit"
+                data-requires="#consent" disabled>
+          Continue
+        </button>
+      </div>
+    </article>
+  </template>
+
+  <template id="tpl-identity">
+    <article class="rosa-card">
+      <h2>Who are you?</h2>
+      <p class="lead">
+        Rosa addresses you by name in briefings and drafts. She also
+        needs your timezone and language so nothing is scheduled or
+        summarised in the wrong locale.
+      </p>
+
+      <div class="rosa-field">
+        <label class="rosa-label" for="f-name">
+          Name <span class="required">*</span>
+        </label>
+        <input class="rosa-input" id="f-name" type="text"
+               placeholder="e.g. Alex Bakker">
+        <small class="rosa-hint">
+          The name Rosa uses when addressing you and when signing
+          drafts on your behalf. Only used inside your own installation.
+        </small>
+      </div>
+
+      <div class="rosa-field">
+        <label class="rosa-label" for="f-email">Primary email</label>
+        <input class="rosa-input" id="f-email" type="email"
+               placeholder="you@company.com">
+        <small class="rosa-hint">
+          Used to recognise which mails are "yours" and which are
+          from someone else. Not sent anywhere.
+        </small>
+      </div>
+
+      <div class="rosa-field">
+        <label class="rosa-label" for="f-timezone">Timezone</label>
+        <select class="rosa-select" id="f-timezone">
+          <option value="Europe/Amsterdam">Europe/Amsterdam</option>
+          <option value="Europe/Brussels">Europe/Brussels</option>
+          <option value="Europe/Berlin">Europe/Berlin</option>
+          <option value="Europe/London">Europe/London</option>
+          <option value="Europe/Paris">Europe/Paris</option>
+          <option value="America/New_York">America/New_York</option>
+          <option value="America/Los_Angeles">America/Los_Angeles</option>
+          <option value="UTC">UTC</option>
+        </select>
+        <small class="rosa-hint">
+          Used when Rosa says "tomorrow" or "in an hour" — she uses
+          your local clock, not the server's.
+        </small>
+      </div>
+
+      <div class="rosa-field">
+        <label class="rosa-label" for="f-language">Language for replies</label>
+        <select class="rosa-select" id="f-language">
+          <option value="en">English</option>
+          <option value="nl">Nederlands</option>
+        </select>
+        <small class="rosa-hint">
+          The language Rosa uses to reply. Independent of the language
+          she reads (she understands both).
+        </small>
+      </div>
+
+      <div class="rosa-field">
+        <label class="rosa-label" for="f-city">Home city</label>
+        <input class="rosa-input" id="f-city" type="text"
+               placeholder="e.g. Amsterdam">
+        <small class="rosa-hint">
+          Used for local weather in the morning briefing and to keep
+          your city name from being redacted from your own notes.
+        </small>
+      </div>
+
+      <div class="rosa-field">
+        <label class="rosa-label" for="f-country">Country (ISO)</label>
+        <input class="rosa-input" id="f-country" type="text" value="NL"
+               maxlength="2" style="max-width: 6rem;">
+        <small class="rosa-hint">
+          Two-letter code (NL, BE, DE, GB, US). Used for public
+          holiday-detection.
+        </small>
+      </div>
+
+      <div class="rosa-field">
+        <label class="rosa-label" for="f-company">
+          Company <span class="rosa-status-tag optional">optional</span>
+        </label>
+        <input class="rosa-input" id="f-company" type="text"
+               placeholder="e.g. Acme Ventures">
+        <small class="rosa-hint">
+          Used in your weekly CEO-letter and other synthetic briefings
+          so Rosa can refer to the business by name. Leave blank if
+          you'd rather she stays generic.
+        </small>
+      </div>
+
+      <div class="rosa-actions">
+        <div class="spacer"></div>
+        <button class="rosa-btn primary" data-action="submit">Continue</button>
+      </div>
+    </article>
+  </template>
+
+  <template id="tpl-claude">
+    <article class="rosa-card">
+      <h2>Anthropic API key</h2>
+      <p class="lead">
+        Rosa uses Claude (from Anthropic) for the harder thinking:
+        writing draft replies, briefings, and reasoning about your
+        schedule. Simpler tasks stay on your Mac via Ollama.
+      </p>
+
+      <div class="rosa-callout info">
+        <strong>Bring your own key.</strong> Rosa never uses a shared
+        or provider-issued key. Get one at
+        <a href="https://console.anthropic.com/settings/keys" target="_blank"
+           rel="noopener">console.anthropic.com/settings/keys</a>.
+        Expect to spend roughly $5–15 per month.
+      </div>
+
+      <div class="rosa-field">
+        <label class="rosa-label" for="f-key">
+          Anthropic API key <span class="required">*</span>
+        </label>
+        <input class="rosa-input" id="f-key" type="password"
+               placeholder="sk-ant-…" autocomplete="off">
+        <small class="rosa-hint">
+          Stored locally in <code>secrets.env</code> (chmod 0600).
+          Only sent to <code>api.anthropic.com</code> — never anywhere
+          else. Starts with <code>sk-ant-</code>.
+        </small>
+      </div>
+
+      <div class="rosa-field">
+        <label class="rosa-label" for="f-model">Claude model</label>
+        <select class="rosa-select" id="f-model">
+          <option value="claude-sonnet-4-6">Sonnet 4.6 (balanced)</option>
+          <option value="claude-opus-4-7">Opus 4.7 (best quality, higher cost)</option>
+          <option value="claude-haiku-4-5-20251001">Haiku 4.5 (cheapest, fast)</option>
+        </select>
+        <small class="rosa-hint">
+          Sonnet is a good default. Switch to Opus if you notice Rosa
+          missing nuance; switch to Haiku if you want to reduce cost.
+          You can change this any time in the config.
+        </small>
+      </div>
+
+      <div class="rosa-field">
+        <label class="rosa-label" for="f-local">Local model (Ollama)</label>
+        <select class="rosa-select" id="f-local">
+          <option value="llama3.1:8b-instruct-q4_K_M">Llama 3.1 8B (default)</option>
+          <option value="phi3:mini">Phi-3 mini (very fast, less capable)</option>
+        </select>
+        <small class="rosa-hint">
+          Used for classification, extraction, and any content marked
+          confidential. Never leaves your Mac. Requires Ollama running
+          locally.
+        </small>
+      </div>
+
+      <div class="rosa-actions">
+        <div class="spacer"></div>
+        <button class="rosa-btn primary" data-action="submit">Continue</button>
+      </div>
+    </article>
+  </template>
+
+  <template id="tpl-imessage">
+    <article class="rosa-card">
+      <h2>iMessage <span class="rosa-status-tag optional">optional</span></h2>
+      <p class="lead">
+        Rosa chats with you via iMessage. Tell her which handle is
+        <em>yours</em> so she only replies to you, and add any secondary
+        handles (work Apple ID, iPad number) if you use more than one.
+      </p>
+
+      <div class="rosa-callout warn">
+        Rosa needs Full Disk Access on macOS to read
+        <code>~/Library/Messages/chat.db</code>. She'll walk you through
+        that after setup completes.
+      </div>
+
+      <div class="rosa-field">
+        <label class="rosa-label" for="f-imsg">Primary handle</label>
+        <input class="rosa-input" id="f-imsg" type="text"
+               placeholder="+31612345678 or you@icloud.com">
+        <small class="rosa-hint">
+          The phone number or Apple ID iMessage sees when you send a
+          message. If you don't know: send yourself a message and look
+          at the recipient bubble.
+        </small>
+      </div>
+
+      <div class="rosa-field">
+        <label class="rosa-label" for="f-imsg-extra">Extra handles</label>
+        <input class="rosa-input" id="f-imsg-extra" type="text"
+               placeholder="+31687654321, work@icloud.com">
+        <small class="rosa-hint">
+          Comma-separated. Rosa treats any of these as "from you".
+        </small>
+      </div>
+
+      <div class="rosa-actions">
+        <button class="rosa-btn ghost" data-action="skip">Skip for now</button>
+        <div class="spacer"></div>
+        <button class="rosa-btn primary" data-action="submit">Save & continue</button>
+      </div>
+    </article>
+  </template>
+
+  <template id="tpl-google">
+    <article class="rosa-card">
+      <h2>Connect Google <span class="rosa-status-tag optional">optional</span></h2>
+      <p class="lead">
+        Rosa reads your Gmail inbox and Google Calendar to build
+        briefings and draft replies. She needs OAuth access which you
+        grant with your own Google Cloud project.
+      </p>
+
+      <div class="rosa-callout info">
+        <strong>Setting up a Google OAuth client — one-time, ~5 min:</strong>
+        <ol style="margin: 0.5rem 0 0 1rem; padding-left: 1rem;">
+          <li>Open <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">console.cloud.google.com/apis/credentials</a>.</li>
+          <li>Create (or select) a project. Under <em>OAuth consent screen</em>, choose <em>External</em>, add your own Gmail as a test-user.</li>
+          <li>Enable the <em>Gmail API</em> and <em>Google Calendar API</em> (APIs &amp; Services → Library).</li>
+          <li>Under <em>Credentials → + Create → OAuth client ID → Web application</em>, add this redirect URI:
+              <br><code id="redirect-url">(loads after "Continue")</code></li>
+          <li>Download the JSON and paste its full contents below.</li>
+        </ol>
+      </div>
+
+      <div class="rosa-field">
+        <label class="rosa-label" for="f-google-creds">
+          credentials.json content
+        </label>
+        <textarea class="rosa-textarea" id="f-google-creds" rows="6"
+                  placeholder='{"web": {"client_id": "...", "client_secret": "...", ...}}'></textarea>
+        <small class="rosa-hint">
+          Paste the entire file. Rosa keeps this locally in
+          <code>ROSA_HOME/config.yaml</code> only long enough to complete
+          the OAuth flow, then discards the secret from memory.
+        </small>
+      </div>
+
+      <div class="rosa-actions">
+        <button class="rosa-btn ghost" data-action="skip">Skip for now</button>
+        <div class="spacer"></div>
+        <button class="rosa-btn cta" data-action="submit">
+          Connect Google
+        </button>
+      </div>
+    </article>
+  </template>
+
+  <template id="tpl-token-step">
+    <article class="rosa-card">
+      <h2 data-slot="title">Connect</h2>
+      <p class="lead" data-slot="body"></p>
+      <div class="rosa-callout info" data-slot="help"></div>
+
+      <div class="rosa-field">
+        <label class="rosa-label" data-slot="label">Token</label>
+        <input class="rosa-input" data-slot="token-input" type="password"
+               autocomplete="off">
+        <small class="rosa-hint" data-slot="token-hint"></small>
+      </div>
+
+      <div class="rosa-actions">
+        <button class="rosa-btn ghost" data-action="skip">Skip for now</button>
+        <div class="spacer"></div>
+        <button class="rosa-btn cta" data-action="submit">
+          Save &amp; continue
+        </button>
+      </div>
+    </article>
+  </template>
+
+  <template id="tpl-plaud">
+    <article class="rosa-card">
+      <h2>Plaud recorder <span class="rosa-status-tag optional">optional</span></h2>
+      <p class="lead">
+        If you use a Plaud device, tell Rosa where new recordings appear.
+        She'll transcribe, analyse, and surface action items automatically.
+      </p>
+
+      <div class="rosa-field">
+        <label class="rosa-label" for="f-plaud-audio">
+          Watched folder <span class="required">*</span>
+        </label>
+        <input class="rosa-input" id="f-plaud-audio" type="text"
+               placeholder="/Users/you/Dropbox/Plaud">
+        <small class="rosa-hint">
+          Rosa scans this folder every 5 minutes for new .mp3/.wav
+          files. Point it at the folder your Plaud syncs to.
+        </small>
+      </div>
+
+      <div class="rosa-field">
+        <label class="rosa-label" for="f-plaud-backup">
+          Backup folder (optional)
+        </label>
+        <input class="rosa-input" id="f-plaud-backup" type="text"
+               placeholder="/Users/you/Dropbox/Plaud-processed">
+        <small class="rosa-hint">
+          Where processed recordings move after transcription. Leave
+          blank to keep them in place.
+        </small>
+      </div>
+
+      <div class="rosa-actions">
+        <button class="rosa-btn ghost" data-action="skip">Skip for now</button>
+        <div class="spacer"></div>
+        <button class="rosa-btn primary" data-action="submit">Save &amp; continue</button>
+      </div>
+    </article>
+  </template>
+
+  <template id="tpl-list-step">
+    <article class="rosa-card">
+      <h2 data-slot="title">List step</h2>
+      <p class="lead" data-slot="body"></p>
+      <div class="rosa-callout info" data-slot="help"></div>
+
+      <div class="rosa-field">
+        <label class="rosa-label" data-slot="label">Items</label>
+        <textarea class="rosa-textarea" data-slot="items" rows="6"
+                  data-slot-placeholder></textarea>
+        <small class="rosa-hint">
+          One per line. Empty lines and lines starting with
+          <code>#</code> are ignored.
+        </small>
+      </div>
+
+      <div class="rosa-actions">
+        <button class="rosa-btn ghost" data-action="skip">Skip for now</button>
+        <div class="spacer"></div>
+        <button class="rosa-btn primary" data-action="submit">
+          Save &amp; continue
+        </button>
+      </div>
+    </article>
+  </template>
+
+  <template id="tpl-notifications">
+    <article class="rosa-card">
+      <h2>Notifications</h2>
+      <p class="lead">
+        When should Rosa reach out? Times are in your local timezone.
+      </p>
+
+      <div class="rosa-field">
+        <label class="rosa-label" for="f-morn">Morning briefing</label>
+        <input class="rosa-input" id="f-morn" type="time" value="07:00"
+               style="max-width: 10rem;">
+        <small class="rosa-hint">Sent to you first thing in the morning.</small>
+      </div>
+
+      <div class="rosa-field">
+        <label class="rosa-label" for="f-midday">Midday heads-up</label>
+        <input class="rosa-input" id="f-midday" type="time" value="14:00"
+               style="max-width: 10rem;">
+        <small class="rosa-hint">Short catch-up around lunchtime.</small>
+      </div>
+
+      <div class="rosa-field">
+        <label class="rosa-label" for="f-dayclose">Day-close</label>
+        <input class="rosa-input" id="f-dayclose" type="time" value="20:00"
+               style="max-width: 10rem;">
+        <small class="rosa-hint">End-of-day wrap.</small>
+      </div>
+
+      <div class="rosa-field">
+        <label class="rosa-label" for="f-qstart">Quiet hours start</label>
+        <input class="rosa-input" id="f-qstart" type="time" value="22:00"
+               style="max-width: 10rem;">
+      </div>
+
+      <div class="rosa-field">
+        <label class="rosa-label" for="f-qend">Quiet hours end</label>
+        <input class="rosa-input" id="f-qend" type="time" value="07:00"
+               style="max-width: 10rem;">
+        <small class="rosa-hint">
+          During quiet hours only urgent alerts (uptime crashes, VIP
+          replies) get through.
+        </small>
+      </div>
+
+      <div class="rosa-actions">
+        <button class="rosa-btn ghost" data-action="skip">Skip for now</button>
+        <div class="spacer"></div>
+        <button class="rosa-btn primary" data-action="submit">
+          Save &amp; continue
+        </button>
+      </div>
+    </article>
+  </template>
+
+  <template id="tpl-features">
+    <article class="rosa-card">
+      <h2>Feature toggles</h2>
+      <p class="lead">
+        Which Rosa features do you want on from day one? You can
+        change any of these later in <code>config.yaml</code>.
+      </p>
+      <div id="features-list"></div>
+      <div class="rosa-actions">
+        <button class="rosa-btn ghost" data-action="skip">Skip for now</button>
+        <div class="spacer"></div>
+        <button class="rosa-btn primary" data-action="submit">
+          Save &amp; continue
+        </button>
+      </div>
+    </article>
+  </template>
+
+  <template id="tpl-stub">
+    <article class="rosa-card">
+      <h2 data-slot="title">Step</h2>
+      <p class="lead" data-slot="body"></p>
+      <div class="rosa-callout info">
+        This integration ships in a follow-up release. For now,
+        skip it and Rosa will run without it.
+      </div>
+      <div class="rosa-actions">
+        <div class="spacer"></div>
+        <button class="rosa-btn primary" data-action="skip">Skip & continue</button>
+      </div>
+    </article>
+  </template>
+
+  <template id="tpl-confirm">
+    <article class="rosa-card">
+      <h2>You're ready</h2>
+      <p class="lead">
+        Before Rosa launches, let's ping every service you configured
+        to catch setup problems early.
+      </p>
+
+      <div id="confirm-summary" class="rosa-callout info"></div>
+
+      <div id="health-checks">
+        <h3 style="margin: 1.5rem 0 0.5rem; font-size: 1rem;">
+          Integration checks
+        </h3>
+        <div id="health-list" style="margin-bottom: 1rem;">
+          <em style="color: var(--rosa-muted);">Running checks…</em>
+        </div>
+        <button class="rosa-btn secondary" data-action="rerun-health"
+                style="font-size: 0.875rem;">
+          Re-run checks
+        </button>
+      </div>
+
+      <div class="rosa-callout warn" style="margin-top: 1.5rem;">
+        You can re-run this wizard any time by deleting
+        <code>~/Library/Application Support/Rosa/.wizard_state.json</code>
+        or launching <code>rosa setup</code>.
+      </div>
+
+      <div class="rosa-actions">
+        <div class="spacer"></div>
+        <button class="rosa-btn cta" data-action="submit">
+          Finish setup
+        </button>
+      </div>
+    </article>
+  </template>
+
+  <template id="tpl-done">
+    <article class="rosa-card">
+      <h2>All set</h2>
+      <p class="lead">
+        Setup is complete. You can close this tab — Rosa is starting up
+        in the background. She'll iMessage you shortly.
+      </p>
+      <div class="rosa-callout info">
+        Logs live in <code>~/Library/Application Support/Rosa/logs/</code>.
+        If something looks off, that's the first place to check.
+      </div>
+    </article>
+  </template>
+
+  <script src="/static/wizard.js"></script>
+</body>
+</html>

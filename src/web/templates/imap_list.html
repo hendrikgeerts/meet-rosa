@@ -1,0 +1,74 @@
+{% extends "_base.html" %}
+{% block title %}IMAP accounts — pa-agent{% endblock %}
+{% block content %}
+<h2>IMAP accounts</h2>
+
+<p style="color: var(--muted); font-size: 12px; max-width: 700px;">
+  Mailboxen die de comm-intel ingest leest (en straks de receipt-collector
+  doorzoekt voor bonnen). Wachtwoorden komen in macOS Keychain — nooit in
+  yaml of logfile. Gmail wordt apart via OAuth gekoppeld; deze lijst is
+  alleen voor IMAP/SMTP accounts.
+</p>
+
+<div class="filters">
+  <a href="/imap-accounts/new" style="margin-left: auto;">+ new account</a>
+</div>
+
+{% if message %}
+  <p class="ok">{{ message }}</p>
+{% endif %}
+{% if error %}
+  <p class="err">{{ error }}</p>
+{% endif %}
+
+<table>
+  <thead>
+    <tr>
+      <th>name</th>
+      <th>label</th>
+      <th>host</th>
+      <th>username</th>
+      <th>password</th>
+      <th>SMTP</th>
+      <th>enabled</th>
+      <th>actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for a in accounts %}
+    <tr>
+      <td><a href="/imap-accounts/{{ a.name }}/edit"><strong>{{ a.name }}</strong></a></td>
+      <td>{{ a.label }}</td>
+      <td>{{ a.host }}:{{ a.port }}</td>
+      <td>{{ a.username }}</td>
+      <td>
+        {% if a.has_password %}
+          <span class="ok">✓ in Keychain</span>
+        {% else %}
+          <span class="err">✗ ontbreekt</span>
+        {% endif %}
+      </td>
+      <td>{{ a.smtp_host or '—' }}</td>
+      <td>
+        {% if a.enabled %}
+          <span class="ok">on</span>
+        {% else %}
+          <span class="warn">off</span>
+        {% endif %}
+      </td>
+      <td>
+        <form method="post" action="/imap-accounts/{{ a.name }}/test" style="display:inline;">
+          <button type="submit" style="padding: 2px 6px; font-size: 11px;">test</button>
+        </form>
+        <form method="post" action="/imap-accounts/{{ a.name }}/delete" style="display:inline;"
+              onsubmit="return confirm('Delete IMAP account {{ a.name }}? Removes yaml-entry + Keychain password.');">
+          <button type="submit" style="padding: 2px 6px; font-size: 11px; background: var(--err); color: white; border: none; border-radius: 3px; cursor: pointer;">remove</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="8" style="text-align:center; color: var(--muted); padding: 20px;">No IMAP accounts — <a href="/imap-accounts/new">add one</a>.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

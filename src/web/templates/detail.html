@@ -1,0 +1,44 @@
+{% extends "_base.html" %}
+{% block title %}detail {{ rec.task }} {{ rec.ts }}{% endblock %}
+{% block content %}
+  <p><a href="/audit?date={{ date }}">← terug naar lijst</a></p>
+
+  <h2>{{ rec.task or '?' }} <span class="label label-{{ rec.label or 'unclassified' }}">{{ rec.label or '?' }}</span></h2>
+
+  {% if leak_hits %}
+    <div class="leak-banner">
+      ⚠️ {{ leak_hits | length }} potentiële PII-leak(s) gevonden in de redacted payload:
+      <ul>
+        {% for h in leak_hits %}
+          <li><strong>{{ h.category }}</strong> in <code>{{ h.field }}</code>: <code>{{ h.sample }}</code></li>
+        {% endfor %}
+      </ul>
+      <small>Heuristisch — controleer handmatig of dit echt PII is of een false positive (bv. een placeholder die per ongeluk als email-pattern matcht).</small>
+    </div>
+  {% else %}
+    <div class="leak-banner clean">✓ Geen PII-patterns gevonden in de redacted payload.</div>
+  {% endif %}
+
+  <div class="meta-grid">
+    <div>tijd</div>          <div>{{ rec.ts }}</div>
+    <div>backend</div>       <div>{{ rec.backend or '?' }}</div>
+    <div>model</div>         <div>{{ rec.model or '?' }}</div>
+    <div>classifier reden</div><div>{{ rec.classifier_reason or '–' }}</div>
+    <div>redactions</div>    <div>{{ rec.redactions_applied if rec.redactions_applied is not none else '–' }}</div>
+    <div>stop reason</div>   <div>{{ rec.stop_reason or '–' }}</div>
+    <div>tokens in/out</div> <div>{{ rec.input_tokens or '?' }} / {{ rec.output_tokens or '?' }}</div>
+    <div>tools_offered</div> <div>{{ rec.tools_offered or '–' }}</div>
+  </div>
+
+  <h2>System (geredacteerd)</h2>
+  <pre>{{ rec.system_redacted or '(geen)' }}</pre>
+
+  <h2>Messages (geredacteerd) — wat Claude écht zag</h2>
+  <pre>{{ rec.messages_redacted | tojson(indent=2) }}</pre>
+
+  <h2>Response (raw, met placeholders)</h2>
+  <pre>{{ rec.response_text or '(geen)' }}</pre>
+
+  <h2>Volledige record (debug)</h2>
+  <pre>{{ rec_pretty }}</pre>
+{% endblock %}

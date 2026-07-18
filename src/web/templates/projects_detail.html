@@ -1,0 +1,94 @@
+{% extends "_base.html" %}
+{% block title %}{{ project.title }} — pa-agent{% endblock %}
+{% block content %}
+<div style="display: flex; align-items: baseline; gap: 12px;">
+  <h2 style="margin: 0;">{{ project.title }}</h2>
+  <span class="label label-{{ 'public' if project.status == 'active' else ('confidential' if project.status == 'abandoned' else 'internal') }}">{{ project.status }}</span>
+  <span class="pill">{{ project.slug }}</span>
+  <span style="margin-left: auto;">
+    <a href="/projects/{{ project.slug }}/edit">edit</a> · <a href="/projects">← all projects</a>
+  </span>
+</div>
+
+<div class="meta-grid">
+  <div>company</div><div>{{ project.company or '—' }}</div>
+  <div>owner</div><div>{{ project.owner or '—' }}</div>
+  <div>deadline</div><div>{{ project.deadline or '—' }}</div>
+  <div>keywords</div><div>{{ project.keywords | join(', ') or '—' }}</div>
+  <div>created / updated</div><div>{{ project.created }} / {{ project.updated }}</div>
+</div>
+
+{% if project.description %}
+<h2>Description</h2>
+<pre style="white-space: pre-wrap;">{{ project.description }}</pre>
+{% endif %}
+
+<h2>Linked activity (last {{ days_back }}d)</h2>
+
+<h3 style="margin-top: 16px; font-size: 13px;">Recent comm ({{ recent_comm | length }})</h3>
+<table>
+  <thead><tr><th>when</th><th>source</th><th>direction</th><th>from</th><th>subject</th></tr></thead>
+  <tbody>
+    {% for c in recent_comm %}
+    <tr>
+      <td>{{ c.occurred_at | format_ts }}</td>
+      <td><span class="pill">{{ c.source }}</span></td>
+      <td>{{ c.direction }}</td>
+      <td>{{ c.from_addr or '—' }}</td>
+      <td>{{ c.subject or c.summary or '(no subject)' }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5" style="color: var(--muted);">none</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h3 style="margin-top: 16px; font-size: 13px;">Recent decisions ({{ recent_decisions | length }})</h3>
+<table>
+  <thead><tr><th>when</th><th>title</th><th>status</th></tr></thead>
+  <tbody>
+    {% for d in recent_decisions %}
+    <tr>
+      <td>{{ d.decided_at | format_ts }}</td>
+      <td>{{ d.title }}</td>
+      <td>{{ d.status }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="3" style="color: var(--muted);">none</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h3 style="margin-top: 16px; font-size: 13px;">Open loops ({{ open_loops | length }})</h3>
+<table>
+  <thead><tr><th>kind</th><th>who</th><th>title</th><th>created</th></tr></thead>
+  <tbody>
+    {% for l in open_loops %}
+    <tr>
+      <td>{{ l.kind }}</td>
+      <td>{{ l.who or '—' }}</td>
+      <td>{{ l.title }}</td>
+      <td>{{ l.created_at | format_ts }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4" style="color: var(--muted);">none</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if upcoming_events %}
+<h3 style="margin-top: 16px; font-size: 13px;">Upcoming events ({{ upcoming_events | length }})</h3>
+<table>
+  <thead><tr><th>when</th><th>summary</th></tr></thead>
+  <tbody>
+    {% for e in upcoming_events %}
+    <tr><td>{{ e.start }}</td><td>{{ e.summary }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+<p style="color: var(--muted); font-size: 11px; margin-top: 20px;">
+  Linkage via keyword-scan op: {{ matched_terms | join(', ') }}
+</p>
+{% endblock %}

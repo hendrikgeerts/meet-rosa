@@ -1,0 +1,28 @@
+anthropic>=0.40.0
+google-auth>=2.30.0
+google-auth-oauthlib>=1.2.0
+google-auth-httplib2>=0.2.0
+google-api-python-client>=2.140.0
+python-dotenv>=1.0.1
+faster-whisper>=1.0.3
+PyYAML>=6.0
+spacy>=3.7
+# spaCy model is downloaded separately:
+#   python -m spacy download nl_core_news_md
+keyring>=25.0       # macOS Keychain backend for IMAP/Slack tokens (no plain-text)
+imap-tools>=1.7     # higher-level IMAP client over imaplib
+slack_sdk>=3.30     # Slack Web API client (user-token, read-only use)
+feedparser>=6.0     # RSS parser for morning-news
+fastapi>=0.115      # local audit-dashboard
+python-multipart>=0.0.27  # form-data parsing — ISO_AUDIT 2026-05 MED: 0.0.26 had CVE-2026-42561
+uvicorn>=0.30       # ASGI server for the dashboard
+jinja2>=3.1         # templating for the dashboard
+# Transitive deps with CVEs — pinned to safe minimums (ISO_AUDIT 2026-05 MED):
+starlette>=1.0.1    # FastAPI core; 1.0.0 had PYSEC-2026-161
+urllib3>=2.7.0      # used by anthropic SDK + googleapiclient; <2.7 had PYSEC-2026-141/142
+idna>=3.15          # TLS hostname check; <3.15 had CVE-2026-45409
+pypdf>=5.0          # PDF text extraction for expense receipts
+openpyxl>=3.1       # Excel parsing voor receipt-collector kwartaalrun
+fpdf2>=2.7         # email-body → evidence-PDF in receipt-collector
+pymupdf>=1.24      # char-level styling (bold/italic) for english_practice PDF import
+sqlite-vec>=0.1.9  # vec0 virtual tables voor semantic-search over comm_items

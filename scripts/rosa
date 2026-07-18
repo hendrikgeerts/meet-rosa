@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Rosa CLI wrapper — thin bash wrapper around python -m cli.main.
+#
+# Symlink or copy to /usr/local/bin/rosa (or ~/bin/rosa) so `rosa`
+# works from anywhere. install.sh does this automatically.
+
+set -eu
+
+ROSA_HOME="${ROSA_HOME:-$HOME/Library/Application Support/Rosa}"
+REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+PYTHON="${PYTHON:-$ROSA_HOME/venv/bin/python}"
+
+if [[ ! -x "$PYTHON" ]]; then
+  echo "error: Python venv not found at $PYTHON" >&2
+  echo "hint: run ./install.sh from $REPO_DIR first." >&2
+  exit 1
+fi
+
+exec env PYTHONPATH="$REPO_DIR/src" "$PYTHON" -m cli.main "$@"

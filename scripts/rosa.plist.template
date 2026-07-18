@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+    Rosa LaunchAgent template — install.sh substitutes {{PYTHON}},
+    {{REPO_DIR}}, and {{ROSA_HOME}}, then writes the result to
+    ~/Library/LaunchAgents/com.rosa.pa-agent.plist.
+
+    Manual install (if not using install.sh):
+
+      sed -e "s|{{PYTHON}}|$HOME/Library/Application Support/Rosa/venv/bin/python|g" \
+          -e "s|{{REPO_DIR}}|$PWD|g" \
+          -e "s|{{ROSA_HOME}}|$HOME/Library/Application Support/Rosa|g" \
+          scripts/rosa.plist.template \
+        > ~/Library/LaunchAgents/com.rosa.pa-agent.plist
+
+      launchctl load ~/Library/LaunchAgents/com.rosa.pa-agent.plist
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.rosa.pa-agent</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>{{PYTHON}}</string>
+        <string>{{REPO_DIR}}/src/main.py</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>{{REPO_DIR}}</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <!-- Always restart on exit. Rosa's own health-monitor uses SIGTERM
+         as auto-recovery for hangs; KeepAlive brings her back up.
+         To fully stop: launchctl unload ~/Library/LaunchAgents/com.rosa.pa-agent.plist -->
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>ThrottleInterval</key>
+    <integer>30</integer>
+
+    <!-- File-descriptor budget. macOS default (256 soft) is exhausted
+         within hours by the poll-loop + IMAP + Whisper + audit-streams.
+         4096 covers weeks/months of uptime. -->
+    <key>SoftResourceLimits</key>
+    <dict>
+        <key>NumberOfFiles</key>
+        <integer>4096</integer>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>{{ROSA_HOME}}/logs/stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>{{ROSA_HOME}}/logs/stderr.log</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>ROSA_HOME</key>
+        <string>{{ROSA_HOME}}</string>
+    </dict>
+
+    <key>ProcessType</key>
+    <string>Interactive</string>
+</dict>
+</plist>

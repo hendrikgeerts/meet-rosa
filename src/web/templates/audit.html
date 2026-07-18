@@ -1,0 +1,77 @@
+{% extends "_base.html" %}
+{% block title %}audit {{ date }}{% endblock %}
+{% block content %}
+  <form class="filters" method="get" action="/audit">
+    <label>datum</label>
+    <select name="date">
+      {% for d in dates %}
+        <option value="{{ d }}" {% if d == date %}selected{% endif %}>{{ d }}</option>
+      {% endfor %}
+    </select>
+    <label>task</label>
+    <select name="task">
+      <option value="">— alle —</option>
+      {% for t in all_tasks %}
+        <option value="{{ t }}" {% if t == task %}selected{% endif %}>{{ t }}</option>
+      {% endfor %}
+    </select>
+    <label>label</label>
+    <select name="label">
+      <option value="">— alle —</option>
+      {% for l in all_labels %}
+        <option value="{{ l }}" {% if l == label %}selected{% endif %}>{{ l }}</option>
+      {% endfor %}
+    </select>
+    <label>backend</label>
+    <select name="backend">
+      <option value="">— alle —</option>
+      {% for b in all_backends %}
+        <option value="{{ b }}" {% if b == backend %}selected{% endif %}>{{ b }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">filter</button>
+  </form>
+
+  <p>{{ records | length }} records</p>
+
+  {% if records %}
+  <table>
+    <thead>
+      <tr>
+        <th>tijd</th>
+        <th>task</th>
+        <th>label</th>
+        <th>backend</th>
+        <th>model</th>
+        <th>red.</th>
+        <th>tokens (in/out)</th>
+        <th>stop</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for r in records %}
+      <tr>
+        <td>{{ r.ts[11:19] if r.ts else '' }}</td>
+        <td>{{ r.task or '' }}</td>
+        <td><span class="label label-{{ r.label or 'unclassified' }}">{{ r.label or '?' }}</span></td>
+        <td>{{ r.backend or '' }}</td>
+        <td>{{ r.model or '' }}</td>
+        <td>{{ r.redactions_applied if r.redactions_applied is not none else '–' }}</td>
+        <td>{{ r.input_tokens or '–' }}/{{ r.output_tokens or '–' }}</td>
+        <td>{{ r.stop_reason or '' }}</td>
+        <td>
+          {% if r.has_payload %}
+            <a href="/audit/{{ date }}/{{ loop.index0 }}">→ details</a>
+          {% else %}
+            <span class="pill">geen payload</span>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p>Geen records gevonden voor deze filter.</p>
+  {% endif %}
+{% endblock %}

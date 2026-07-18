@@ -1,0 +1,192 @@
+# Copy to settings.yaml. Secrets blijven in .env (zie .env.example),
+# alle niet-gevoelige runtime-config staat hier.
+
+runtime:
+  # Hoofd-Claude-model voor reasoning. Veranderen via PR, niet per env.
+  claude_model: "claude-sonnet-4-6"
+  # Lokaal classificatie-/extractie-model (Ollama).
+  local_model_small: "phi3:mini"
+  # Lokaal hoofdmodel voor confidential-flows (Ollama).
+  local_model_main: "llama3.1:8b-instruct-q4_K_M"
+  # Embedding-model voor vector search (Ollama).
+  embedding_model: "nomic-embed-text"
+  # Whisper-model voor transcriptie spraakberichten. Trade-off accuracy ↔ speed:
+  # tiny / base / small / medium / large-v3-turbo. 'small' (~244MB) is een
+  # goede default; upgrade naar 'medium' (~769MB) als accuracy nog te wensen
+  # over laat — vooral bij accent/ruis. Eerste run downloadt het model.
+  whisper_model: "small"
+  # spaCy NER model voor onbekende-naam detectie in de redactor.
+  # Leeg laten of weghalen om NER uit te zetten (alleen dictionary+regex).
+  # Installeren: `python -m spacy download nl_core_news_lg` (~568 MB,
+  # better PERSON/ORG/LOC recall dan _md). Op trage hardware mag _md
+  # (~50 MB) — recall is wel zichtbaar lager.
+  ner_model: "nl_core_news_lg"
+  log_level: "INFO"
+  # Default IANA-tijdzone voor briefings/dayclose/etc. Wordt overruled
+  # door app_state.active_timezone (= "rosa tz <name>" via iMessage)
+  # zodat reizigers de daily flow op lokale tijd kunnen krijgen.
+  default_timezone: "Europe/Amsterdam"
+
+paths:
+  # Allemaal relatief aan repo-root tenzij absolute paden gegeven.
+  data_dir: "data"
+  audit_dir: "data/audit"
+  voice_in_dir: "data/voice-in"
+  vectors_dir: "data/vectors"
+  memory_db: "data/memory.db"
+  google_credentials: "google_credentials.json"
+  google_token: "data/google_token.json"
+  plaud_inbox: "~/PlaudInbox"
+  log_file: "data/logs/agent.log"
+  # macOS chat.db locatie — zelden anders.
+  messages_db: "~/Library/Messages/chat.db"
+
+imessage:
+  # Owner-handles waarvan inkomende berichten worden geaccepteerd.
+  # Eerste handle is ook de bestemming voor proactieve briefings/reminders.
+  # In .env: OWNER_IMESSAGE_HANDLE (verplicht) + OWNER_EXTRA_HANDLES (optioneel).
+  poll_interval_seconds: 3
+
+briefings:
+  enabled: true
+  # 24h notation Europe/Amsterdam. Werkdagen (ma-vr) en weekend (za-zo)
+  # mogen verschillen.
+  weekday_time: "07:00"
+  weekend_time: "08:30"
+
+dayclose:
+  # Dagelijkse dagafsluiting: wat is er vandaag gebeurd, wat staat
+  # morgen op de agenda, korte "onthouden"-regel.
+  enabled: true
+  time: "20:00"
+
+midday:
+  # Mid-dag heads-up: wat is vanochtend gebeurd, wat staat nog open,
+  # wat komt er vanmiddag/-avond. Korter dan briefing/dayclose.
+  enabled: true
+  time: "13:00"
+
+english_practice:
+  # Dagelijkse nudge over due English-collocation cards. Stuurt alleen
+  # iets wanneer er kaarten openstaan — geen "0 cards"-spam.
+  enabled: true
+  time: "09:00"           # weekdag-slot
+  weekend_time: "10:00"   # alleen relevant als skip_weekend=false
+  skip_weekend: true      # default: alleen ma-vr
+
+market_intel:
+  # Wekelijkse markt-intel digest (digital signage + AI). Bron-feeds
+  # staan in src/extensions/market_intel/sources.py.
+  enabled: true
+  weekday: 6      # 0=ma .. 6=zo
+  time: "11:00"
+
+travel_alerts:
+  # "Vertrek nu" alerts op basis van phone-locatie + HERE Maps traffic.
+  # Vereist HERE_API_KEY in .env. Phone-locatie komt binnen via PA-LOC mails
+  # (iOS Shortcut → mail).
+  enabled: true
+  check_interval_seconds: 180     # elke 3 min
+  horizon_minutes: 120            # kijk 2u vooruit op de agenda
+  plan_minutes: 30                # eerste alert ~30 min vóór 'vertrek nu'
+  buffer_minutes: 5               # extra marge bovenop pure reistijd
+  # GDPR / ISO 27001 A.18.1.3 — minimal data storage. current_location is
+  # GPS-history van you; cap & prune om geen continu traject-archief
+  # in memory.db op te bouwen.
+  location_retention_days: 7      # daily prune van rijen ouder dan N dagen
+  location_min_interval_seconds: 3600  # max 1 insert per uur (sub-uur skip)
+  # Home-adres fallback: gebruikt als origin wanneer er geen recente
+  # phone-locatie is. Leeg laten om disabled — dan skipt de tick als
+  # er geen PA-LOC binnen 2u is. Vul in met lat/lon van je woonadres.
+  # Privacy: deze coords gaan bij elke alert naar HERE Maps.
+  home_lat: null
+  home_lon: null
+
+meeting_prep:
+  # Stuurt N min vóór een agenda-event met externe deelnemers een prep-brief
+  # via iMessage: wie zitten erbij, recente mail-context, talking points.
+  enabled: true
+  minutes_before: 30
+  check_interval_seconds: 120
+  skip_internal_only: true        # alleen prep voor afspraken met externe attendees
+
+scheduler_assist:
+  # Calendly-link wordt aan elke scheduling-reply toegevoegd zodat
+  # ontvangers ook zelf een tijd kunnen kiezen. Leeg laten om weg te laten.
+  calendly_url: ""
+
+todoist:
+  # Bidirectional sync van reminders + actionable open_loops naar Todoist.
+  # Vereist TODOIST_API_TOKEN in .env.
+  enabled: true
+  project_name: "Rosa"
+  sync_interval_seconds: 300
+
+tts:
+  # Voice-reply: als you een spraakbericht stuurt, antwoordt Rosa ook
+  # met audio (matcht het kanaal).
+  enabled: true
+  # 'say' = lokaal macOS (gratis, ISO 27001-vriendelijk).
+  # 'elevenlabs' = neural cloud TTS (ELEVENLABS_API_KEY in .env vereist).
+  engine: "say"
+  # macOS voice. 'Ava (Enhanced)' is hoogwaardig en gratis te downloaden via
+  # System Settings → Accessibility → Spoken Content → Manage Voices.
+  voice: "Ava (Enhanced)"
+  max_chars: 600                   # ~25-30s gesproken tekst
+  elevenlabs_voice_id: "21m00Tcm4TlvDq8ikWAM"   # 'Rachel' default
+  elevenlabs_model_id: "eleven_multilingual_v2"
+  # ISO MED-6: bescherming tegen agent-bug-in-loop die het free-tier
+  # char-budget dichtmaakt. 0 = uitschakelen, anders silent fallback
+  # naar `say` zodra dagbudget op is.
+  elevenlabs_daily_char_cap: 8000
+
+privacy:
+  # Default sensitivity bij twijfel (nooit lager dan 'internal').
+  default_label: "internal"
+  # Max bytes per externe call — boven deze drempel verplichte handmatige review.
+  max_external_payload_bytes: 50000
+  # Audit-log roteert dagelijks. Egress-jsonl (metadata) blijft langer dan
+  # de shadow-payloads (= geredacteerde bodies; 1.6 MB/dag) — twee aparte
+  # vensters. MED-4 uit SECURITY_REVIEW_2.
+  audit_retention_days: 90         # egress-YYYY-MM-DD.jsonl
+  payloads_retention_days: 14      # payloads-YYYY-MM-DD.jsonl
+  admin_retention_days: 365        # admin-YYYY-MM-DD.jsonl (config-mutaties)
+  # ISO 27001 A.18.1.3 — minimal data storage. Daily prune-tick verwijdert
+  # rijen ouder dan onderstaande dagen. Zet 0 om prune uit te schakelen.
+  comm_items_retention_days: 365   # 1 jaar mail/Slack/IMAP-historie
+  expenses_retention_days: 2555    # ~7 jaar — NL fiscale bewaartermijn
+  uptime_events_retention_days_up: 90       # up/down events worden ruisig
+  uptime_events_retention_days_alert: 365   # alert/recovery/silence — history voor SLA
+  # Shadow-log: schrijf de redacted payload + Claude response per call naar
+  # data/audit/payloads-YYYY-MM-DD.jsonl. Voor menselijke audit via het
+  # dashboard. Mapping (placeholder→origineel) wordt NOOIT gelogd.
+  log_payloads: true
+
+web:
+  # Lokale audit-dashboard (FastAPI). Alleen op 127.0.0.1 — geen
+  # netwerk-blootstelling. Browser openen op http://127.0.0.1:<port>.
+  enabled: true
+  host: "127.0.0.1"
+  port: 8080
+
+extensions:
+  # Core werkt zonder enige extensie. Zet aan wanneer je hem gebruikt.
+  reminders: true
+  voice_in: true
+  vision_ocr: false
+  delegation_tracker: false
+  todos: false
+  projects: false
+  decisions_log: false
+  knowledge_base: false
+  patterns: false
+  saturday_review: false
+  research: false
+
+# Eigen email-domeinen — uitgaande facturen vanaf deze adressen
+# (bv. via Mollie/Stripe als noreply@, of jij persoonlijk) worden
+# in comm-intel gemarkeerd als 'fyi' ipv question/task. Voorkomt
+# dat je eigen facturatie-mails als TODO in de briefing verschijnen.
+own_email_domains: []
+  # - example.com
+  # - example.com

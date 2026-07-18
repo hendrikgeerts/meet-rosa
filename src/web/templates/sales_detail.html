@@ -1,0 +1,122 @@
+{% extends "_base.html" %}
+{% block title %}{{ acc.naam }} — sales{% endblock %}
+{% block content %}
+<p><a href="/sales">← terug naar sales</a></p>
+
+<h2>
+  {{ acc.naam }}
+  <span class="pill" title="{{ acc.target_title }}">{{ acc.target_label }}</span>
+  <span class="label label-{% if acc.status == 'offerte' %}confidential{% elif acc.status in ('kansrijk','won') %}public{% else %}internal{% endif %}">{{ acc.status }}</span>
+</h2>
+
+{% if message %}<p class="ok">{{ message }}</p>{% endif %}
+
+<div style="display:flex; gap:24px; flex-wrap:wrap;">
+  <div style="flex:1; min-width:300px;">
+    <h3>Profiel</h3>
+    <table>
+      <tr><th>sector</th><td>{{ acc.sector or '—' }}</td></tr>
+      <tr><th>prospect type</th><td>{{ acc.prospect_type or '—' }}</td></tr>
+      <tr><th>plaats</th><td>{{ acc.plaats or '—' }}</td></tr>
+      <tr><th>kvk</th><td>{{ acc.kvk or '—' }}</td></tr>
+      <tr><th>website</th><td>
+        {% if acc.website %}<a href="{{ acc.website }}" target="_blank">{{ acc.website }}</a>{% else %}—{% endif %}
+      </td></tr>
+      <tr><th>contact naam</th><td>{{ acc.primary_contact_name or '—' }}</td></tr>
+      <tr><th>contact email</th><td>{{ acc.primary_contact_email or '—' }}</td></tr>
+      <tr><th>contact rol</th><td>{{ acc.primary_contact_role or '—' }}</td></tr>
+      <tr><th>est. waarde</th><td>
+        {% if acc.estimated_value_eur %}€{{ '{:,}'.format(acc.estimated_value_eur).replace(',', '.') }}{% else %}—{% endif %}
+      </td></tr>
+      <tr><th>next touch</th><td {% if acc.next_touch_overdue %}style="color:#b1231b;"{% endif %}>{{ acc.next_touch_human }}</td></tr>
+      <tr><th>last touch</th><td>{{ acc.last_touch_human }}</td></tr>
+      <tr><th>cadence override</th><td>{% if acc.nurture_cadence_days %}{{ acc.nurture_cadence_days }}d{% else %}default per status{% endif %}</td></tr>
+    </table>
+
+    {% if acc.notes %}
+    <h4>Notes</h4>
+    <pre style="white-space:pre-wrap; background:var(--bg); padding:8px; border-radius:4px;">{{ acc.notes }}</pre>
+    {% endif %}
+  </div>
+
+  <div style="flex:1; min-width:300px;">
+    <h3>Acties</h3>
+
+    <form method="post" action="/sales/{{ acc.id }}/log_touchpoint" style="margin-bottom:16px;">
+      <h4>Touchpoint loggen</h4>
+      <label>channel
+        <select name="channel" required>
+          <option value="email_out">email_out</option>
+          <option value="email_in">email_in</option>
+          <option value="linkedin">linkedin</option>
+          <option value="call">call</option>
+          <option value="meeting">meeting</option>
+          <option value="plaud">plaud</option>
+          <option value="slack">slack</option>
+          <option value="imessage">imessage</option>
+          <option value="other">other</option>
+        </select>
+      </label>
+      <label>outcome
+        <select name="outcome">
+          <option value="">—</option>
+          <option value="positive">positive</option>
+          <option value="neutral">neutral</option>
+          <option value="negative">negative</option>
+          <option value="no_response">no_response</option>
+        </select>
+      </label>
+      <label style="display:block;">summary
+        <input type="text" name="summary" maxlength="500" style="width:100%;">
+      </label>
+      <button type="submit">log</button>
+    </form>
+
+    <form method="post" action="/sales/{{ acc.id }}/set_status" style="margin-bottom:16px;">
+      <h4>Status wijzigen</h4>
+      <select name="status">
+        {% for s in all_statuses %}
+        <option value="{{ s }}" {% if acc.status == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit">update</button>
+    </form>
+
+    <form method="post" action="/sales/{{ acc.id }}/snooze" style="margin-bottom:16px;">
+      <h4>Snooze</h4>
+      <input type="number" name="days" value="14" min="1" max="365" style="width:80px;"> dagen
+      <button type="submit">snooze</button>
+    </form>
+
+    <form method="post" action="/sales/{{ acc.id }}/forget"
+          onsubmit="return confirm('Hard-delete {{ acc.naam }}? Niet ongedaan te maken.');"
+          style="margin-top:24px; border-top:1px solid var(--line); padding-top:12px;">
+      <h4 style="color:#b1231b;">Verwijderen (AVG)</h4>
+      <input type="text" name="reason" placeholder="reden (optioneel)" style="width:100%; margin-bottom:6px;">
+      <button type="submit" style="background:#b1231b; color:white;">verwijder definitief</button>
+    </form>
+  </div>
+</div>
+
+<h3 style="margin-top:32px;">Touchpoints</h3>
+{% if touchpoints %}
+<table>
+  <thead>
+    <tr><th>wanneer</th><th>channel</th><th>summary</th><th>outcome</th><th>bron</th></tr>
+  </thead>
+  <tbody>
+    {% for tp in touchpoints %}
+    <tr>
+      <td>{{ tp.occurred_at|format_ts if tp.occurred_at else '—' }}</td>
+      <td>{{ tp.channel }}</td>
+      <td>{{ tp.summary or '—' }}</td>
+      <td>{{ tp.outcome or '—' }}</td>
+      <td style="color:var(--muted);">{% if tp.detected_auto %}auto{% else %}manueel{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p style="color:var(--muted);">Nog geen touchpoints.</p>
+{% endif %}
+{% endblock %}

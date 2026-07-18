@@ -1,0 +1,48 @@
+{% extends "_base.html" %}
+{% block title %}Top-3 vandaag — sales{% endblock %}
+{% block content %}
+<p><a href="/sales">← terug naar sales</a></p>
+
+<h2>🎯 Vandaag's top-3</h2>
+<p style="color:var(--muted); font-size:13px;">
+  Voorbeeld van de selectie die in de 07:00 briefing komt. Triggers worden hier NIET verbruikt
+  (read-only preview).
+</p>
+
+{% if top_three %}
+{% for item in top_three %}
+<div class="card" style="border:1px solid var(--line); padding:16px; margin-bottom:12px;">
+  <div style="display:flex; gap:12px; align-items:center; margin-bottom:8px;">
+    <h3 style="margin:0;"><a href="/sales/{{ item.id }}">{{ item.naam }}</a></h3>
+    <span class="pill">{{ target_labels[item.target][0] if item.target in target_labels else item.target }}</span>
+    <span class="label label-{% if item.status == 'offerte' %}confidential{% elif item.status in ('kansrijk','won') %}public{% else %}internal{% endif %}">{{ item.status }}</span>
+  </div>
+  <p style="margin:4px 0;"><strong>{{ item.reason }}</strong></p>
+  <p style="margin:4px 0; color:var(--muted);">→ {{ item.suggestion }}</p>
+</div>
+{% endfor %}
+{% else %}
+<p style="color:var(--muted);">Geen kandidaten — alle accounts zijn binnen cadence, geen openstaande offertes of recente triggers.</p>
+{% endif %}
+
+<h3>Pipeline snapshot</h3>
+{% if pipeline_snapshot %}
+<table>
+  <thead>
+    <tr><th>target</th>{% for s in ['koud','nurturing','kansrijk','offerte'] %}<th>{{ s }}</th>{% endfor %}</tr>
+  </thead>
+  <tbody>
+    {% for t, by_status in pipeline_snapshot.items() %}
+    <tr>
+      <td><strong>{{ target_labels[t][0] if t in target_labels else t }}</strong></td>
+      {% for s in ['koud','nurturing','kansrijk','offerte'] %}
+      <td>{{ by_status.get(s, 0) }}</td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p style="color:var(--muted);">Geen actieve accounts in pipeline.</p>
+{% endif %}
+{% endblock %}

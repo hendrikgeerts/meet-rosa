@@ -1,0 +1,94 @@
+{% extends "_base.html" %}
+{% block title %}{{ 'Edit' if project else 'New' }} project — pa-agent{% endblock %}
+{% block content %}
+<h2>{{ 'Edit' if project else 'New' }} project</h2>
+
+{% if error %}
+  <p class="err">{{ error }}</p>
+{% endif %}
+
+<form method="post" action="{{ '/projects/' + project.slug + '/edit' if project else '/projects/new' }}"
+      style="display: grid; grid-template-columns: 200px 1fr; gap: 10px 12px; max-width: 800px;">
+  <label for="title">Title *</label>
+  <input id="title" name="title" type="text" required value="{{ project.title if project else '' }}">
+
+  <label for="slug">Slug{% if not project %} (auto from title){% endif %}</label>
+  <input id="slug" name="slug" type="text" value="{{ project.slug if project else '' }}"
+         {% if project %}readonly style="opacity: 0.6;"{% endif %}>
+
+  <label for="company">Company</label>
+  <input id="company" name="company" type="text" value="{{ project.company or '' if project else '' }}"
+         placeholder="DST / HGE / Initiale / ...">
+
+  <label for="owner">Owner</label>
+  <input id="owner" name="owner" type="text" value="{{ project.owner or '' if project else '' }}">
+
+  <label for="status">Status</label>
+  <select id="status" name="status">
+    {% for s in ['active','paused','done','abandoned'] %}
+    <option value="{{ s }}" {% if project and project.status == s %}selected{% endif %}>{{ s }}</option>
+    {% endfor %}
+  </select>
+
+  <label for="deadline">Deadline</label>
+  <input id="deadline" name="deadline" type="date" value="{{ project.deadline or '' if project else '' }}">
+
+  <label for="keywords">Keywords (comma-separated)</label>
+  <div style="display: flex; gap: 8px;">
+    <input id="keywords" name="keywords" type="text" style="flex: 1;"
+           value="{{ project.keywords | join(', ') if project else '' }}"
+           placeholder="rosa, pa-agent, assistant">
+    <button type="button" id="suggest-keywords-btn"
+            style="padding: 4px 10px; background: var(--code-bg); border: 1px solid var(--bd); border-radius: 4px; cursor: pointer; font-size: 12px;"
+            title="Llama suggereert keywords op basis van title + description">💡 Suggest</button>
+  </div>
+
+  <label for="description">Description</label>
+  <textarea id="description" name="description" rows="6" style="resize: vertical;">{{ project.description or '' if project else '' }}</textarea>
+
+  <div></div>
+  <div style="display: flex; gap: 12px; align-items: center;">
+    <button type="submit" class="filters">Save</button>
+    <a href="/projects">Cancel</a>
+    {% if project %}
+      <span style="margin-left: auto;">
+        <button type="submit" form="delete-form" style="background: var(--err); color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer;"
+                onclick="return confirm('Delete project &quot;{{ project.title }}&quot;? This cannot be undone.');">Delete</button>
+      </span>
+    {% endif %}
+  </div>
+</form>
+
+{% if project %}
+<form id="delete-form" method="post" action="/projects/{{ project.slug }}/delete" style="display:none;"></form>
+{% endif %}
+
+<script>
+document.getElementById('suggest-keywords-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('suggest-keywords-btn');
+  const title = document.getElementById('title').value.trim();
+  const desc = document.getElementById('description').value.trim();
+  if (!title) { alert('Vul eerst een title in'); return; }
+  btn.disabled = true; btn.textContent = '⏳ Llama denkt na (~25s)...';
+  try {
+    const resp = await fetch('/api/suggest/project-keywords', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({title, description: desc}),
+    });
+    const data = await resp.json();
+    if (data.keywords && data.keywords.length) {
+      const existing = document.getElementById('keywords').value
+        .split(',').map(k => k.trim()).filter(Boolean);
+      const combined = [...new Set([...existing, ...data.keywords])];
+      document.getElementById('keywords').value = combined.join(', ');
+    } else {
+      alert('Geen suggesties van Llama: ' + (data.error || data.note || '?'));
+    }
+  } catch (e) {
+    alert('Suggest faalde: ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = '💡 Suggest';
+  }
+});
+</script>
+{% endblock %}

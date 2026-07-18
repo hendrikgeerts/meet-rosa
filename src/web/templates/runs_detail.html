@@ -1,0 +1,83 @@
+{% extends "_base.html" %}
+{% block title %}Run #{{ run.id }} — pa-agent{% endblock %}
+{% block content %}
+<div style="display: flex; align-items: baseline; gap: 12px;">
+  <h2 style="margin: 0;">Run #{{ run.id }} — {{ run.period_label or 'unlabeled' }}</h2>
+  <span class="label label-{{ 'public' if run.status == 'completed' else ('confidential' if run.status == 'failed' else 'internal') }}">{{ run.status }}</span>
+  <span style="margin-left: auto;">
+    <a href="/receipt-runs">← all runs</a>
+  </span>
+</div>
+
+<div class="meta-grid">
+  <div>excel input</div><div style="font-family: monospace; font-size: 12px;">{{ run.excel_path }}</div>
+  <div>output dir</div><div style="font-family: monospace; font-size: 12px;">{{ run.output_dir }}</div>
+  <div>started / completed</div><div>{{ run.started }} / {{ run.completed or '(running)' }}</div>
+  <div>date window</div><div>{{ run.window_start_date }} → {{ run.window_end_date }}</div>
+  <div>counts</div><div>
+    <strong>{{ run.transaction_count }}</strong> txn ·
+    <span class="ok">{{ run.matched_count }} matched</span> ·
+    {{ run.needs_portal_count }} portal ·
+    <span class="warn">{{ run.unknown_count }} unknown</span>
+  </div>
+</div>
+
+<div class="filters" style="margin-top: 16px;">
+  <form method="get" action="/receipt-runs/{{ run.id }}" style="display: flex; gap: 8px; align-items: center;">
+    <label>filter status
+      <select name="status">
+        <option value="">all</option>
+        {% for s in ['matched','needs_portal','unknown_vendor','manual_resolved','pending'] %}
+        <option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button type="submit">filter</button>
+  </form>
+  <span style="margin-left: auto; color: var(--muted); font-size: 12px;">
+    {{ items|length }} items shown
+  </span>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>row</th>
+      <th>date</th>
+      <th>vendor (excel)</th>
+      <th style="text-align: right;">amount</th>
+      <th>status</th>
+      <th>via</th>
+      <th>score</th>
+      <th>attachment</th>
+      <th>action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for i in items %}
+    <tr>
+      <td style="color: var(--muted); font-size: 11px;">{{ i.row_idx }}</td>
+      <td>{{ i.transaction_date_iso }}</td>
+      <td>{{ i.vendor_raw }}</td>
+      <td style="text-align: right; font-family: monospace;">€ {{ '%.2f'|format(i.amount_eur|abs) }}</td>
+      <td>
+        <span class="label label-{{ 'public' if i.status == 'matched' else ('warn' if i.status == 'unknown_vendor' else 'internal') }}">{{ i.status }}</span>
+      </td>
+      <td style="font-family: monospace; font-size: 11px;">{{ i.matched_via or '—' }}</td>
+      <td style="font-family: monospace; font-size: 11px;">{{ '%.2f'|format(i.match_score) if i.match_score else '—' }}</td>
+      <td style="font-family: monospace; font-size: 11px;">
+        {% if i.attachment_path %}
+          <a href="/receipt-runs/{{ run.id }}/attachment/{{ i.attachment_path|urlencode }}" target="_blank">{{ i.attachment_path }}</a>
+        {% else %}—{% endif %}
+      </td>
+      <td>
+        {% if i.status == 'unknown_vendor' %}
+          <a href="/vendors/new?prefill_alias={{ i.vendor_raw|urlencode }}&prefill_amount={{ '%.2f'|format(i.amount_eur|abs) }}&prefill_date={{ i.transaction_date_iso }}"
+             style="background: var(--accent); color: white; padding: 2px 6px; border-radius: 3px; text-decoration: none; font-size: 11px;">+ vendor</a>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "_base.html" %}
+{% block title %}Receipt runs — pa-agent{% endblock %}
+{% block content %}
+<h2>Receipt-collection runs</h2>
+
+<p style="color: var(--muted); font-size: 12px; max-width: 700px;">
+  Elke kwartaal-run die Rosa heeft uitgevoerd. Klik op een run voor de
+  volledige lijst van transacties met match-status, score en attachment-link.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>id</th>
+      <th>period</th>
+      <th>started</th>
+      <th>status</th>
+      <th>txn</th>
+      <th>matched</th>
+      <th>needs portal</th>
+      <th>unknown</th>
+      <th>output dir</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in runs %}
+    <tr>
+      <td><a href="/receipt-runs/{{ r.id }}">#{{ r.id }}</a></td>
+      <td>{{ r.period_label or '—' }}</td>
+      <td>{{ r.started }}</td>
+      <td>
+        <span class="label label-{{ 'public' if r.status == 'completed' else ('confidential' if r.status == 'failed' else 'internal') }}">{{ r.status }}</span>
+      </td>
+      <td>{{ r.transaction_count }}</td>
+      <td><strong class="ok">{{ r.matched_count }}</strong></td>
+      <td>{{ r.needs_portal_count }}</td>
+      <td><span class="warn">{{ r.unknown_count }}</span></td>
+      <td style="font-family: monospace; font-size: 11px; color: var(--muted);">{{ r.output_dir | replace(home_prefix, '~/') }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="9" style="text-align:center; color: var(--muted); padding: 20px;">
+      Nog geen runs gedaan. Drop een Excel in <code>~/PA-Receipts/inbox/</code> en vraag Rosa via iMessage om de run te starten.
+    </td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

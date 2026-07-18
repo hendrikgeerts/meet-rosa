@@ -1,0 +1,134 @@
+{% extends "_base.html" %}
+{% block title %}VIP suggestions — pa-agent{% endblock %}
+{% block content %}
+<style>
+  .sample { color: var(--muted); font-family: monospace; font-size: 11px; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .row-form { display: flex; gap: 6px; align-items: center; }
+  .row-form input[type="text"] { width: 160px; padding: 2px 6px; font-size: 12px;
+    border: 1px solid var(--bd); border-radius: 3px; background: var(--bg); color: var(--fg); }
+  .row-form select { padding: 2px 6px; font-size: 12px; border: 1px solid var(--bd);
+    border-radius: 3px; background: var(--bg); color: var(--fg); }
+  .submit-bar { position: sticky; bottom: 0; background: var(--bg);
+    padding: 10px 0; border-top: 1px solid var(--bd); margin-top: 16px; }
+  .submit-bar button { padding: 8px 18px; font-size: 14px; background: var(--accent);
+    color: white; border: none; border-radius: 4px; cursor: pointer; }
+</style>
+
+<h1 style="margin-top:0;">VIP suggestions</h1>
+<p style="color:var(--muted);max-width:680px">
+  Op basis van je inbox/sent-mail (laatste 365 dagen). Score combineert
+  totaal-volume + bilaterale conversatie + recente activiteit. Eigen
+  domeinen en noreply-/automated-adressen zijn al gefilterd. Vink aan
+  wie je echt als VIP wilt behandelen — bij submit worden ze in
+  <code>vip_contacts.yaml</code> gezet (huidige config wordt bewaard
+  in <code>vip_contacts.yaml.bak</code>).
+</p>
+
+<form method="post" action="/vip/suggest">
+
+  <h2 style="margin-top:20px">👥 Top personen <span class="pill">{{ persons|length }}</span></h2>
+  {% if persons %}
+  <table>
+    <thead>
+      <tr>
+        <th></th>
+        <th>email</th>
+        <th>naam (edit indien gewenst)</th>
+        <th>tier</th>
+        <th class="num">in</th>
+        <th class="num">uit</th>
+        <th class="num">bilat</th>
+        <th>relatie-tijd</th>
+        <th>laatste</th>
+        <th class="num">score</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in persons %}
+      <tr>
+        <td><input type="checkbox" name="person_{{ p.email }}"></td>
+        <td>{{ p.email }}</td>
+        <td>
+          <input type="text" name="name_person_{{ p.email }}"
+                 value="{{ p.email.split('@')[0] }}" placeholder="naam">
+        </td>
+        <td>
+          <select name="tier_person_{{ p.email }}">
+            <option value="A">A — strategisch</option>
+            <option value="B" selected>B — actief</option>
+            <option value="C">C — incidenteel</option>
+          </select>
+        </td>
+        <td class="num">{{ p.in }}</td>
+        <td class="num">{{ p.out }}</td>
+        <td class="num">{{ p.bilateral }}</td>
+        <td><span class="pill">{{ p.first }} → {{ p.last }}</span></td>
+        <td>
+          {% if p.days_since == 0 %}<span class="pill">vandaag</span>
+          {% elif p.days_since < 30 %}<span class="pill">{{ p.days_since }}d</span>
+          {% elif p.days_since < 90 %}<span class="pill warn">{{ p.days_since }}d</span>
+          {% else %}<span class="pill err">{{ p.days_since }}d</span>{% endif %}
+        </td>
+        <td class="num">{{ p.score }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color:var(--muted);font-style:italic">Geen kandidaten — comm-historie is leeg of alles is al in yaml.</p>
+  {% endif %}
+
+  <h2 style="margin-top:24px">🏢 Top organisaties <span class="pill">{{ orgs|length }}</span></h2>
+  {% if orgs %}
+  <table>
+    <thead>
+      <tr>
+        <th></th>
+        <th>domein</th>
+        <th>naam (edit indien gewenst)</th>
+        <th>tier</th>
+        <th class="num">in</th>
+        <th class="num">uit</th>
+        <th class="num">bilat</th>
+        <th class="num">#emails</th>
+        <th>sample</th>
+        <th class="num">score</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for o in orgs %}
+      <tr>
+        <td><input type="checkbox" name="org_{{ o.domain }}"></td>
+        <td><strong>@{{ o.domain }}</strong></td>
+        <td>
+          <input type="text" name="name_org_{{ o.domain }}"
+                 value="{{ o.domain.split('.')[0]|capitalize }}" placeholder="naam">
+        </td>
+        <td>
+          <select name="tier_org_{{ o.domain }}">
+            <option value="A">A — strategisch</option>
+            <option value="B" selected>B — actief</option>
+            <option value="C">C — incidenteel</option>
+          </select>
+        </td>
+        <td class="num">{{ o.in }}</td>
+        <td class="num">{{ o.out }}</td>
+        <td class="num">{{ o.bilateral }}</td>
+        <td class="num">{{ o.uniq_emails }}</td>
+        <td class="sample">{{ ", ".join(o.sample_emails) }}</td>
+        <td class="num">{{ o.score }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color:var(--muted);font-style:italic">Geen org-kandidaten.</p>
+  {% endif %}
+
+  <div class="submit-bar">
+    <button type="submit">✓ Voeg aangevinkte kandidaten toe aan vip_contacts.yaml</button>
+    <a href="/vip" style="margin-left:14px;color:var(--muted)">terug naar /vip</a>
+  </div>
+</form>
+{% endblock %}

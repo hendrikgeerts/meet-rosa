@@ -1,0 +1,14 @@
+# Lijst van Slack-workspaces die de agent meeleest.
+#
+# **Beheer dit bestand niet met de hand** — gebruik:
+#     ./venv/bin/python scripts/slack_workspace.py add | edit | remove | list
+# Het script slaat tokens op in macOS Keychain (service "pa-agent-slack"),
+# nooit hier. Dit yaml-bestand bevat alleen niet-gevoelige metadata.
+
+workspaces:
+  # Voorbeeld:
+  # - name: "initiale"                  # unieke key — alleen [a-z0-9_-]
+  #   label: "YourClient werk-Slack"      # tonen aan you in iMessage
+  #   workspace_url: "initiale.slack.com"  # display only
+  #   enabled: true
+  #   poll_interval_seconds: 300        # 5 min default

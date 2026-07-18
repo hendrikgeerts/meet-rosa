@@ -1,0 +1,36 @@
+# Lijst van IMAP-mailboxen die de agent meeleest.
+#
+# **Beheer dit bestand niet met de hand** — gebruik:
+#     ./venv/bin/python scripts/imap_account.py add | edit | remove | list
+# Het script slaat passwords op in macOS Keychain (service "pa-agent-imap"),
+# nooit hier. Dit yaml-bestand bevat alleen niet-gevoelige verbindings-info.
+
+accounts:
+  # Voorbeeld:
+  # - name: "initiale"                 # unieke key — alleen [a-z0-9_-], geen spaties
+  #   label: "YourClient werkmail"       # tonen aan you in iMessage
+  #   host: "mail.initiale.nl"
+  #   port: 993
+  #   ssl: true                         # IMAPS (vrijwel altijd true)
+  #   username: "you@example.com"
+  #   folders:
+  #     inbox: "INBOX"                  # IMAP-folder voor binnenkomende mail
+  #     sent: "Sent"                    # IMAP-folder voor verzonden mail
+  #                                     # NB: verschillende servers gebruiken
+  #                                     #     "Sent", "Sent Items", "Verzonden"
+  #                                     #     of "INBOX.Sent" — gebruik
+  #                                     #     `imap_account.py folders <name>`
+  #                                     #     om alle beschikbare folders te zien.
+  #   enabled: true
+  #   poll_interval_seconds: 300        # 5 min default
+  #
+  #   # SMTP-config voor uitgaande mails op deze account (concept-mailer
+  #   # van scheduler_assist gebruikt dit). Wachtwoord uit Keychain (zelfde
+  #   # als IMAP, dus geen aparte setup nodig). Laat dit blok weg om
+  #   # send-capability uit te zetten.
+  #   smtp:
+  #     host: "smtp.initiale.nl"
+  #     port: 587
+  #     use_starttls: true
+  #   from_address: "you@example.com"   # default = username
+  #   from_name: "[Your Name]"           # optioneel, voor From-header

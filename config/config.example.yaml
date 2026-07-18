@@ -1,0 +1,243 @@
+# Rosa — voorbeeld-configuratie voor een nieuwe gebruiker.
+#
+# Deze file wordt door de setup-wizard automatisch gegenereerd op basis
+# van jouw antwoorden. Je hoeft 'em normaal gesproken niet handmatig te
+# bewerken — start de wizard opnieuw via `rosa setup` of via het
+# lokale dashboard (settings → "Herstart wizard").
+#
+# Locatie in productie: ~/Library/Application Support/Rosa/config.yaml
+#
+# Secrets (API-keys, OAuth-tokens) staan NOOIT in deze file — die zitten
+# in secrets.env of macOS Keychain. Zie SETUP.md voor uitleg.
+
+# -----------------------------------------------------------------------
+# 1. USER — wie ben jij
+# -----------------------------------------------------------------------
+user:
+  # Jouw naam. Wordt gebruikt in briefings ("Morning, Alex —") en in
+  # concept-mails ("Onderteken met…"). Geen last name verplicht.
+  name: ""
+
+  # Jouw primaire email. Wordt gebruikt voor uitgaande audit-notities
+  # en (later) support-tickets. Niet noodzakelijk hetzelfde als Gmail
+  # of IMAP.
+  email: ""
+
+  # IANA-tijdzone. Default gebruikt macOS-tijdzone bij eerste boot.
+  # Voorbeelden: "Europe/Amsterdam", "America/Los_Angeles".
+  timezone: "Europe/Amsterdam"
+
+  # Interface-taal voor Rosa's iMessage-antwoorden en briefings.
+  # Ondersteund: "en" (Engels) of "nl" (Nederlands).
+  preferred_language: "en"
+
+  # Woonplaats — helpt Rosa te weten wanneer een adres in mails
+  # "thuisbasis" is. Kan leeg blijven.
+  home_city: ""
+  home_country: "NL"
+
+  # Bedrijfsnaam voor CEO-letter en soortgelijke briefings. Blijft
+  # de prompt generic bij een lege waarde.
+  company: ""
+
+  # Home-coördinaten voor travel-alerts fallback. Wizard vult deze
+  # automatisch via HERE-Maps geocoding op basis van een adres.
+  # Leeg → travel-alerts skippen als er geen recente phone-locatie is.
+  home_lat: null
+  home_lon: null
+
+# -----------------------------------------------------------------------
+# 2. FEATURES — welke onderdelen wil je gebruiken?
+# -----------------------------------------------------------------------
+# Elke feature is een aparte module. Zet `false` om 'em volledig uit te
+# schakelen (geen scheduler-tick, geen tools, geen briefing-sectie).
+# De wizard zet ze default op basis van welke integraties je hebt
+# geconfigureerd.
+features:
+  # Cross-source open-items tracker (mail + Slack + Plaud + Todoist)
+  reminders: true
+  open_loops: true
+  delegation_tracker: true
+
+  # Communicatie-intel over mail + Slack
+  comm_intel: true
+  todoist_sync: false        # vereist Todoist API-token
+  slack_ingest: false        # vereist Slack user-token per workspace
+  plaud_watcher: false       # vereist Plaud folder-path
+
+  # Voice-in via iMessage audio-bubble → Whisper → intent
+  voice_in: true
+  # Voice-out: Rosa's antwoord ook als audio wanneer je 'em inspreekt
+  voice_reply: true
+
+  # Vision — foto's/screenshots via Apple Vision
+  vision_ocr: false
+
+  # Uptime-monitoring van eigen platforms
+  uptime_monitor: false      # vereist uptime_targets.yaml
+
+  # Travel-alerts via HERE Maps + phone-locatie
+  travel_alerts: false       # vereist HERE_API_KEY + PA-LOC iOS Shortcut
+
+  # Meeting prep 30 min vóór afspraak
+  meeting_prep: true
+
+  # Sales / CRM pipeline
+  sales: false
+
+  # Public data feeds
+  market_intel: false        # RSS-nieuws-scoring; vereist morning_extras.yaml
+  tenders: false             # TenderNed aanbestedingen NL
+  insolvencies: false        # KvK faillissementen watchlist NL
+
+  # Memory + persoonlijke productiviteit
+  memory_cards: true         # via iMessage "onthoud dat …"
+  decisions_log: true
+  patterns: true             # long-term pattern detection
+  weekly_retro: true         # zaterdag reflectie
+
+  # Life-long learning (you-specifiek, default off)
+  english_practice: false
+  okr_coaching: false
+  receipt_collector: false
+
+# -----------------------------------------------------------------------
+# 3. RUNTIME — modellen + paden
+# -----------------------------------------------------------------------
+runtime:
+  claude_model: "claude-sonnet-4-6"
+  local_model_small: "phi3:mini"
+  local_model_main: "llama3.1:8b-instruct-q4_K_M"
+  embedding_model: "nomic-embed-text"
+  whisper_model: "small"
+  ner_model: "nl_core_news_lg"
+  log_level: "INFO"
+  default_timezone: "Europe/Amsterdam"
+
+paths:
+  # Standaard: alles onder ~/Library/Application Support/Rosa/
+  # Kan overruled worden via env-var ROSA_HOME=/custom/path.
+  data_dir: "data"
+  audit_dir: "data/audit"
+  voice_in_dir: "data/voice-in"
+  vectors_dir: "data/vectors"
+  memory_db: "data/memory.db"
+  google_credentials: "google_credentials.json"
+  google_token: "data/google_token.json"
+  plaud_inbox: "~/PlaudInbox"
+  log_file: "data/logs/agent.log"
+  messages_db: "~/Library/Messages/chat.db"
+
+# -----------------------------------------------------------------------
+# 4. iMESSAGE — de primaire chat-interface
+# -----------------------------------------------------------------------
+imessage:
+  # Jouw iMessage-handles: email en/of telefoonnummer. Nieuwe berichten
+  # vanaf deze handles worden geaccepteerd als "van jou". Eerste handle
+  # is ook waar proactieve briefings/reminders naartoe gaan.
+  # In secrets.env: OWNER_IMESSAGE_HANDLE + optionele OWNER_EXTRA_HANDLES.
+  poll_interval_seconds: 3
+
+# -----------------------------------------------------------------------
+# 5. BRIEFINGS — dagelijkse ritmes
+# -----------------------------------------------------------------------
+briefings:
+  enabled: true
+  weekday_time: "07:00"
+  weekend_time: "08:30"
+
+dayclose:
+  enabled: true
+  time: "20:00"
+
+midday:
+  enabled: true
+  time: "13:00"
+
+# -----------------------------------------------------------------------
+# 6. INTEGRATIES — API-tokens komen uit secrets.env
+# -----------------------------------------------------------------------
+todoist:
+  enabled: false
+  project_name: "Rosa"
+  sync_interval_seconds: 300
+  loops_review_queue: true
+
+travel_alerts:
+  enabled: false
+  check_interval_seconds: 180
+  horizon_minutes: 120
+  plan_minutes: 30
+  buffer_minutes: 5
+  location_retention_days: 7
+  location_min_interval_seconds: 3600
+
+meeting_prep:
+  enabled: true
+  minutes_before: 30
+  check_interval_seconds: 120
+  skip_internal_only: true
+
+scheduler_assist:
+  # Jouw Calendly-link (of gelijkwaardig) — wordt in scheduling-replies
+  # aangeboden zodat ontvangers zelf een slot kunnen kiezen. Leeg = uit.
+  calendly_url: ""
+
+market_intel:
+  enabled: false
+  weekday: 6
+  time: "11:00"
+
+# -----------------------------------------------------------------------
+# 7. TTS — spraak-antwoord instellingen
+# -----------------------------------------------------------------------
+tts:
+  enabled: true
+  # 'say' = lokaal macOS (gratis, privacy-vriendelijk)
+  # 'elevenlabs' = cloud neural TTS (ELEVENLABS_API_KEY vereist)
+  engine: "say"
+  voice: "Ava (Enhanced)"
+  max_chars: 600
+  elevenlabs_voice_id: "21m00Tcm4TlvDq8ikWAM"
+  elevenlabs_model_id: "eleven_multilingual_v2"
+  elevenlabs_daily_char_cap: 8000
+
+# -----------------------------------------------------------------------
+# 8. PRIVACY — retention + audit-instellingen
+# -----------------------------------------------------------------------
+privacy:
+  default_label: "internal"
+  max_external_payload_bytes: 50000
+  audit_retention_days: 90
+  payloads_retention_days: 14
+  admin_retention_days: 365
+  comm_items_retention_days: 365
+  expenses_retention_days: 2555
+  uptime_events_retention_days_up: 90
+  uptime_events_retention_days_alert: 365
+  conversation_turns_retention_days: 180
+  processed_messages_retention_days: 180
+
+  # Maandelijkse Anthropic-budget cap (USD). Als deze maand's spend
+  # over dit bedrag heen gaat, blokkeert de gateway nieuwe Claude-
+  # calls tot volgende maand. `rosa cost` toont je huidige stand.
+  # 0.0 = uit (geen cap — gebruik op eigen risico).
+  monthly_anthropic_budget_usd: 25.0
+  log_payloads: false     # ISO fix — opt-in tijdens redactor-tuning
+  progress_ack_threshold_seconds: 15.0
+
+# -----------------------------------------------------------------------
+# 9. WEB DASHBOARD — audit + settings
+# -----------------------------------------------------------------------
+web:
+  enabled: true
+  host: "127.0.0.1"
+  port: 8080
+
+# -----------------------------------------------------------------------
+# 10. EIGEN EMAIL-DOMEINEN — outbound-facturatie unaffected
+# -----------------------------------------------------------------------
+# Facturen/notities die van deze domeinen komen worden als 'fyi'
+# gemarkeerd i.p.v. als actie-item — voorkomt dat je eigen facturatie
+# in briefings verschijnt.
+own_email_domains: []

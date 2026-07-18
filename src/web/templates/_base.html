@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}pa-agent audit{% endblock %}</title>
+  <style>
+    :root { color-scheme: light dark; --fg: #1a1a1a; --bg: #fafafa; --muted: #666;
+            --accent: #2563eb; --warn: #d97706; --err: #dc2626; --ok: #059669;
+            --bd: #e5e5e5; --code-bg: #f3f3f3; }
+    @media (prefers-color-scheme: dark) {
+      :root { --fg: #e8e8e8; --bg: #111; --muted: #9a9a9a; --accent: #60a5fa;
+              --bd: #2a2a2a; --code-bg: #1a1a1a; }
+    }
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0;
+           color: var(--fg); background: var(--bg); font-size: 14px; line-height: 1.45; }
+    header { padding: 12px 20px; border-bottom: 1px solid var(--bd); display: flex;
+             gap: 16px; align-items: center; }
+    header h1 { margin: 0; font-size: 16px; }
+    header .nav { display: flex; gap: 12px; margin-left: auto; }
+    header a { color: var(--accent); text-decoration: none; }
+    main { padding: 20px; max-width: 1400px; margin: 0 auto; }
+    a { color: var(--accent); }
+    .filters { display: flex; gap: 12px; flex-wrap: wrap; padding: 10px 0; align-items: center; }
+    .filters label { color: var(--muted); font-size: 12px; }
+    .filters select, .filters input { padding: 4px 8px; font-size: 13px;
+                                       border: 1px solid var(--bd); border-radius: 4px;
+                                       background: var(--bg); color: var(--fg); }
+    .filters button { padding: 4px 10px; font-size: 13px; border-radius: 4px;
+                      border: 1px solid var(--bd); background: var(--accent); color: white; cursor: pointer; }
+    table { border-collapse: collapse; width: 100%; font-size: 13px; }
+    th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--bd); }
+    th { font-weight: 600; color: var(--muted); position: sticky; top: 0; background: var(--bg); }
+    tr:hover { background: rgba(0,0,0,0.03); }
+    .label { padding: 2px 6px; border-radius: 3px; font-size: 11px; font-weight: 500; }
+    .label-internal     { background: #dbeafe; color: #1e40af; }
+    .label-confidential { background: #fee2e2; color: #991b1b; }
+    .label-public       { background: #dcfce7; color: #166534; }
+    .label-tool_use, .label-tool_use_redacted { background: #ede9fe; color: #5b21b6; }
+    .label-unclassified { background: #e5e5e5; color: #525252; }
+    @media (prefers-color-scheme: dark) {
+      .label-internal     { background: #1e3a8a; color: #bfdbfe; }
+      .label-confidential { background: #7f1d1d; color: #fecaca; }
+      .label-public       { background: #14532d; color: #bbf7d0; }
+      .label-tool_use, .label-tool_use_redacted { background: #4c1d95; color: #ddd6fe; }
+      .label-unclassified { background: #404040; color: #d4d4d4; }
+    }
+    .pill { display: inline-block; padding: 1px 6px; border-radius: 999px; font-size: 11px;
+            background: var(--code-bg); color: var(--muted); }
+    .ok   { color: var(--ok); }
+    .warn { color: var(--warn); }
+    .err  { color: var(--err); }
+    pre { background: var(--code-bg); padding: 12px; border-radius: 4px; overflow: auto;
+          font-size: 12px; }
+    .leak-banner { background: var(--err); color: white; padding: 12px 16px; border-radius: 4px;
+                   margin: 10px 0; }
+    .leak-banner.clean { background: var(--ok); }
+    .meta-grid { display: grid; grid-template-columns: 200px 1fr; gap: 4px 12px; margin: 10px 0; }
+    .meta-grid div:nth-child(odd) { color: var(--muted); }
+    h2 { margin-top: 20px; font-size: 14px; color: var(--muted);
+         text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🔒 pa-agent audit</h1>
+    <span class="pill">127.0.0.1 only</span>
+    <nav class="nav">
+      <a href="/audit">audit</a>
+      <a href="/projects">projects</a>
+      <a href="/imap-accounts">imap</a>
+      <a href="/vendors">vendors</a>
+      <a href="/receipt-runs">runs</a>
+      <a href="/wishes">wishes</a>
+      <a href="/loops">loops</a>
+      <a href="/uptime">uptime</a>
+      <a href="/sales">sales</a>
+      <a href="/ceo"><strong>CEO</strong></a>
+      <a href="/vip">VIPs</a>
+      {% if dates %}
+        {% for d in dates[:3] %}<a href="/audit?date={{ d }}">{{ d }}</a>{% endfor %}
+      {% endif %}
+    </nav>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

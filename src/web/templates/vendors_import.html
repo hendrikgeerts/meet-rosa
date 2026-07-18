@@ -1,0 +1,43 @@
+{% extends "_base.html" %}
+{% block title %}Importeer unknown vendors — pa-agent{% endblock %}
+{% block content %}
+<h2>Onbekende vendors uit laatste run</h2>
+
+<p style="color: var(--muted); font-size: 12px; max-width: 700px;">
+  Deze vendors kwamen voor in run #{{ run_id }} maar Rosa kon ze niet vinden in
+  je mailboxen. Klik per vendor op <strong>+ strategie</strong> om vast te leggen
+  hoe Rosa volgende keer wél de bon vindt. Volgorde: meest voorkomend bovenaan.
+</p>
+
+<p><a href="/vendors">← terug naar vendor list</a> · <a href="/receipt-runs/{{ run_id }}">→ run detail</a></p>
+
+<table>
+  <thead>
+    <tr>
+      <th># keer</th>
+      <th>vendor (excel)</th>
+      <th>laatst bedrag</th>
+      <th>laatst datum</th>
+      <th>actie</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for u in unknowns %}
+    <tr>
+      <td>{{ u.count }}</td>
+      <td>{{ u.vendor_raw }}</td>
+      <td>€ {{ '%.2f'|format(u.last_amount) }}</td>
+      <td>{{ u.last_date }}</td>
+      <td>
+        <a href="/vendors/new?prefill_name={{ u.suggested_name|urlencode }}&prefill_alias={{ u.vendor_raw|urlencode }}&prefill_amount={{ '%.2f'|format(u.last_amount) }}&prefill_date={{ u.last_date }}"
+           style="background: var(--accent); color: white; padding: 3px 10px; border-radius: 3px; text-decoration: none; font-size: 12px;">+ strategie</a>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5" style="text-align:center; color: var(--muted); padding: 20px;">
+      Geen onbekende vendors meer 🎉
+    </td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

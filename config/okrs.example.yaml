@@ -1,0 +1,47 @@
+# OKRs — kwartaal-doelen waar Rosa beslissingen + voorstellen aan kan toetsen.
+#
+# Bron-van-waarheid: deze file. Wijzig hier en commit — geen DB-overlay.
+# Rosa leest alleen `status: active` objectieven in briefing/dayclose context.
+# Tool `okrs_check(proposal)` scoort vrije tekst (bv. "moet ik vrijdag naar
+# die conferentie") tegen elk actief objectief — 0-10 + rationale.
+#
+# Kopieer naar okrs.yaml voor je eigen doelen. okrs.yaml staat in .gitignore.
+
+period: "Q2 2026"
+period_start: "2026-04-01"
+period_end: "2026-06-30"
+
+objectives:
+  # - id: "dst-arr"
+  #   title: "Verdubbel DST Templates ARR"
+  #   company: "DST"             # optional tag — voor filteren in briefings
+  #   why: "Hoofdhefboom voor M4-upgrade + groei kantoorteam"
+  #   status: "active"            # active | paused | done | abandoned
+  #   key_results:
+  #     - id: "kr1"
+  #       text: "€60K ARR (van €30K)"
+  #       target: 60000
+  #       unit: "EUR"
+  #       current: 32000
+  #     - id: "kr2"
+  #       text: "10 nieuwe enterprise-klanten"
+  #       target: 10
+  #       unit: "count"
+  #       current: 2
+  #
+  # - id: "hge-pa-launch"
+  #   title: "PA-agent v1.0 productie-klaar"
+  #   company: "HGE"
+  #   why: "Eerste eigen AI-product naar markt — bewijst HGE-thesis"
+  #   status: "active"
+  #   key_results:
+  #     - id: "kr1"
+  #       text: "ISO 27001 audit succesvol"
+  #       target: 1
+  #       unit: "milestone"
+  #       current: 0
+  #     - id: "kr2"
+  #       text: "5 paying beta-users"
+  #       target: 5
+  #       unit: "count"
+  #       current: 0

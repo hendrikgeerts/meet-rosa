@@ -1,0 +1,139 @@
+{% extends "_base.html" %}
+{% block title %}VIP relationship monitor — pa-agent{% endblock %}
+{% block content %}
+<style>
+  .flag-alert { background: #fee2e2; color: #991b1b; }
+  .flag-warn  { background: #fef3c7; color: #92400e; }
+  .flag-ok    { background: #dcfce7; color: #166534; }
+  .flag-never { background: #e5e5e5; color: #525252; }
+  @media (prefers-color-scheme: dark) {
+    .flag-alert { background: #7f1d1d; color: #fecaca; }
+    .flag-warn  { background: #78350f; color: #fde68a; }
+    .flag-ok    { background: #14532d; color: #bbf7d0; }
+    .flag-never { background: #404040; color: #d4d4d4; }
+  }
+  .tier { font-weight: 700; min-width: 18px; display: inline-block; text-align: center; }
+  .tier-A { color: var(--err); }
+  .tier-B { color: var(--warn); }
+  .tier-C { color: var(--muted); }
+  .trend-up { color: var(--ok); }
+  .trend-down { color: var(--err); }
+</style>
+
+<h1 style="margin-top:0;">VIP relationship monitor</h1>
+<p style="color:var(--muted);max-width:680px">
+  Per persoon/organisatie uit <code>vip_contacts.yaml</code>: dagen sinds laatste contact + mail-volume deze week vs gemiddelde van afgelopen 4 weken. Alert-drempel hangt af van tier:
+  A = strategisch (stil &gt; 14d), B = actief (stil &gt; 30d), C = incidenteel (stil &gt; 60d).
+</p>
+
+{% if not snap.has_config %}
+  <div class="card" style="background:var(--code-bg);padding:16px;border-radius:6px;margin-top:16px;">
+    <h2 style="margin-top:0">Geen VIPs geconfigureerd</h2>
+    <p>Reden: <em>{{ snap.reason }}</em></p>
+    <p>Vul <code>config/vip_contacts.yaml</code> met je echte klanten/contacten. Format zie <code>config/vip_contacts.example.yaml</code>. De yaml staat in <code>.gitignore</code>.</p>
+    <p>Minimaal nodig per persoon:</p>
+    <pre>people:
+  - name: "Voorbeeld Klant"
+    emails: ["contact@klant.nl"]
+    tier: "A"
+organizations:
+  - name: "Klant B.V."
+    domains: ["klant.nl"]
+    tier: "A"</pre>
+  </div>
+{% elif not snap.vips %}
+  <p style="color:var(--muted);font-style:italic;margin-top:16px">Geen VIPs gevonden in de yaml.</p>
+{% else %}
+
+  {% set alerts = snap.vips | selectattr("flag", "equalto", "alert") | list %}
+  {% if alerts %}
+    <h2 style="margin-top:20px">🔴 Direct attention <span class="pill">{{ alerts|length }}</span></h2>
+    <table>
+      <thead><tr>
+        <th>tier</th><th>naam</th><th>type</th><th>silent</th>
+        <th>deze week</th><th>baseline/wk</th><th>trend</th><th>match</th>
+      </tr></thead>
+      <tbody>
+        {% for v in alerts %}
+          <tr>
+            <td><span class="tier tier-{{ v.tier }}">{{ v.tier }}</span></td>
+            <td><strong>{{ v.name }}</strong>{% if v.relationship %} <span style="color:var(--muted);font-size:11px">({{ v.relationship }})</span>{% endif %}</td>
+            <td><span class="pill">{{ v.kind }}</span></td>
+            <td><span class="pill flag-alert">{{ v.days_silent }}d</span></td>
+            <td>{{ v.week_count }}</td>
+            <td>{{ v.baseline_per_week }}</td>
+            <td>
+              {% if v.trend_pct < -25 %}<span class="trend-down">{{ v.trend_pct }}%</span>
+              {% elif v.trend_pct > 25 %}<span class="trend-up">+{{ v.trend_pct }}%</span>
+              {% else %}{{ v.trend_pct }}%{% endif %}
+            </td>
+            <td style="color:var(--muted);font-family:monospace;font-size:11px;">{{ v.match_on }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+
+  {% set warns = snap.vips | selectattr("flag", "equalto", "warn") | list %}
+  {% if warns %}
+    <h2 style="margin-top:20px">🟡 Watch <span class="pill">{{ warns|length }}</span></h2>
+    <table>
+      <thead><tr>
+        <th>tier</th><th>naam</th><th>silent</th>
+        <th>deze week</th><th>baseline/wk</th><th>trend</th>
+      </tr></thead>
+      <tbody>
+        {% for v in warns %}
+          <tr>
+            <td><span class="tier tier-{{ v.tier }}">{{ v.tier }}</span></td>
+            <td>{{ v.name }}</td>
+            <td><span class="pill flag-warn">{{ v.days_silent }}d</span></td>
+            <td>{{ v.week_count }}</td>
+            <td>{{ v.baseline_per_week }}</td>
+            <td>
+              {% if v.trend_pct < -25 %}<span class="trend-down">{{ v.trend_pct }}%</span>
+              {% elif v.trend_pct > 25 %}<span class="trend-up">+{{ v.trend_pct }}%</span>
+              {% else %}{{ v.trend_pct }}%{% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+
+  {% set oks = snap.vips | selectattr("flag", "equalto", "ok") | list %}
+  {% if oks %}
+    <h2 style="margin-top:20px">🟢 Healthy <span class="pill">{{ oks|length }}</span></h2>
+    <table>
+      <thead><tr><th>tier</th><th>naam</th><th>silent</th><th>deze week</th><th>trend</th></tr></thead>
+      <tbody>
+        {% for v in oks %}
+          <tr>
+            <td><span class="tier tier-{{ v.tier }}">{{ v.tier }}</span></td>
+            <td>{{ v.name }}</td>
+            <td>{{ v.days_silent }}d</td>
+            <td>{{ v.week_count }}</td>
+            <td>
+              {% if v.trend_pct < -10 %}<span class="trend-down">{{ v.trend_pct }}%</span>
+              {% elif v.trend_pct > 10 %}<span class="trend-up">+{{ v.trend_pct }}%</span>
+              {% else %}{{ v.trend_pct }}%{% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+
+  {% set nevers = snap.vips | selectattr("flag", "equalto", "never") | list %}
+  {% if nevers %}
+    <h2 style="margin-top:20px;color:var(--muted)">Nooit contact gehad <span class="pill">{{ nevers|length }}</span></h2>
+    <p style="color:var(--muted);font-size:12px">Misschien staan ze in je yaml maar heb je nog geen mail uitgewisseld via de gemonitorde sources. Of er staan tikfouten in de e-mail/domein-config.</p>
+    <ul class="compact">
+      {% for v in nevers %}
+        <li><span class="tier tier-{{ v.tier }}">{{ v.tier }}</span> {{ v.name }} <span style="color:var(--muted);font-size:11px;">({{ v.match_on }})</span></li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+{% endif %}
+{% endblock %}
