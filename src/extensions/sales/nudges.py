@@ -22,7 +22,6 @@ import core.timezone as _tz  # late-bound zodat test-monkey-patches doorwerken
 
 from .briefing import compute_sales_pulse
 
-
 _OUTBOUND_CHANNELS = ("email_out", "linkedin", "call", "meeting", "plaud")
 
 # Target → label voor iMessage-output

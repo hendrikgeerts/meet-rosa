@@ -4,7 +4,7 @@ from __future__ import annotations
 import sqlite3
 import threading
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from email.utils import format_datetime
 from pathlib import Path
 from unittest.mock import patch
@@ -15,18 +15,25 @@ from extensions.insolvencies.alerts import format_alert
 from extensions.insolvencies.feed import InsolvencyItem
 from extensions.insolvencies.matcher import DEFAULT_FILTER, match
 from extensions.insolvencies.schema import (
-    add_to_watchlist, init_insolvencies_schema, is_kvk_on_watchlist,
+    add_to_watchlist,
+    init_insolvencies_schema,
+    is_kvk_on_watchlist,
 )
 from extensions.insolvencies.tools import (
-    INSOLVENCIES_HANDLERS, INSOLVENCIES_TOOL_SCHEMAS,
+    INSOLVENCIES_HANDLERS,
+    INSOLVENCIES_TOOL_SCHEMAS,
     _validate_kvk,
-    insolvencies_list_recent_handler, insolvencies_search_handler,
-    insolvencies_ignore_handler, insolvencies_status_handler,
-    insolvency_watchlist_add_handler, insolvency_watchlist_list_handler,
+    insolvencies_ignore_handler,
+    insolvencies_list_recent_handler,
+    insolvencies_search_handler,
+    insolvencies_status_handler,
+    insolvency_watchlist_add_handler,
+    insolvency_watchlist_list_handler,
     insolvency_watchlist_remove_handler,
 )
 from extensions.insolvencies.worker import (
-    InsolvenciesWorker, _publication_age_days,
+    InsolvenciesWorker,
+    _publication_age_days,
 )
 
 
@@ -268,13 +275,13 @@ def _make_worker(db: Path, *, send=None) -> InsolvenciesWorker:
 
 
 def test_publication_age_days_recent() -> None:
-    recent = format_datetime(datetime.now(timezone.utc) - timedelta(hours=2))
+    recent = format_datetime(datetime.now(UTC) - timedelta(hours=2))
     age = _publication_age_days(recent)
     assert 0.0 < age < 0.5
 
 
 def test_publication_age_days_old() -> None:
-    old = format_datetime(datetime.now(timezone.utc) - timedelta(days=10))
+    old = format_datetime(datetime.now(UTC) - timedelta(days=10))
     age = _publication_age_days(old)
     assert age > 9.0
 
@@ -289,7 +296,7 @@ def test_worker_tick_inserts_and_alerts(db: Path) -> None:
     sent: list[tuple[str, str]] = []
     worker = _make_worker(db, send=lambda h, t: sent.append((h, t)))
 
-    recent_pubdate = format_datetime(datetime.now(timezone.utc))
+    recent_pubdate = format_datetime(datetime.now(UTC))
     matched_item = InsolvencyItem(
         link="http://example/match",
         naam="Pegasus Signage Holding B.V.",
@@ -335,7 +342,7 @@ def test_worker_skips_old_publication(db: Path) -> None:
     """Backfill-bescherming: pub_date 10 dagen oud → opslag wel, alert niet."""
     sent: list = []
     worker = _make_worker(db, send=lambda h, t: sent.append((h, t)))
-    old_pubdate = format_datetime(datetime.now(timezone.utc) - timedelta(days=10))
+    old_pubdate = format_datetime(datetime.now(UTC) - timedelta(days=10))
     item = InsolvencyItem(
         link="http://example/old",
         naam="Signage Holding BV",
@@ -361,7 +368,7 @@ def test_worker_dedupes(db: Path) -> None:
     worker = _make_worker(db, send=lambda h, t: sent.append((h, t)))
     with sqlite3.connect(db, isolation_level=None) as conn:
         _seed(conn, link="http://example/seen", matched=True, alerted=True)
-    recent_pubdate = format_datetime(datetime.now(timezone.utc))
+    recent_pubdate = format_datetime(datetime.now(UTC))
     item = InsolvencyItem(
         link="http://example/seen",
         naam="Already seen",
@@ -402,7 +409,7 @@ def test_h1_alert_send_outside_db_connection(db: Path) -> None:
             can_write_during_send.append(f"locked: {e}")
 
     worker = _make_worker(db, send=slow_send)
-    recent_pubdate = format_datetime(datetime.now(timezone.utc))
+    recent_pubdate = format_datetime(datetime.now(UTC))
     item = InsolvencyItem(
         link="http://example/match",
         naam="Pegasus Signage Holding B.V.",
@@ -527,7 +534,6 @@ def test_m2_watchlist_finds_kvk_across_normalizations(db: Path) -> None:
     """M2: watchlist '12345678' moet hits geven voor feed-waarde
     '12345678', '00012345' moet '12345' vinden. is_kvk_on_watchlist
     normaliseert beide kanten."""
-    from extensions.insolvencies.schema import is_kvk_on_watchlist
 
     insolvency_watchlist_add_handler(db, {"kvk": "12345"})  # 5 chars → '00012345'
     with sqlite3.connect(db) as conn:

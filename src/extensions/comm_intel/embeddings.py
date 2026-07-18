@@ -131,7 +131,7 @@ def search(
     fetch_k = k if (since_unix is None and source is None) else k * 5
 
     rows = conn.execute(
-        f"""SELECT e.rowid, e.distance, c.source, c.account, c.direction,
+        """SELECT e.rowid, e.distance, c.source, c.account, c.direction,
                     c.from_addr, c.subject, c.occurred_at, c.summary,
                     c.intent, c.body_full, c.thread_ref
               FROM comm_embeddings e

@@ -11,7 +11,6 @@ from __future__ import annotations
 import logging
 import re
 import sqlite3
-import time as _time
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -19,8 +18,12 @@ from zoneinfo import ZoneInfo
 
 from extensions.projects.aggregator import project_status as _project_status
 from extensions.projects.schema import (
-    delete_project, get_project, insert_project, list_projects,
-    update_project, VALID_STATUS,
+    VALID_STATUS,
+    delete_project,
+    get_project,
+    insert_project,
+    list_projects,
+    update_project,
 )
 
 log = logging.getLogger(__name__)

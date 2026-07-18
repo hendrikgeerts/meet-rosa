@@ -8,7 +8,8 @@ from pathlib import Path
 import pytest
 
 from extensions.comm_intel.response_time import (
-    collect_per_sender_stats, find_overdue_threads,
+    collect_per_sender_stats,
+    find_overdue_threads,
 )
 from extensions.comm_intel.schema import init_comm_schema
 from extensions.comm_intel.tools import COMM_HANDLERS

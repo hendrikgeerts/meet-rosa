@@ -7,9 +7,10 @@ from typing import Any
 
 from extensions.comm_intel.schema import CommItem
 from extensions.comm_intel.summarize import (
-    INTENTS, SENTIMENTS, Summary, _parse_loose_json, summarize,
+    Summary,
+    _parse_loose_json,
+    summarize,
 )
-
 
 # --- _parse_loose_json -----------------------------------------------------
 

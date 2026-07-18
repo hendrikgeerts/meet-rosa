@@ -11,7 +11,9 @@ import pytest
 
 from extensions.english_practice.reminder import generate_english_reminder
 from extensions.english_practice.schema import (
-    init_english_practice_schema, insert_card, set_active_card,
+    init_english_practice_schema,
+    insert_card,
+    set_active_card,
 )
 
 TZ = ZoneInfo("Europe/Amsterdam")

@@ -6,22 +6,26 @@ import sqlite3
 import time as _time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
 
 import pytest
 
 from extensions import reminders
 from extensions.open_loops.schema import (
-    OpenLoop, init_open_loops_schema, insert_loop,
+    OpenLoop,
+    init_open_loops_schema,
+    insert_loop,
 )
 from extensions.todoist_sync.schema import (
-    get_link_by_local, init_todoist_sync_schema, insert_link,
+    init_todoist_sync_schema,
+    insert_link,
 )
 from extensions.todoist_sync.sync import (
-    _loop_label, to_rfc3339, pull_completions, push_pending,
+    _loop_label,
+    pull_completions,
+    push_pending,
+    to_rfc3339,
 )
 from integrations.todoist import Project, Task
-
 
 # --- fixtures + fakes -----------------------------------------------------
 

@@ -15,7 +15,9 @@ from unittest.mock import patch
 import pytest
 
 from integrations.todoist import (
-    BASE, TodoistClient, TodoistProjectFullError,
+    BASE,
+    TodoistClient,
+    TodoistProjectFullError,
 )
 
 
@@ -40,9 +42,8 @@ def test_max_items_limit_raises_project_full_error(caplog) -> None:
         "error_code": 49,
     })
     with patch("integrations.todoist.urllib.request.urlopen",
-                side_effect=err):
-        with pytest.raises(TodoistProjectFullError):
-            client._request("POST", "/tasks", body={"content": "x"})
+                side_effect=err), pytest.raises(TodoistProjectFullError):
+        client._request("POST", "/tasks", body={"content": "x"})
 
 
 def test_log_does_not_contain_raw_body_content(caplog) -> None:
@@ -55,10 +56,9 @@ def test_log_does_not_contain_raw_body_content(caplog) -> None:
     }
     err = _http_error(400, sensitive)
     with patch("integrations.todoist.urllib.request.urlopen",
-                side_effect=err):
-        with caplog.at_level(logging.WARNING, logger="integrations.todoist"):
-            with pytest.raises(urllib.error.HTTPError):
-                client._request("POST", "/tasks", body={"content": "x"})
+                side_effect=err), caplog.at_level(logging.WARNING, logger="integrations.todoist"):
+        with pytest.raises(urllib.error.HTTPError):
+            client._request("POST", "/tasks", body={"content": "x"})
 
     log_text = "\n".join(r.message for r in caplog.records)
     # Geen content uit body
@@ -79,10 +79,9 @@ def test_non_json_error_body_doesnt_crash(caplog) -> None:
     )
     client = TodoistClient("dummy-token")
     with patch("integrations.todoist.urllib.request.urlopen",
-                side_effect=err):
-        with caplog.at_level(logging.WARNING, logger="integrations.todoist"):
-            with pytest.raises(urllib.error.HTTPError):
-                client._request("GET", "/projects")
+                side_effect=err), caplog.at_level(logging.WARNING, logger="integrations.todoist"):
+        with pytest.raises(urllib.error.HTTPError):
+            client._request("GET", "/projects")
     log_text = "\n".join(r.message for r in caplog.records)
     assert "HTTP 502" in log_text
     # Geen rauwe HTML in log

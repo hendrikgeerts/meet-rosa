@@ -55,7 +55,7 @@ class WizardState:
     skipped: set[str]
 
     @classmethod
-    def load(cls, path: Path) -> "WizardState":
+    def load(cls, path: Path) -> WizardState:
         if not path.exists():
             return cls(completed=set(), skipped=set())
         try:

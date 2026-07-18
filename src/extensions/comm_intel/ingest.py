@@ -11,16 +11,21 @@ from __future__ import annotations
 import logging
 import sqlite3
 import threading
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable  # noqa: F401
+from typing import Any
 
 from extensions.comm_intel.schema import (
-    insert_item, item_exists, load_state, upsert_state,
+    insert_item,
+    item_exists,
+    load_state,
+    upsert_state,
 )
 from extensions.comm_intel.summarize import summarize
 from extensions.open_loops.detect import sync_for_comm_item
 from extensions.travel_alerts.parser import (
-    SUBJECT_PREFIX as PA_LOC_PREFIX, is_location_message, parse_location_body,
+    is_location_message,
+    parse_location_body,
 )
 from extensions.travel_alerts.schema import insert_location
 from models.ollama import OllamaClient
@@ -168,7 +173,9 @@ class IngestWorker(threading.Thread):
                     # batch-indexer niet competeert om Ollama-queue.
                     try:
                         from extensions.comm_intel.embeddings import (
-                            _open_with_vec, embed, upsert_embedding,
+                            _open_with_vec,
+                            embed,
+                            upsert_embedding,
                         )
                         text = (item.subject or "") + "\n\n" + (item.body_full or "")[:4000]
                         if text.strip():

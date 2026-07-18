@@ -292,7 +292,7 @@ def format_imessage_report(
         trend = _fmt_trend(s.trend_diff)
         lines.append(f"{s.name}    {s.uptime_pct:.2f}%   {trend}")
         if s.incident_count == 0:
-            lines.append(f"  geen downtime · 0 incidents")
+            lines.append("  geen downtime · 0 incidents")
         else:
             dur = _fmt_duration(s.downtime_seconds)
             incident_word = "incident" if s.incident_count == 1 else "incidents"

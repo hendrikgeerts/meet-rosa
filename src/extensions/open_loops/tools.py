@@ -14,8 +14,10 @@ from zoneinfo import ZoneInfo
 
 from core.query_safety import validate_query
 from extensions.open_loops.schema import (
-    close_loop, delegations_due_for_followup, extend_followup,
-    list_open, snooze_loop,
+    close_loop,
+    extend_followup,
+    list_open,
+    snooze_loop,
 )
 
 LOOPS_TOOL_SCHEMAS: list[dict[str, Any]] = [

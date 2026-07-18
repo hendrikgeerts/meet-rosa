@@ -15,7 +15,9 @@ from pathlib import Path
 from typing import Any
 
 from extensions.okrs.loader import (
-    load_okrs, to_briefing_snapshot, update_kr_progress,
+    load_okrs,
+    to_briefing_snapshot,
+    update_kr_progress,
 )
 from privacy.gateway import Gateway
 

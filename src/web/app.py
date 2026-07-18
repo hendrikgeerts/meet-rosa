@@ -61,20 +61,45 @@ class HostHeaderAllowlistMiddleware(BaseHTTPMiddleware):
 
 from extensions.projects.aggregator import project_status as _project_status
 from extensions.projects.schema import (
-    delete_project, get_project, insert_project, list_projects,
-    update_project, VALID_STATUS,
+    VALID_STATUS,
+    delete_project,
+    get_project,
+    insert_project,
+    list_projects,
+    update_project,
 )
 from extensions.receipt_collector.schema import (
-    VALID_SOURCE_KIND, get_run as _get_receipt_run,
-    list_run_items as _list_run_items, list_runs as _list_receipt_runs,
-    list_vendor_strategies, upsert_vendor_strategy,
+    VALID_SOURCE_KIND,
+    list_vendor_strategies,
+    upsert_vendor_strategy,
+)
+from extensions.receipt_collector.schema import (
+    get_run as _get_receipt_run,
+)
+from extensions.receipt_collector.schema import (
+    list_run_items as _list_run_items,
+)
+from extensions.receipt_collector.schema import (
+    list_runs as _list_receipt_runs,
 )
 from integrations.imap import (
-    ImapAccount, ImapClient, ImapFolders,
+    ImapAccount,
+    ImapClient,
+    ImapFolders,
+)
+from integrations.imap import (
     delete_password as _imap_delete_password,
+)
+from integrations.imap import (
     get_password as _imap_get_password,
+)
+from integrations.imap import (
     load_accounts as _imap_load,
+)
+from integrations.imap import (
     save_accounts as _imap_save,
+)
+from integrations.imap import (
     set_password as _imap_set_password,
 )
 
@@ -892,12 +917,12 @@ def _register_imap_routes(
         )
 
 
-def _imap_test(account: "ImapAccount", password: str) -> tuple[bool, str]:
+def _imap_test(account: ImapAccount, password: str) -> tuple[bool, str]:
     try:
         client = ImapClient(account, password)
         client.test_connection()
         return True, ""
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         return False, str(e)[:200]
 
 
@@ -1127,11 +1152,15 @@ def _register_wishes_routes(
     app: FastAPI, templates: Jinja2Templates, db_path: Path,
 ) -> None:
     """CRUD voor config_wishes — the user's structurele preferences."""
+    from datetime import datetime as _dt
+
     from extensions.config_wishes.schema import (
-        VALID_STATUS as _WISH_VALID_STATUS, get_wish, list_wishes,
+        VALID_STATUS as _WISH_VALID_STATUS,
+    )
+    from extensions.config_wishes.schema import (
+        list_wishes,
         update_wish_status,
     )
-    from datetime import datetime as _dt
 
     def _fmt(w: dict) -> dict:
         out = dict(w)
@@ -1182,11 +1211,14 @@ def _register_loops_routes(
     app: FastAPI, templates: Jinja2Templates, db_path: Path,
 ) -> None:
     """Read-only dashboard voor open_loops + status-toggle (close/snooze)."""
-    from extensions.open_loops.schema import (
-        close_loop, list_open, snooze_loop,
-    )
     from datetime import datetime as _dt
     from datetime import timedelta as _td
+
+    from extensions.open_loops.schema import (
+        close_loop,
+        list_open,
+        snooze_loop,
+    )
 
     def _fmt(r: dict) -> dict:
         out = dict(r)
@@ -1271,7 +1303,9 @@ def _register_vip_routes(
     """VIP-relationship-monitor dashboard /vip + suggester /vip/suggest."""
     from web.vip_aggregator import build_vip_snapshot
     from web.vip_suggester import (
-        append_to_yaml, load_existing_vips, suggest_vips,
+        append_to_yaml,
+        load_existing_vips,
+        suggest_vips,
     )
 
     def _vip_path() -> Path:
@@ -1335,6 +1369,7 @@ def _register_uptime_routes(
 ) -> None:
     """Read-only dashboard met state + events per target."""
     import time as _time
+
     from extensions.uptime.schema import list_targets_state, recent_events
 
     @app.get("/uptime", response_class=HTMLResponse)
@@ -1360,17 +1395,23 @@ def _register_sales_routes(
     Read-mostly. Mutaties (snooze / set_status / forget) gaan via kleine
     POST-endpoints die naar dezelfde lijst terug-redirecten.
     """
-    import json as _json
     import time as _time
     from datetime import datetime as _dt
 
     from extensions.sales.briefing import compute_sales_pulse
     from extensions.sales.schema import (
-        VALID_PROSPECT_TYPES, VALID_STATUSES, VALID_TARGETS,
+        VALID_PROSPECT_TYPES,
+        VALID_STATUSES,
+        VALID_TARGETS,
     )
     from extensions.sales.storage import (
-        forget_account, get_account, insert_touchpoint, list_accounts,
-        list_touchpoints, snooze_account, update_account,
+        forget_account,
+        get_account,
+        insert_touchpoint,
+        list_accounts,
+        list_touchpoints,
+        snooze_account,
+        update_account,
     )
 
     TARGET_LABELS = {
@@ -1389,7 +1430,7 @@ def _register_sales_routes(
         if nt:
             days = (int(nt) - now) // 86400
             a["next_touch_human"] = (
-                f"vandaag" if abs(days) < 1
+                "vandaag" if abs(days) < 1
                 else f"in {days}d" if days > 0
                 else f"{-days}d over tijd"
             )
@@ -1560,5 +1601,5 @@ def _register_sales_routes(
             except Exception:
                 pass
         return RedirectResponse(
-            f"/sales?message=account+verwijderd", status_code=303,
+            "/sales?message=account+verwijderd", status_code=303,
         )

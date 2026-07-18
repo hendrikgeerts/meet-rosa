@@ -6,15 +6,21 @@ import sqlite3
 import time as _time
 from pathlib import Path
 
-import pytest
-
 from extensions.comm_intel.schema import CommItem
 from extensions.open_loops.detect import (
-    close_for_outgoing_comm_item, sync_for_comm_item, track_for_comm_item,
+    close_for_outgoing_comm_item,
+    sync_for_comm_item,
+    track_for_comm_item,
 )
 from extensions.open_loops.schema import (
-    OpenLoop, close_loop, close_loops_by_context, init_open_loops_schema,
-    insert_loop, list_open, reopen_snoozed_due, snooze_loop,
+    OpenLoop,
+    close_loop,
+    close_loops_by_context,
+    init_open_loops_schema,
+    insert_loop,
+    list_open,
+    reopen_snoozed_due,
+    snooze_loop,
 )
 
 
@@ -200,7 +206,6 @@ def test_outgoing_without_thread_ref_skipped(tmp_path: Path) -> None:
 
 # --- delegate-tracker (outgoing_request) -----------------------------------
 
-from extensions.open_loops.detect import sync_for_comm_item
 
 
 def test_outgoing_question_creates_outgoing_request_loop(tmp_path: Path) -> None:

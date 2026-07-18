@@ -12,7 +12,9 @@ from zoneinfo import ZoneInfo
 
 from extensions import reminders  # noqa: F401 — schema-init side effect
 from extensions.morning_extras.news import (
-    fetch_news_bundle, load_morning_extras_config, parse_feeds,
+    fetch_news_bundle,
+    load_morning_extras_config,
+    parse_feeds,
 )
 from extensions.morning_extras.weather import fetch_weather
 from extensions.okrs.loader import load_okrs, to_briefing_snapshot
@@ -25,6 +27,7 @@ from privacy.gateway import Gateway
 
 log = logging.getLogger(__name__)
 from core.timezone import now_local
+
 TZ = ZoneInfo("Europe/Amsterdam")
 
 
@@ -222,9 +225,10 @@ def _compute_today_travels(
     """Voor elk physical event vandaag: bereken reistijd vanaf laatste
     PA-LOC (of home-fallback), retourneer leave_by + travel_min + delta.
     Vermijdt online meetings en past max_items toe."""
-    import re as _re
+
     from extensions.travel_alerts.check import (
-        _ONLINE_MEETING_PATTERNS, _parse_destination,
+        _ONLINE_MEETING_PATTERNS,
+        _parse_destination,
     )
 
     with sqlite3.connect(db_path, isolation_level=None) as conn:

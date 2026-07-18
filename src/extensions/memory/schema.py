@@ -18,7 +18,6 @@ from typing import Any
 
 from extensions.comm_intel.embeddings import EMBED_DIM
 
-
 _SCHEMA = f"""
 CREATE TABLE IF NOT EXISTS memories (
   id              INTEGER PRIMARY KEY AUTOINCREMENT,

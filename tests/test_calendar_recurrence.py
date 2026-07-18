@@ -10,7 +10,6 @@ import pytest
 
 from core.tools import _build_recurrence
 
-
 # --- happy path ----------------------------------------------------------
 
 def test_none_returns_none() -> None:

@@ -12,7 +12,7 @@ geretourneerd zodat de hele briefing niet platgaat door één API-glitch.
 from __future__ import annotations
 
 import logging
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from typing import Any
 
 from integrations.todoist import Task, TodoistClient

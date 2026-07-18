@@ -4,7 +4,6 @@ from pathlib import Path
 
 from core.perms import secure_dir, secure_file
 
-
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS processed_messages (
     guid TEXT PRIMARY KEY,

@@ -8,7 +8,11 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 from extensions.config_wishes.schema import (
-    VALID_STATUS, get_wish, insert_wish, list_wishes, update_wish_status,
+    VALID_STATUS,
+    get_wish,
+    insert_wish,
+    list_wishes,
+    update_wish_status,
 )
 
 TZ = ZoneInfo("Europe/Amsterdam")

@@ -10,7 +10,6 @@ import pytest
 
 from models.ollama import LocalResponse, OllamaClient, _flatten_content
 
-
 # --- _flatten_content ------------------------------------------------------
 
 def test_flatten_str_passes_through() -> None:
@@ -45,7 +44,7 @@ class _FakeResp:
     def __init__(self, body: dict[str, Any]) -> None:
         self._buf = io.BytesIO(json.dumps(body).encode("utf-8"))
     def read(self) -> bytes: return self._buf.read()
-    def __enter__(self) -> "_FakeResp": return self
+    def __enter__(self) -> _FakeResp: return self
     def __exit__(self, *a: Any) -> None: pass
 
 

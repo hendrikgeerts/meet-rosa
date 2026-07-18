@@ -75,14 +75,14 @@ def _run_uvicorn(app, host: str, port: int, ready: threading.Event) -> None:
 
     # Signal ready as soon as the server socket is up.
     orig_startup = server.startup
-    async def _hooked_startup(*a, **kw):  # noqa: ANN001
+    async def _hooked_startup(*a, **kw):
         await orig_startup(*a, **kw)
         ready.set()
     server.startup = _hooked_startup
 
     try:
         server.run()
-    except Exception:  # noqa: BLE001
+    except Exception:
         log.exception("wizard uvicorn crashed")
         ready.set()
 
@@ -108,8 +108,10 @@ def ensure_configured(
         return
 
     try:
-        from wizard.server import (  # noqa: WPS433
-            build_app, wait_until_finished, reset_finish_event,
+        from wizard.server import (
+            build_app,
+            reset_finish_event,
+            wait_until_finished,
         )
     except ImportError:
         log.exception("bootstrap: kon wizard-server niet importeren")

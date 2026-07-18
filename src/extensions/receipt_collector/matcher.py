@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -161,7 +161,8 @@ def _gmail_render_evidence_pdf(
     """Render Gmail body als PDF-evidence wanneer er geen PDF-attachment was
     maar de mail invoice-keywords bevat. Returns None bij no-go."""
     from extensions.receipt_collector.email_to_pdf import (
-        looks_like_invoice, render_email_as_pdf,
+        looks_like_invoice,
+        render_email_as_pdf,
     )
     body_html, body_text = _gmail_extract_body(gmail, msg)
     haystack = f"{headers.get('subject','')}\n{body_text or ''}\n{body_html or ''}"
@@ -437,7 +438,8 @@ def _imap_extract_attachments(msg: Any) -> list[Attachment]:
 def _imap_render_evidence_pdf(msg: Any) -> Attachment | None:
     """Render IMAP body als PDF-evidence voor invoice-in-body cases."""
     from extensions.receipt_collector.email_to_pdf import (
-        looks_like_invoice, render_email_as_pdf,
+        looks_like_invoice,
+        render_email_as_pdf,
     )
     body_text = msg.text or ""
     body_html = msg.html or ""
@@ -521,6 +523,7 @@ def _amount_in_pdf(data: bytes, amount_eur: float) -> bool:
         return False
     try:
         from io import BytesIO
+
         from pypdf import PdfReader
         reader = PdfReader(BytesIO(data))
         text = ""

@@ -5,30 +5,44 @@ import sqlite3
 from datetime import date
 from io import BytesIO
 from pathlib import Path
-from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
 
 from extensions.receipt_collector.matcher import (
-    Attachment, MatchCandidate, _amount_search_strings, score_candidate,
+    Attachment,
+    MatchCandidate,
+    _amount_search_strings,
+    score_candidate,
 )
 from extensions.receipt_collector.parser import (
-    Transaction, derive_date_window, parse_excel,
-    _parse_amount, _parse_date, _vendor_from_description,
+    Transaction,
+    _parse_amount,
+    _parse_date,
+    _vendor_from_description,
+    derive_date_window,
+    parse_excel,
 )
 from extensions.receipt_collector.runner import (
-    _build_search_vendors, _is_reverse_match_eligible, run_receipt_collection,
+    _build_search_vendors,
+    _is_reverse_match_eligible,
+    run_receipt_collection,
 )
 from extensions.receipt_collector.schema import (
-    find_vendor_strategy, init_receipt_collector_schema,
-    insert_run, insert_run_item, list_run_items, list_runs,
-    list_vendor_strategies, upsert_vendor_strategy,
-    update_run_counts, update_run_item,
+    find_vendor_strategy,
+    init_receipt_collector_schema,
+    insert_run,
+    insert_run_item,
+    list_run_items,
+    list_vendor_strategies,
+    update_run_counts,
+    upsert_vendor_strategy,
 )
 from extensions.receipt_collector.tools import (
-    receipt_run_start_handler, receipt_run_status_handler,
-    receipt_runs_list_handler, vendor_strategies_list_handler,
+    receipt_run_start_handler,
+    receipt_run_status_handler,
+    receipt_runs_list_handler,
+    vendor_strategies_list_handler,
     vendor_strategy_remember_handler,
 )
 
@@ -153,9 +167,8 @@ def test_upsert_idempotent(db: Path) -> None:
 
 
 def test_invalid_source_kind(db: Path) -> None:
-    with sqlite3.connect(db) as c:
-        with pytest.raises(ValueError):
-            upsert_vendor_strategy(c, name="X", source_kind="weird")
+    with sqlite3.connect(db) as c, pytest.raises(ValueError):
+        upsert_vendor_strategy(c, name="X", source_kind="weird")
 
 
 # --- parser --------------------------------------------------------------
@@ -310,10 +323,6 @@ def _txn(amount: int = -12750, vendor: str = "AWS",
 def _make_pdf_with_amount(amount_text: str) -> bytes:
     """Mini-PDF die amount_text in extract_text terugbrengt."""
     from pypdf import PdfWriter
-    from pypdf.generic import (
-        ArrayObject, DictionaryObject, NameObject, NumberObject,
-        TextStringObject,
-    )
     # Simpel: schrijf een lege pdf en voeg een visible-text annotation toe.
     # Voor de test maken we een page met een Contents stream die 'amount_text'
     # in een BT...ET blok zet.
@@ -613,10 +622,10 @@ def test_email_to_pdf_looks_like_invoice() -> None:
 
 def test_email_to_pdf_render_roundtrip() -> None:
     """Gerenderde PDF moet bedrag bevatten zodat _amount_in_pdf 'm vindt."""
-    from io import BytesIO
+
+    from pypdf import PdfReader
 
     from extensions.receipt_collector.email_to_pdf import render_email_as_pdf
-    from pypdf import PdfReader
 
     pdf = render_email_as_pdf(
         headers={"From": "billing@datadog.com", "Subject": "Invoice"},

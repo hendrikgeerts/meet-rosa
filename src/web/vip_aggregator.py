@@ -15,8 +15,7 @@ in de template: tier A eerst, dan oplopend op days-silent.
 from __future__ import annotations
 
 import sqlite3
-import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo

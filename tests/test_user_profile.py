@@ -7,10 +7,12 @@ from typing import Any
 import yaml
 
 from extensions.user_profile.profile import (
-    load_user_profile, render_for_prompt,
+    load_user_profile,
+    render_for_prompt,
 )
 from extensions.user_profile.tools import (
-    USER_PROFILE_HANDLERS, USER_PROFILE_TOOL_SCHEMAS,
+    USER_PROFILE_HANDLERS,
+    USER_PROFILE_TOOL_SCHEMAS,
 )
 
 

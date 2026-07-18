@@ -4,18 +4,22 @@ from __future__ import annotations
 import sqlite3
 import time as _time
 from pathlib import Path
-from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
 
 from extensions.comm_intel.schema import CommItem, init_comm_schema, insert_item
 from extensions.open_loops.schema import (
-    OpenLoop, init_open_loops_schema, insert_loop,
+    OpenLoop,
+    init_open_loops_schema,
+    insert_loop,
 )
 from extensions.person_brief.lookup import (
-    _aliases_for_search, build_person_brief, find_vip_match,
-    load_vip_contacts, validate_query,
+    _aliases_for_search,
+    build_person_brief,
+    find_vip_match,
+    load_vip_contacts,
+    validate_query,
 )
 from extensions.plaud_intel.schema import init_plaud_meetings_schema
 

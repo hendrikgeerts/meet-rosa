@@ -5,7 +5,6 @@ from unittest.mock import MagicMock
 
 import pytest
 
-
 # --- first_boot ------------------------------------------------------------
 
 
@@ -65,7 +64,7 @@ def test_send_welcome_only_first_time(tmp_path, monkeypatch):
 def test_send_welcome_survives_send_failure(tmp_path, monkeypatch):
     monkeypatch.setenv("ROSA_HOME", str(tmp_path))
     monkeypatch.delenv("ROSA_DEV", raising=False)
-    from core.first_boot import send_welcome_if_first_boot, is_first_boot
+    from core.first_boot import is_first_boot, send_welcome_if_first_boot
 
     def failing_sender(h, t):
         raise RuntimeError("iMessage bridge unreachable")

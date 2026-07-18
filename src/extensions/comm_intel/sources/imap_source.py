@@ -7,8 +7,8 @@ de ingest-loop (deze klasse is stateless).
 from __future__ import annotations
 
 import logging
+from collections.abc import Iterable
 from datetime import datetime
-from typing import Iterable
 from zoneinfo import ZoneInfo
 
 from extensions.comm_intel.schema import CommItem

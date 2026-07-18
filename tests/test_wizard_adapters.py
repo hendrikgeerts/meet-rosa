@@ -29,7 +29,7 @@ def rosa_home(tmp_path, monkeypatch):
 
 @pytest.fixture
 def client(rosa_home):
-    from wizard.server import build_app, _SESSION_TOKEN
+    from wizard.server import _SESSION_TOKEN, build_app
     c = TestClient(build_app())
     c.headers["X-Wizard-Token"] = _SESSION_TOKEN
     return c
@@ -69,8 +69,8 @@ def test_uptime_adapter_derives_target_name_from_host(tmp_path):
 def test_uptime_yaml_readable_by_existing_load_targets(tmp_path):
     """Belangrijkste check: het YAML dat we schrijven moet door de
     bestaande extension-code gelezen kunnen worden zonder aanpassing."""
-    from wizard.adapters import write_uptime_targets
     from extensions.uptime.checker import load_targets
+    from wizard.adapters import write_uptime_targets
     path = write_uptime_targets(tmp_path, [
         "https://acme.com",
         "https://api.acme.com/health",

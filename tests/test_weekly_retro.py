@@ -3,20 +3,23 @@ from __future__ import annotations
 
 import sqlite3
 import time as _time
-from datetime import datetime, timedelta
 from pathlib import Path
 
 import pytest
 
 from core.weekly_retro import (
-    _collect_closed_counts, _collect_comm_volume,
-    _collect_delegations_summary, _collect_still_open,
+    _collect_closed_counts,
+    _collect_comm_volume,
+    _collect_delegations_summary,
+    _collect_still_open,
     collect_weekly_retro_context,
 )
-from extensions.open_loops.schema import (
-    OpenLoop, init_open_loops_schema, insert_loop,
-)
 from extensions.comm_intel.schema import init_comm_schema
+from extensions.open_loops.schema import (
+    OpenLoop,
+    init_open_loops_schema,
+    insert_loop,
+)
 
 
 @pytest.fixture

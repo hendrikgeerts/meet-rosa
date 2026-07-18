@@ -10,7 +10,8 @@ import pytest
 from extensions.comm_intel.schema import init_comm_schema
 from extensions.comm_intel.tools import COMM_HANDLERS
 from extensions.comm_intel.topics import (
-    collect_active_topics, collect_topic_items,
+    collect_active_topics,
+    collect_topic_items,
 )
 
 

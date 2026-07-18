@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import sys
 
-
 COMMANDS = {
     "doctor": "cli.doctor",
     "logs": "cli.logs_view",

@@ -13,9 +13,8 @@ import json
 import logging
 import re
 import time
-import urllib.request
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from models.ollama import OllamaClient
@@ -108,6 +107,7 @@ def fetch_news_bundle(
 
 def _fetch_one(feed: FeedConfig, *, cutoff_unix: float) -> list[NewsItem]:
     import feedparser
+
     from extensions.morning_extras._http import fetch_with_retry
     raw = fetch_with_retry(feed.url, timeout=10)
     if raw is None:
@@ -137,7 +137,7 @@ def _entry_unix(entry: Any) -> int | None:
     if parsed is None:
         return None
     try:
-        return int(datetime(*parsed[:6], tzinfo=timezone.utc).timestamp())
+        return int(datetime(*parsed[:6], tzinfo=UTC).timestamp())
     except (TypeError, ValueError):
         return None
 
@@ -243,6 +243,7 @@ def _parse_rank_output(text: str, _n: int) -> list[dict[str, Any]]:
 def load_morning_extras_config(yaml_path) -> dict[str, Any] | None:  # type: ignore[no-untyped-def]
     """Load config/morning_extras.yaml. Returns None if file missing."""
     from pathlib import Path
+
     import yaml
     p = Path(yaml_path)
     if not p.exists():

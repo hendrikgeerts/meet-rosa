@@ -9,10 +9,15 @@ from pathlib import Path
 from unittest.mock import patch
 
 from integrations.slack import (
-    KEYRING_SERVICE, SlackWorkspace,
-    all_enabled, delete_token, get_token, load_workspaces, save_workspaces, set_token,
+    KEYRING_SERVICE,
+    SlackWorkspace,
+    all_enabled,
+    delete_token,
+    get_token,
+    load_workspaces,
+    save_workspaces,
+    set_token,
 )
-
 
 # --- yaml roundtrip --------------------------------------------------------
 

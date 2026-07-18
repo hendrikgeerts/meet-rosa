@@ -6,10 +6,9 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any
 
-import pytest
-
 from extensions.todoist_sync.tools import (
-    TODOIST_HANDLERS, TODOIST_TOOL_SCHEMAS,
+    TODOIST_HANDLERS,
+    TODOIST_TOOL_SCHEMAS,
 )
 from integrations.todoist import Task
 

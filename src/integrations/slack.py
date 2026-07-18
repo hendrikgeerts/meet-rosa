@@ -18,14 +18,15 @@ store both summary + raw text in memory.db.
 from __future__ import annotations
 
 import logging
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 import keyring
+import yaml
 
 from core.external_audit import timed_call
-import yaml
 
 log = logging.getLogger(__name__)
 

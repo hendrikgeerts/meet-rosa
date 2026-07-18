@@ -13,21 +13,27 @@ sub-processor).
 from __future__ import annotations
 
 import logging
-import socket
 import urllib.error
 from datetime import datetime, timedelta
 from typing import Any
 
 from core.query_safety import QUERY_SCHEMA, validate_query
 from extensions.todoist_sync.cleanup import (
-    find_duplicates, find_stale, get_proposal,
-    register_duplicate_proposal, register_stale_proposal,
+    find_duplicates,
+    find_stale,
+    get_proposal,
+    register_duplicate_proposal,
+    register_stale_proposal,
 )
 from extensions.todoist_sync.schema import (
-    queue_get, queue_list_pending, queue_mark_approved, queue_mark_rejected,
+    queue_get,
+    queue_list_pending,
+    queue_mark_approved,
+    queue_mark_rejected,
 )
 from extensions.todoist_sync.sync import (
-    loop_description_for_todoist, to_rfc3339, with_date_prefix,
+    loop_description_for_todoist,
+    with_date_prefix,
 )
 from integrations.todoist import Task, TodoistClient
 
@@ -42,7 +48,7 @@ def _list_tasks_safely(
     Exception terug komt. Returns (tasks, error_dict)."""
     try:
         return client.list_tasks(project_id=project_id), None
-    except (urllib.error.URLError, socket.timeout) as exc:
+    except (TimeoutError, urllib.error.URLError) as exc:
         log.warning("todoist list_tasks network failure: %s", exc)
         return None, {"error": "todoist temporarily unreachable, try again later"}
     except urllib.error.HTTPError as exc:
@@ -442,6 +448,7 @@ def _todoist_review_queue_approve(
     project_full = False
 
     import sqlite3 as _sql
+
     from integrations.todoist import TodoistProjectFullError
 
     with _sql.connect(db_path, isolation_level=None) as conn:

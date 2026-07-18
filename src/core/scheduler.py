@@ -6,40 +6,40 @@ from __future__ import annotations
 import logging
 import sqlite3
 import threading
-import time
-from datetime import datetime
+from collections.abc import Callable
+from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 from zoneinfo import ZoneInfo
-
-from datetime import timedelta
 
 from core.audit import prune_old as audit_prune_old
 from core.briefings import (
-    generate_briefing, next_fire_time, next_fire_time_with_catchup,
+    generate_briefing,
+    next_fire_time,
+    next_fire_time_with_catchup,
 )
-from core.config import Settings
 from core.ceo_letter import generate_ceo_letter
+from core.config import Settings
 from core.dayclose import generate_dayclose
 from core.midday import generate_midday
 from core.scheduler_state import get_last_fired, set_last_fired
+from core.timezone import active_tz
+from extensions import reminders
+from extensions.comm_intel.schema import prune_old_comm_items
 from extensions.english_practice.reminder import generate_english_reminder
 from extensions.expenses.scan import scan_inbox as scan_expenses_inbox
+from extensions.expenses.schema import prune_old_expenses
 from extensions.market_intel.digest import generate_market_digest
 from extensions.meeting_prep.check import tick as meeting_prep_tick
 from extensions.patterns.detector import run_weekly_detection
-from extensions.comm_intel.schema import prune_old_comm_items
-from extensions.expenses.schema import prune_old_expenses
+from extensions.sales.schema import prune_inactive_cold_accounts
 from extensions.travel_alerts.check import tick as travel_alerts_tick
 from extensions.travel_alerts.schema import prune_old_locations
-from extensions.sales.schema import prune_inactive_cold_accounts
 from extensions.uptime.schema import prune_old_events as prune_old_uptime_events
-from integrations.here_maps import HereMapsClient
-from extensions import reminders
 from integrations import plaud
 from integrations.gcal import CalendarClient
-from core.timezone import active_tz
 from integrations.gmail import GmailClient
+from integrations.here_maps import HereMapsClient
 from models.ollama import OllamaClient
 from privacy.gateway import Gateway
 
@@ -560,7 +560,8 @@ class Scheduler(threading.Thread):
         try:
             from extensions.uptime.checker import load_targets
             from extensions.uptime.weekly_report import (
-                compute_weekly_stats, format_imessage_report,
+                compute_weekly_stats,
+                format_imessage_report,
                 previous_week_window,
             )
             targets = load_targets(self._uptime_config_path)
@@ -727,8 +728,10 @@ class Scheduler(threading.Thread):
 
         try:
             import sqlite3 as _sql
+
             from extensions.open_loops.schema import (
-                delegations_due_for_followup, mark_followup_pinged,
+                delegations_due_for_followup,
+                mark_followup_pinged,
             )
             with _sql.connect(
                 self._settings.db_path, isolation_level=None,

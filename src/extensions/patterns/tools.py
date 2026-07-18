@@ -16,7 +16,8 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 from extensions.patterns.schema import (
-    list_patterns, snooze_pattern,
+    list_patterns,
+    snooze_pattern,
 )
 
 TZ = ZoneInfo("Europe/Amsterdam")

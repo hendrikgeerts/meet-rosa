@@ -18,8 +18,12 @@ from zoneinfo import ZoneInfo
 
 from extensions.receipt_collector.runner import run_receipt_collection
 from extensions.receipt_collector.schema import (
-    VALID_SOURCE_KIND, get_run, list_run_items, list_runs,
-    list_vendor_strategies, upsert_vendor_strategy,
+    VALID_SOURCE_KIND,
+    get_run,
+    list_run_items,
+    list_runs,
+    list_vendor_strategies,
+    upsert_vendor_strategy,
 )
 from integrations.imap import ImapAccount
 

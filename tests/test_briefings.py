@@ -139,6 +139,7 @@ def test_compute_today_travels_home_fallback(tmp_path) -> None:
     from datetime import datetime as _dt
     from unittest.mock import MagicMock
     from zoneinfo import ZoneInfo as _ZI
+
     from core.briefings import _compute_today_travels
     from extensions.travel_alerts.schema import init_travel_alerts_schema
     from integrations.here_maps import RouteSummary
@@ -182,6 +183,7 @@ def test_compute_today_travels_returns_empty_without_origin(tmp_path) -> None:
     from datetime import datetime as _dt
     from unittest.mock import MagicMock
     from zoneinfo import ZoneInfo as _ZI
+
     from core.briefings import _compute_today_travels
     from extensions.travel_alerts.schema import init_travel_alerts_schema
 

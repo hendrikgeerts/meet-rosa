@@ -22,7 +22,6 @@ import socket
 import threading
 import time
 import urllib.request
-from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -67,7 +66,7 @@ def test_fresh_install_full_flow_via_http(tmp_path, monkeypatch):
     monkeypatch.delenv("ROSA_DEV", raising=False)
 
     from core.config import is_configured
-    from wizard.server import build_app, _SESSION_TOKEN, reset_finish_event
+    from wizard.server import _SESSION_TOKEN, build_app, reset_finish_event
 
     reset_finish_event()
     assert is_configured() is False

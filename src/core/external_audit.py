@@ -86,7 +86,7 @@ class _Timer:
         self._fields = fields
         self._start = 0.0
 
-    def __enter__(self) -> "_Timer":
+    def __enter__(self) -> _Timer:
         self._start = time.monotonic()
         return self
 

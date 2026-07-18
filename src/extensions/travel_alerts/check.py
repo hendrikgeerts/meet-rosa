@@ -16,19 +16,24 @@ from __future__ import annotations
 import logging
 import re
 import sqlite3
+from collections.abc import Callable
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 from zoneinfo import ZoneInfo
 
 from extensions.travel_alerts.schema import (
-    alert_already_sent, last_alert_duration, latest_location, mark_alert_sent,
+    alert_already_sent,
+    last_alert_duration,
+    latest_location,
+    mark_alert_sent,
 )
 from integrations.gcal import CalendarClient
 from integrations.here_maps import HereMapsClient, RouteSummary
 
 log = logging.getLogger(__name__)
 from core.timezone import current_tz, now_local
+
 TZ = ZoneInfo("Europe/Amsterdam")
 
 # Lat/lon-pair in een event.location als die aanwezig is. Als de location

@@ -16,7 +16,7 @@ from zoneinfo import ZoneInfo
 
 import yaml
 
-from core.query_safety import validate_query  # noqa: F401 — re-exported
+from core.query_safety import validate_query
 from integrations.gcal import CalendarClient
 
 log = logging.getLogger(__name__)

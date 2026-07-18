@@ -23,7 +23,6 @@ import urllib.error
 import urllib.request
 from dataclasses import dataclass
 from email.utils import parsedate_to_datetime
-from typing import Iterable
 from xml.etree import ElementTree as ET
 
 from core.external_audit import timed_call
@@ -35,6 +34,7 @@ log = logging.getLogger(__name__)
 
 FEED_URL = "https://www.faillissementsdossier.nl/nl/rss/nieuwe-faillissementen.aspx"
 import os as _os
+
 _OPERATOR_CONTACT = _os.environ.get("UPTIME_OPERATOR_CONTACT", "").strip()
 _USER_AGENT = (
     f"rosa-insolvencies/1.0 (+mailto:{_OPERATOR_CONTACT})"

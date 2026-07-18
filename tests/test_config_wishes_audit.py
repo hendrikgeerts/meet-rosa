@@ -11,7 +11,7 @@ import pytest
 
 from extensions.config_wishes.audit import find_unrecorded_wish_candidates
 from extensions.config_wishes.schema import (
-    init_config_wishes_schema, insert_wish,
+    init_config_wishes_schema,
 )
 
 

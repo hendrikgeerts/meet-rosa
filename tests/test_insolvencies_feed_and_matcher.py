@@ -15,13 +15,18 @@ from pathlib import Path
 import pytest
 
 from extensions.insolvencies.feed import (
-    InsolvencyItem, parse_description, parse_feed,
+    InsolvencyItem,
+    parse_description,
+    parse_feed,
 )
 from extensions.insolvencies.matcher import (
-    DEFAULT_FILTER, InsolvencyFilter, match,
+    DEFAULT_FILTER,
+    InsolvencyFilter,
+    match,
 )
 from extensions.insolvencies.schema import (
-    add_to_watchlist, init_insolvencies_schema,
+    add_to_watchlist,
+    init_insolvencies_schema,
 )
 
 
@@ -137,19 +142,19 @@ def test_m3_parse_feed_handles_entity_decoded_br() -> None:
     _strip_html in parser moet die clean afhandelen. Regression-test
     voor een toekomstige XML-parser-wissel die entities anders doet."""
     rss = (
-        '<?xml version="1.0" encoding="utf-8"?>'
-        '<rss version="2.0"><channel><item>'
-        '<title>Pegasus B.V.</title>'
-        '<link>http://x</link>'
-        '<description>Pegasus B.V. te Tilburg (Noord-Brabant) is door de '
-        'rechtbank in Zeeland-West-Brabant failliet verklaard. Als curator is '
-        'aangesteld mr X. Y. Het insolventienummer van deze zaak is '
-        'F.02/26/100. De (hoofd)activiteit van Pegasus B.V. is reclame. '
-        'Er zijn geen verslagen.&lt;br&gt;&lt;br&gt;'
-        'Status: Faillissement | KvK nummer: 11223344 | Plaats: Tilburg</description>'
-        '<pubDate>Wed, 03 Jun 2026 00:00:00 GMT</pubDate>'
-        '</item></channel></rss>'
-    ).encode()
+        b'<?xml version="1.0" encoding="utf-8"?>'
+        b'<rss version="2.0"><channel><item>'
+        b'<title>Pegasus B.V.</title>'
+        b'<link>http://x</link>'
+        b'<description>Pegasus B.V. te Tilburg (Noord-Brabant) is door de '
+        b'rechtbank in Zeeland-West-Brabant failliet verklaard. Als curator is '
+        b'aangesteld mr X. Y. Het insolventienummer van deze zaak is '
+        b'F.02/26/100. De (hoofd)activiteit van Pegasus B.V. is reclame. '
+        b'Er zijn geen verslagen.&lt;br&gt;&lt;br&gt;'
+        b'Status: Faillissement | KvK nummer: 11223344 | Plaats: Tilburg</description>'
+        b'<pubDate>Wed, 03 Jun 2026 00:00:00 GMT</pubDate>'
+        b'</item></channel></rss>'
+    )
     items = parse_feed(rss)
     assert len(items) == 1
     it = items[0]
@@ -163,12 +168,12 @@ def test_m3_parse_feed_handles_entity_decoded_br() -> None:
 
 def test_parse_feed_skips_item_without_link_or_title() -> None:
     rss = (
-        '<?xml version="1.0"?><rss version="2.0"><channel>'
-        '<item><title>X</title><link></link><description></description></item>'
-        '<item><title></title><link>http://x</link><description></description></item>'
-        '<item><title>OK</title><link>http://y</link><description></description></item>'
-        '</channel></rss>'
-    ).encode()
+        b'<?xml version="1.0"?><rss version="2.0"><channel>'
+        b'<item><title>X</title><link></link><description></description></item>'
+        b'<item><title></title><link>http://x</link><description></description></item>'
+        b'<item><title>OK</title><link>http://y</link><description></description></item>'
+        b'</channel></rss>'
+    )
     items = parse_feed(rss)
     assert len(items) == 1
     assert items[0].naam == "OK"

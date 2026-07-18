@@ -16,7 +16,7 @@ import pytest
 pytest.importorskip("fastapi")
 pytest.importorskip("yaml")
 
-from fastapi.testclient import TestClient  # noqa: E402
+from fastapi.testclient import TestClient
 
 
 @pytest.fixture
@@ -24,10 +24,11 @@ def wizard_completed(tmp_path, monkeypatch):
     """Doorloop volledige wizard-flow en return ROSA_HOME + Settings."""
     monkeypatch.setenv("ROSA_HOME", str(tmp_path))
     monkeypatch.delenv("ROSA_DEV", raising=False)
-    from wizard import server as srv, google_oauth
+    from wizard import google_oauth
+    from wizard import server as srv
     srv.reset_finish_event()
     google_oauth.clear_pending()
-    from wizard.server import build_app, _SESSION_TOKEN
+    from wizard.server import _SESSION_TOKEN, build_app
     c = TestClient(build_app())
     c.headers["X-Wizard-Token"] = _SESSION_TOKEN
 
@@ -80,14 +81,14 @@ def test_all_sqlite_schemas_can_init(wizard_completed):
     _, settings = wizard_completed
 
     from core import db
+    from core.app_state import init_app_state_schema
     from extensions import reminders
-    from integrations import plaud
     from extensions.comm_intel.schema import init_comm_schema
+    from extensions.market_intel.schema import init_market_intel_schema
     from extensions.open_loops.schema import init_open_loops_schema
     from extensions.plaud_intel.schema import init_plaud_meetings_schema
-    from extensions.market_intel.schema import init_market_intel_schema
     from extensions.travel_alerts.schema import init_travel_alerts_schema
-    from core.app_state import init_app_state_schema
+    from integrations import plaud
 
     db.init_db(settings.db_path)
     reminders.init_reminders_schema(settings.db_path)
@@ -109,6 +110,7 @@ def test_classifier_picks_up_wizard_confidential_domains(wizard_completed):
     confidential-YAML herkennen als confidential."""
     home, settings = wizard_completed
     import yaml
+
     from privacy.classifier import Classifier
 
     conf_yaml = settings.data_dir.parent / "config" / "confidential_domains.yaml"
@@ -163,7 +165,9 @@ def test_google_token_would_refresh_without_credentials_file(wizard_completed):
     refresh_token) zonder aparte credentials.json."""
     home, _ = wizard_completed
     import json
+
     from google.oauth2.credentials import Credentials
+
     from integrations.google_auth import SCOPES
 
     # Simuleer een token zoals de wizard 'em na exchange schrijft

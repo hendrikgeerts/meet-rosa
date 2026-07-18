@@ -11,8 +11,9 @@ from __future__ import annotations
 
 import base64
 import logging
+from collections.abc import Iterable
 from datetime import datetime
-from typing import Any, Iterable
+from typing import Any
 from zoneinfo import ZoneInfo
 
 from extensions.comm_intel.schema import CommItem

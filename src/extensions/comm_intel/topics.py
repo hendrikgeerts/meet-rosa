@@ -29,18 +29,18 @@ _MIN_TOKEN_LEN = 4
 _STOPWORDS = frozenset({
     # NL korte fillers
     "de", "het", "een", "en", "of", "voor", "naar", "met", "van",
-    "een", "ook", "maar", "deze", "die", "dat", "dit", "ben", "hij",
+    "ook", "maar", "deze", "die", "dat", "dit", "ben", "hij",
     "zij", "wij", "jullie", "onze", "jouw", "mijn", "geen",
     # Email noise
     "fwd", "fw", "re", "antwoord", "reply", "subject", "betreft",
     "hoi", "hallo", "beste", "groet", "groeten", "regards", "thanks",
     "thank", "please", "graag", "even", "kort", "vraag", "vraagje",
-    "info", "informatie", "vraagje", "snel", "korte",
+    "info", "informatie", "snel", "korte",
     # Generieke ondertekening-context
     "mvg", "verstuurd", "iphone", "samsung", "android", "outlook",
     "gmail", "mail", "email",
     # EN fillers
-    "the", "a", "an", "and", "or", "to", "for", "of", "in", "on",
+    "the", "a", "an", "and", "or", "to", "for", "in", "on",
     "is", "be", "are", "with", "from", "this", "that", "have", "will",
 })
 

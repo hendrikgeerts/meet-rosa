@@ -12,15 +12,11 @@ publicatie correct genegeerd wordt.
 """
 from __future__ import annotations
 
-import pytest
-
 from extensions.tenders.matcher import (
     DEFAULT_FILTER,
-    MatchResult,
     TenderFilter,
     match,
 )
-
 
 # --- regression fixtures from Hendrik's 3 examples ----------------------
 

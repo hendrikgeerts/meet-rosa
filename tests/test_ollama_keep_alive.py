@@ -11,8 +11,6 @@ Deze tests beschermen tegen regressie.
 """
 from __future__ import annotations
 
-import pytest
-
 from models.ollama import OllamaClient, _normalize_keep_alive
 
 

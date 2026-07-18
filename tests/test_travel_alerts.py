@@ -15,12 +15,20 @@ import pytest
 
 from extensions.travel_alerts.check import _parse_destination, tick
 from extensions.travel_alerts.parser import (
-    is_location_message, parse_location_body, SUBJECT_PREFIX,
+    SUBJECT_PREFIX,
+    is_location_message,
+    parse_location_body,
 )
 from extensions.travel_alerts.schema import (
-    alert_already_sent, geocode_cache_get, geocode_cache_set,
-    init_travel_alerts_schema, insert_location, last_alert_duration,
-    latest_location, mark_alert_sent, prune_old_locations,
+    alert_already_sent,
+    geocode_cache_get,
+    geocode_cache_set,
+    init_travel_alerts_schema,
+    insert_location,
+    last_alert_duration,
+    latest_location,
+    mark_alert_sent,
+    prune_old_locations,
 )
 from integrations.here_maps import RouteSummary
 

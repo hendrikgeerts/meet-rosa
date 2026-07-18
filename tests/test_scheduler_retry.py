@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 from unittest.mock import MagicMock
 from zoneinfo import ZoneInfo
 
-
 TZ = ZoneInfo("Europe/Amsterdam")
 
 

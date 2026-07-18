@@ -14,7 +14,7 @@ from email.message import EmailMessage
 import keyring
 
 from core.external_audit import log_external
-from integrations.imap import ImapAccount, KEYRING_SERVICE
+from integrations.imap import KEYRING_SERVICE, ImapAccount
 
 log = logging.getLogger(__name__)
 

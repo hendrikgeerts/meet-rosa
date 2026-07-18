@@ -22,8 +22,8 @@ import resource
 import signal
 import threading
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable
 
 log = logging.getLogger(__name__)
 

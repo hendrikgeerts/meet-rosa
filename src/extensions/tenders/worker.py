@@ -21,9 +21,10 @@ import random
 import sqlite3
 import threading
 import time
-from datetime import datetime, timedelta
+from collections.abc import Callable
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 from zoneinfo import ZoneInfo
 
 # TenderNed levert sluitingsdatums + publicatiedatums naive — interpretatie
@@ -33,12 +34,17 @@ TENDERNED_TZ = ZoneInfo("Europe/Amsterdam")
 
 from .alerts import format_alert
 from .feed import (
-    TenderNedError, TenderNedRateLimited,
-    fetch_publication_detail, fetch_recent_summaries, overview_url,
+    TenderNedError,
+    TenderNedRateLimited,
+    fetch_publication_detail,
+    fetch_recent_summaries,
+    overview_url,
 )
 from .matcher import DEFAULT_FILTER, TenderFilter, match
 from .schema import (
-    kenmerk_already_alerted, prune_old_unmatched, tender_exists,
+    kenmerk_already_alerted,
+    prune_old_unmatched,
+    tender_exists,
 )
 
 log = logging.getLogger(__name__)

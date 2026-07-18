@@ -9,71 +9,88 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 from zoneinfo import ZoneInfo
 
 from core.query_safety import QUERY_SCHEMA, validate_query
 from extensions import reminders
-from extensions.comm_intel.tools import COMM_HANDLERS, COMM_TOOL_SCHEMAS
-from extensions.memory.tools import MEMORY_HANDLERS, MEMORY_TOOL_SCHEMAS
-from extensions.uptime.tools import UPTIME_HANDLERS, UPTIME_TOOL_SCHEMAS
-from extensions.tenders.tools import TENDER_HANDLERS, TENDER_TOOL_SCHEMAS
-from extensions.insolvencies.tools import (
-    INSOLVENCIES_HANDLERS, INSOLVENCIES_TOOL_SCHEMAS,
-)
-from extensions.sales.tools import SALES_HANDLERS, SALES_TOOL_SCHEMAS
-from extensions.market_intel.tools import (
-    MARKET_INTEL_HANDLERS, MARKET_INTEL_TOOL_SCHEMAS,
-)
-from extensions.open_loops.tools import LOOPS_HANDLERS, LOOPS_TOOL_SCHEMAS
 from extensions.birthdays.tools import (
-    BIRTHDAY_HANDLERS, BIRTHDAY_TOOL_SCHEMAS,
+    BIRTHDAY_HANDLERS,
+    BIRTHDAY_TOOL_SCHEMAS,
+)
+from extensions.comm_intel.tools import COMM_HANDLERS, COMM_TOOL_SCHEMAS
+from extensions.config_wishes.tools import (
+    CONFIG_WISHES_HANDLERS,
+    CONFIG_WISHES_TOOL_SCHEMAS,
 )
 from extensions.decisions.tools import (
-    DECISIONS_HANDLERS, DECISIONS_TOOL_SCHEMAS,
-)
-from extensions.expenses.tools import (
-    EXPENSES_HANDLERS, EXPENSES_TOOL_SCHEMAS,
-)
-from extensions.okrs.tools import (
-    OKR_HANDLERS, OKR_TOOL_SCHEMAS,
-)
-from extensions.person_brief.tools import (
-    PERSON_BRIEF_HANDLERS, PERSON_BRIEF_TOOL_SCHEMAS,
-)
-from extensions.patterns.tools import (
-    PATTERN_HANDLERS, PATTERN_TOOL_SCHEMAS,
-)
-from extensions.projects.tools import (
-    PROJECT_HANDLERS, PROJECT_TOOL_SCHEMAS,
-)
-from extensions.receipt_collector.tools import (
-    RECEIPT_HANDLERS, RECEIPT_TOOL_SCHEMAS,
-)
-from extensions.config_wishes.tools import (
-    CONFIG_WISHES_HANDLERS, CONFIG_WISHES_TOOL_SCHEMAS,
+    DECISIONS_HANDLERS,
+    DECISIONS_TOOL_SCHEMAS,
 )
 from extensions.english_practice.tools import (
-    ENGLISH_PRACTICE_HANDLERS, ENGLISH_PRACTICE_TOOL_SCHEMAS,
+    ENGLISH_PRACTICE_HANDLERS,
+    ENGLISH_PRACTICE_TOOL_SCHEMAS,
 )
+from extensions.expenses.tools import (
+    EXPENSES_HANDLERS,
+    EXPENSES_TOOL_SCHEMAS,
+)
+from extensions.insolvencies.tools import (
+    INSOLVENCIES_HANDLERS,
+    INSOLVENCIES_TOOL_SCHEMAS,
+)
+from extensions.market_intel.tools import (
+    MARKET_INTEL_HANDLERS,
+    MARKET_INTEL_TOOL_SCHEMAS,
+)
+from extensions.memory.tools import MEMORY_HANDLERS, MEMORY_TOOL_SCHEMAS
+from extensions.okrs.tools import (
+    OKR_HANDLERS,
+    OKR_TOOL_SCHEMAS,
+)
+from extensions.open_loops.tools import LOOPS_HANDLERS, LOOPS_TOOL_SCHEMAS
+from extensions.patterns.tools import (
+    PATTERN_HANDLERS,
+    PATTERN_TOOL_SCHEMAS,
+)
+from extensions.person_brief.tools import (
+    PERSON_BRIEF_HANDLERS,
+    PERSON_BRIEF_TOOL_SCHEMAS,
+)
+from extensions.projects.tools import (
+    PROJECT_HANDLERS,
+    PROJECT_TOOL_SCHEMAS,
+)
+from extensions.receipt_collector.tools import (
+    RECEIPT_HANDLERS,
+    RECEIPT_TOOL_SCHEMAS,
+)
+from extensions.sales.tools import SALES_HANDLERS, SALES_TOOL_SCHEMAS
 from extensions.scheduler_assist.tools import (
-    SCHEDULER_HANDLERS, SCHEDULER_TOOL_SCHEMAS,
+    SCHEDULER_HANDLERS,
+    SCHEDULER_TOOL_SCHEMAS,
 )
+from extensions.tenders.tools import TENDER_HANDLERS, TENDER_TOOL_SCHEMAS
 from extensions.todoist_sync.tools import (
-    TODOIST_HANDLERS, TODOIST_TOOL_SCHEMAS,
+    TODOIST_HANDLERS,
+    TODOIST_TOOL_SCHEMAS,
+)
+from extensions.uptime.tools import UPTIME_HANDLERS, UPTIME_TOOL_SCHEMAS
+from extensions.user_profile.tools import (
+    USER_PROFILE_HANDLERS,
+    USER_PROFILE_TOOL_SCHEMAS,
 )
 from extensions.whats_open.tools import (
-    WHATS_OPEN_HANDLERS, WHATS_OPEN_TOOL_SCHEMAS,
+    WHATS_OPEN_HANDLERS,
+    WHATS_OPEN_TOOL_SCHEMAS,
 )
-from extensions.user_profile.tools import (
-    USER_PROFILE_HANDLERS, USER_PROFILE_TOOL_SCHEMAS,
-)
-from integrations.imap import ImapAccount
 from integrations.gcal import CalendarClient
 from integrations.gmail import GmailClient
+from integrations.imap import ImapAccount
 
 log = logging.getLogger(__name__)
 TZ = ZoneInfo("Europe/Amsterdam")
@@ -763,9 +780,10 @@ class ToolExecutor:
     def _set_timezone(self, args: dict[str, Any]) -> dict[str, Any]:
         """Switch active timezone. Accepts IANA-zone OR alias
         ('home'/'reset'/'off') om naar default terug te vallen."""
-        from core.timezone import set_active_timezone, current_tz, default_tz_name
-        from core.audit import log_admin_action
         from zoneinfo import ZoneInfo
+
+        from core.audit import log_admin_action
+        from core.timezone import current_tz, default_tz_name, set_active_timezone
         raw_input = args.get("timezone")
         if isinstance(raw_input, (list, tuple, dict)):
             return {"ok": False, "error": "timezone must be a string"}
@@ -809,8 +827,9 @@ class ToolExecutor:
         }
 
     def _get_timezone(self, _args: dict[str, Any]) -> dict[str, Any]:
-        from core.timezone import current_tz, default_tz_name
         from zoneinfo import ZoneInfo
+
+        from core.timezone import current_tz, default_tz_name
         active = current_tz()
         active_name = str(active)
         default = default_tz_name()
@@ -853,7 +872,8 @@ class ToolExecutor:
         )
 
     def _calendar_search_events(self, a: dict[str, Any]) -> list[dict[str, Any]]:
-        from datetime import datetime as _dt, timedelta as _td
+        from datetime import datetime as _dt
+        from datetime import timedelta as _td
         from zoneinfo import ZoneInfo
         now = _dt.now(ZoneInfo("Europe/Amsterdam"))
         return self._ctx.calendar.search_events(
@@ -1092,7 +1112,7 @@ def _build_recurrence(rec: Any) -> list[str] | None:
         except ValueError as e:
             raise ValueError(f"recurrence.until ongeldig: {e}")
         # UTC, geen scheidings-tekens
-        utc_dt = dt.astimezone(timezone.utc)
+        utc_dt = dt.astimezone(UTC)
         parts.append(f"UNTIL={utc_dt.strftime('%Y%m%dT%H%M%SZ')}")
 
     return [f"RRULE:{';'.join(parts)}"]

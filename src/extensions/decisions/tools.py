@@ -2,18 +2,19 @@
 from __future__ import annotations
 
 import json
+import logging
 import sqlite3
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
-import logging
-
 from core.llm_helpers import llm_json_object
 from core.query_safety import QUERY_SCHEMA, validate_query
 from extensions.decisions.schema import (
-    insert_decision, recent_decisions, search_decisions,
+    insert_decision,
+    recent_decisions,
+    search_decisions,
     update_decision_tags,
 )
 

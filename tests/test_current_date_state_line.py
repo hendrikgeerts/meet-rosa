@@ -14,8 +14,8 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from main import _current_date_state_line
 import core.timezone as ctz
+from main import _current_date_state_line
 
 
 @pytest.fixture

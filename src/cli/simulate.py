@@ -13,7 +13,6 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import sys
 import time
 
 
@@ -39,8 +38,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     # Classifier check
-    from privacy.classifier import Classifier
     import yaml
+
+    from privacy.classifier import Classifier
     conf_yaml = settings.data_dir.parent / "config" / "confidential_domains.yaml"
     domains = []
     if conf_yaml.exists():
@@ -73,8 +73,8 @@ def main(argv: list[str] | None = None) -> int:
     )
     # M-3: import direct uit core.prompts i.p.v. main, zodat we
     # main.py's ~800 regels module-scope import-side-effects skippen.
-    from core.prompts import SYSTEM_PROMPT_TEMPLATE
     from core.prompt_builder import render_system_prompt
+    from core.prompts import SYSTEM_PROMPT_TEMPLATE
     system = render_system_prompt(SYSTEM_PROMPT_TEMPLATE, settings)
 
     t0 = time.time()

@@ -15,7 +15,6 @@ import json
 import os
 import shutil
 import sqlite3
-import stat
 import subprocess
 import sys
 from pathlib import Path
@@ -148,7 +147,7 @@ def collect_diagnostics() -> dict:
             )
 
     # Live services
-    from wizard.health_checks import check_ollama, check_anthropic
+    from wizard.health_checks import check_anthropic, check_ollama
     ollama_check = check_ollama()
     diag["services"]["ollama"] = {
         "ok": ollama_check["ok"], "message": ollama_check["message"],

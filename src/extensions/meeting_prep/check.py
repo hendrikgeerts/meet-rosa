@@ -14,9 +14,10 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
+from collections.abc import Callable
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 from zoneinfo import ZoneInfo
 
 from extensions.meeting_prep.schema import already_sent, mark_sent
@@ -26,6 +27,7 @@ from privacy.gateway import Gateway
 
 log = logging.getLogger(__name__)
 from core.timezone import current_tz, now_local
+
 TZ = ZoneInfo("Europe/Amsterdam")
 
 

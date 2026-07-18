@@ -24,6 +24,7 @@ def db(tmp_path: Path) -> Path:
 @pytest.fixture
 def client(db: Path, tmp_path: Path):  # type: ignore[no-untyped-def]
     from fastapi.testclient import TestClient
+
     from web.app import create_app
     audit = tmp_path / "audit"
     audit.mkdir()

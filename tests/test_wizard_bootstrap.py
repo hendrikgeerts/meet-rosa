@@ -83,6 +83,7 @@ def test_port_in_use_raises(monkeypatch, tmp_path):
     monkeypatch.setenv("ROSA_HOME", str(tmp_path))
 
     import socket
+
     from wizard import bootstrap
 
     # Bezet een port en probeer de bootstrap tegen exact die port.

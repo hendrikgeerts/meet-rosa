@@ -70,7 +70,7 @@ class HereMapsClient:
         # L2: persistent SQLite cache (survives restarts).
         if self._cache_db_path is not None:
             from extensions.travel_alerts.schema import (
-                geocode_cache_get, geocode_cache_set,
+                geocode_cache_get,
             )
             try:
                 with sqlite3.connect(self._cache_db_path, isolation_level=None) as conn:

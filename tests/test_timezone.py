@@ -2,13 +2,12 @@
 caching, en de bind/current_tz helpers."""
 from __future__ import annotations
 
-import time as _time
 from pathlib import Path
-from zoneinfo import ZoneInfo
 
 import pytest
 
-from core import app_state, timezone as tz_mod
+from core import app_state
+from core import timezone as tz_mod
 
 
 @pytest.fixture

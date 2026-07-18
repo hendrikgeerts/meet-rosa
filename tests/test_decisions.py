@@ -8,11 +8,16 @@ from pathlib import Path
 import pytest
 
 from extensions.decisions.schema import (
-    init_decisions_schema, insert_decision, recent_decisions,
-    search_decisions, supersede_decision,
+    init_decisions_schema,
+    insert_decision,
+    recent_decisions,
+    search_decisions,
+    supersede_decision,
 )
 from extensions.decisions.tools import (
-    find_decisions_handler, log_decision_handler, recent_decisions_handler,
+    find_decisions_handler,
+    log_decision_handler,
+    recent_decisions_handler,
 )
 
 

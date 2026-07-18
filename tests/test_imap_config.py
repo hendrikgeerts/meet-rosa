@@ -9,13 +9,17 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import patch
 
-import pytest
-
 from integrations.imap import (
-    KEYRING_SERVICE, ImapAccount, ImapFolders,
-    all_enabled, delete_password, get_password, load_accounts, save_accounts, set_password,
+    KEYRING_SERVICE,
+    ImapAccount,
+    ImapFolders,
+    all_enabled,
+    delete_password,
+    get_password,
+    load_accounts,
+    save_accounts,
+    set_password,
 )
-
 
 # --- yaml roundtrip --------------------------------------------------------
 

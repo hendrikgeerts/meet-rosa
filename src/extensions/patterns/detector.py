@@ -152,11 +152,10 @@ def _detect_decisions_slowing(
         "kind": "decisions_slowing",
         "severity": "watch",
         "title": f"Beslissingen vertragen ({this_week} deze week, gem {baseline_avg:.1f})",
-        "body": ("Vorige weken loste je gemiddeld {b:.1f} beslissingen per "
-                  "week in. Deze week {n}. Iets blokkeert óf je hebt geen "
+        "body": (f"Vorige weken loste je gemiddeld {baseline_avg:.1f} beslissingen per "
+                  f"week in. Deze week {this_week}. Iets blokkeert óf je hebt geen "
                   "moment voor strategische keuzes gemaakt — check open "
-                  "loops met kind='outgoing_request'.").format(
-            b=baseline_avg, n=this_week),
+                  "loops met kind='outgoing_request'."),
         "metric_value": float(this_week),
         "baseline_value": float(baseline_avg),
     }

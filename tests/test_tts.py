@@ -7,8 +7,10 @@ from unittest.mock import patch
 import pytest
 
 from integrations.tts import (
-    _elevenlabs_rate_status, _reset_elevenlabs_rate_for_tests,
-    is_available, synthesize,
+    _elevenlabs_rate_status,
+    _reset_elevenlabs_rate_for_tests,
+    is_available,
+    synthesize,
 )
 
 

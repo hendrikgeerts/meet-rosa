@@ -20,8 +20,10 @@ from .schema import (
     delete_memory,
     get_memory,
     insert_memory,
-    list_memories as db_list_memories,
     open_with_vec,
+)
+from .schema import (
+    list_memories as db_list_memories,
 )
 
 log = logging.getLogger(__name__)
@@ -199,7 +201,7 @@ def forget_memory_handler(
             to_value=None,
             reason=(args.get("reason") or "user-requested")[:200],
         )
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         log.warning("forget_memory audit failed: %s", e)
 
     return {

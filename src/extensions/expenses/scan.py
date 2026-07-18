@@ -7,10 +7,15 @@ import sqlite3
 from pathlib import Path
 
 from extensions.expenses.extract import (
-    classify, extract_text, parse_date, to_cents,
+    classify,
+    extract_text,
+    parse_date,
+    to_cents,
 )
 from extensions.expenses.schema import (
-    CATEGORIES, already_seen, insert_expense,
+    CATEGORIES,
+    already_seen,
+    insert_expense,
 )
 from privacy.gateway import Gateway
 

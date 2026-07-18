@@ -30,7 +30,10 @@ from typing import Any
 from extensions.comm_intel.schema import CommItem
 from extensions.open_loops.deadline import extract_deadline
 from extensions.open_loops.schema import (
-    OpenLoop, close_loops_by_context, insert_loop, set_action_summary,
+    OpenLoop,
+    close_loops_by_context,
+    insert_loop,
+    set_action_summary,
 )
 
 log = logging.getLogger(__name__)

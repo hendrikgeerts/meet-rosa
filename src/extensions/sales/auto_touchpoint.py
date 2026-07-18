@@ -21,14 +21,13 @@ mag hergebruiken (vermijdt double-connection lock-risk).
 from __future__ import annotations
 
 import logging
-import re
 import sqlite3
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from .schema import normalize_naam
 from .storage import (
-    insert_touchpoint, touchpoint_exists_for_source,
+    insert_touchpoint,
+    touchpoint_exists_for_source,
 )
 
 if TYPE_CHECKING:
@@ -112,7 +111,7 @@ def _account_id_for_domain(
     return None
 
 
-def _resolve_channel(item: "CommItem") -> str:
+def _resolve_channel(item: CommItem) -> str:
     """H1 review-fix: dead code overschrijving verwijderd. Slack-items
     krijgen nu een eigen 'slack'-channel; LinkedIn-bridges (Slack-bot
     of expliciete linkedin-mail) krijgen 'linkedin'. Gmail/IMAP per
@@ -132,7 +131,7 @@ def _resolve_channel(item: "CommItem") -> str:
 
 def maybe_log_touchpoint(
     db_path: Path,
-    item: "CommItem",
+    item: CommItem,
     *,
     enabled: bool = True,
     conn: sqlite3.Connection | None = None,

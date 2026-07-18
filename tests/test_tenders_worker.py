@@ -13,12 +13,11 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 from unittest.mock import patch
-from zoneinfo import ZoneInfo
 
 import pytest
 
 import core.timezone as ctz
-from extensions.tenders.schema import init_tenders_schema, tender_exists
+from extensions.tenders.schema import init_tenders_schema
 from extensions.tenders.worker import (
     TENDERNED_TZ,
     TenderWorker,
@@ -166,7 +165,6 @@ def test_should_alert_skips_expired(db: Path) -> None:
 def test_should_alert_skips_rectification_of_alerted_kenmerk(db: Path) -> None:
     """Eerste publicatie van kenmerk X krijgt alert. Rectificatie met
     zelfde kenmerk → no-alert."""
-    import json
     worker = _make_worker(db)
     fresh = (datetime.now(NL) - timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S")
     future = (datetime.now(NL) + timedelta(days=30)).strftime("%Y-%m-%dT%H:%M:%S")

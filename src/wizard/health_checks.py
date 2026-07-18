@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import json
 import logging
-import socket
 import ssl
 import urllib.error
 import urllib.request
@@ -66,7 +65,7 @@ def check_anthropic(api_key: str) -> dict[str, Any]:
                 "anthropic-version": "2023-06-01",
             },
         )
-    except (urllib.error.URLError, socket.timeout, ssl.SSLError) as e:
+    except (TimeoutError, urllib.error.URLError, ssl.SSLError) as e:
         return {"ok": False, "message": f"Cannot reach api.anthropic.com: {e}"}
     if code == 200:
         return {"ok": True, "message": "Anthropic API key accepted."}
@@ -84,7 +83,7 @@ def check_ollama(host: str = "http://localhost:11434") -> dict[str, Any]:
     modellen beschikbaar zijn."""
     try:
         code, body = _http_json(f"{host}/api/tags", timeout=3.0)
-    except (urllib.error.URLError, socket.timeout) as e:
+    except (TimeoutError, urllib.error.URLError):
         return {
             "ok": False,
             "message": f"Ollama not reachable at {host}",

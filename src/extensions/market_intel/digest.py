@@ -14,7 +14,6 @@ import json
 import logging
 import sqlite3
 from collections import Counter
-from datetime import datetime
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -23,7 +22,8 @@ from extensions.market_intel.schema import mark_digested, top_for_digest
 from privacy.gateway import Gateway
 
 log = logging.getLogger(__name__)
-from core.timezone import current_tz, now_local
+from core.timezone import now_local
+
 TZ = ZoneInfo("Europe/Amsterdam")
 
 

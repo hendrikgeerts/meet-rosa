@@ -14,7 +14,7 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 from core.audit import AuditLogger
-from privacy.classifier import Classification, Classifier
+from privacy.classifier import Classifier
 from privacy.gateway import Gateway
 from privacy.redactor import Redactor
 

@@ -8,14 +8,15 @@ from __future__ import annotations
 import json
 import sqlite3
 import time
-from pathlib import Path
 from typing import Any
 
 from .schema import (
-    VALID_PROSPECT_TYPES, VALID_STATUSES, VALID_TARGETS,
-    compute_next_touch, normalize_naam,
+    VALID_PROSPECT_TYPES,
+    VALID_STATUSES,
+    VALID_TARGETS,
+    compute_next_touch,
+    normalize_naam,
 )
-
 
 # ---- accounts ---------------------------------------------------------
 

@@ -1,11 +1,7 @@
 """Tests voor mail_router routing logic — geen netwerkcalls, alle backends gemockt."""
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Any
 from unittest.mock import MagicMock, patch
-
-import pytest
 
 from integrations.imap import ImapAccount, ImapFolders
 from integrations.mail_router import _account_matches, send

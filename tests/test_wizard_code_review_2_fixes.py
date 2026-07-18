@@ -6,17 +6,18 @@ from unittest.mock import MagicMock
 import pytest
 
 pytest.importorskip("fastapi")
-from fastapi.testclient import TestClient  # noqa: E402
+from fastapi.testclient import TestClient
 
 
 @pytest.fixture
 def client(tmp_path, monkeypatch):
     monkeypatch.setenv("ROSA_HOME", str(tmp_path))
     monkeypatch.delenv("ROSA_DEV", raising=False)
-    from wizard import server as srv, google_oauth
+    from wizard import google_oauth
+    from wizard import server as srv
     srv.reset_finish_event()
     google_oauth.clear_pending()
-    from wizard.server import build_app, _SESSION_TOKEN
+    from wizard.server import _SESSION_TOKEN, build_app
     c = TestClient(build_app())
     c.headers["X-Wizard-Token"] = _SESSION_TOKEN
     return c, tmp_path
@@ -29,8 +30,8 @@ def test_h1_state_lines_render_user_name():
     """H1 — state-lines bevatten `${user_name}` als literal en moeten
     door render_system_prompt gesubstitueerd worden. Voor Alex: `${user_name}`
     wordt vervangen. Voor Hendrik: identical output."""
-    from main import _current_date_state_line, _english_practice_state_line
     from core.prompt_builder import render_system_prompt
+    from main import _current_date_state_line
 
     date_line = _current_date_state_line()
     # State-line moet `${user_name}` marker bevatten
@@ -54,7 +55,7 @@ def test_h1_state_lines_render_user_name():
 def test_h1_state_lines_contain_no_double_braces():
     """H1 — verifier dat `${{user_name}}` (Python-f-string-escape) NIET
     in de state-line output zit. Dat was de zichtbare regressie."""
-    from main import _current_date_state_line, _english_practice_state_line
+    from main import _current_date_state_line
 
     assert "${{user_name}}" not in _current_date_state_line()
 

@@ -10,7 +10,6 @@ from privacy.reconstructor import (
     reconstruct_with_info,
 )
 
-
 # --- basic mapping replacement ------------------------------------------
 
 def test_replaces_exact_placeholders() -> None:

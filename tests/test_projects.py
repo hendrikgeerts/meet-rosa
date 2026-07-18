@@ -9,17 +9,24 @@ import pytest
 
 from extensions.comm_intel.schema import init_comm_schema
 from extensions.decisions.schema import (
-    init_decisions_schema, insert_decision,
+    init_decisions_schema,
+    insert_decision,
 )
 from extensions.open_loops.schema import init_open_loops_schema
 from extensions.projects.aggregator import project_status
 from extensions.projects.schema import (
-    delete_project, get_project, init_projects_schema, insert_project,
-    list_projects, update_project,
+    get_project,
+    init_projects_schema,
+    insert_project,
+    list_projects,
+    update_project,
 )
 from extensions.projects.tools import (
-    project_create_handler, project_delete_handler, project_list_handler,
-    project_status_handler, project_update_handler,
+    project_create_handler,
+    project_delete_handler,
+    project_list_handler,
+    project_status_handler,
+    project_update_handler,
 )
 
 
@@ -53,9 +60,8 @@ def test_unique_slug_constraint(db: Path) -> None:
 
 
 def test_invalid_status_rejected(db: Path) -> None:
-    with sqlite3.connect(db) as c:
-        with pytest.raises(ValueError):
-            insert_project(c, slug="x", title="X", status="weird")
+    with sqlite3.connect(db) as c, pytest.raises(ValueError):
+        insert_project(c, slug="x", title="X", status="weird")
 
 
 def test_update_partial(db: Path) -> None:

@@ -8,8 +8,12 @@ from pathlib import Path
 import pytest
 
 from extensions.receipt_collector.schema import (
-    init_receipt_collector_schema, insert_run, insert_run_item,
-    update_run_counts, update_run_item, upsert_vendor_strategy,
+    init_receipt_collector_schema,
+    insert_run,
+    insert_run_item,
+    update_run_counts,
+    update_run_item,
+    upsert_vendor_strategy,
 )
 
 
@@ -23,6 +27,7 @@ def db(tmp_path: Path) -> Path:
 @pytest.fixture
 def client(db: Path, tmp_path: Path):  # type: ignore[no-untyped-def]
     from fastapi.testclient import TestClient
+
     from web.app import create_app
     audit = tmp_path / "audit"
     audit.mkdir()

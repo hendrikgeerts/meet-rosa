@@ -7,8 +7,13 @@ from pathlib import Path
 import pytest
 
 from extensions.comm_intel.schema import (
-    CommItem, init_comm_schema, insert_item, item_exists, load_state,
-    prune_old_comm_items, upsert_state,
+    CommItem,
+    init_comm_schema,
+    insert_item,
+    item_exists,
+    load_state,
+    prune_old_comm_items,
+    upsert_state,
 )
 
 

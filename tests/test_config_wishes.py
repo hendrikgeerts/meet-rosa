@@ -7,11 +7,16 @@ from pathlib import Path
 import pytest
 
 from extensions.config_wishes.schema import (
-    count_open, get_wish, init_config_wishes_schema, insert_wish,
-    list_wishes, update_wish_status,
+    count_open,
+    get_wish,
+    init_config_wishes_schema,
+    insert_wish,
+    list_wishes,
+    update_wish_status,
 )
 from extensions.config_wishes.tools import (
-    add_config_wish_handler, config_wish_set_status_handler,
+    add_config_wish_handler,
+    config_wish_set_status_handler,
     config_wishes_list_handler,
 )
 

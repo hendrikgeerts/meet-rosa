@@ -11,15 +11,19 @@ from __future__ import annotations
 
 import io
 import json
+import urllib.error
 from unittest.mock import MagicMock, patch
 
 import pytest
-import urllib.error
 
 from extensions.tenders.feed import (
-    TenderNedError, TenderNedRateLimited,
-    _parse_retry_after, _request,
-    fetch_publication_detail, fetch_recent_summaries, overview_url,
+    TenderNedError,
+    TenderNedRateLimited,
+    _parse_retry_after,
+    _request,
+    fetch_publication_detail,
+    fetch_recent_summaries,
+    overview_url,
 )
 
 
@@ -156,9 +160,8 @@ def test_fetch_recent_summaries_raises_on_non_dict_payload() -> None:
     """Als payload een list of string is, weet de feed niet wat te
     doen → expliciete TenderNedError."""
     with patch("urllib.request.urlopen",
-                return_value=_mock_urlopen_resp(b'["wrong shape"]')):
-        with pytest.raises(TenderNedError):
-            fetch_recent_summaries()
+                return_value=_mock_urlopen_resp(b'["wrong shape"]')), pytest.raises(TenderNedError):
+        fetch_recent_summaries()
 
 
 def test_fetch_publication_detail_returns_dict() -> None:
@@ -170,9 +173,8 @@ def test_fetch_publication_detail_returns_dict() -> None:
 
 def test_fetch_publication_detail_raises_on_non_dict() -> None:
     with patch("urllib.request.urlopen",
-                return_value=_mock_urlopen_resp(b'"not a dict"')):
-        with pytest.raises(TenderNedError):
-            fetch_publication_detail(1)
+                return_value=_mock_urlopen_resp(b'"not a dict"')), pytest.raises(TenderNedError):
+        fetch_publication_detail(1)
 
 
 def test_overview_url_format() -> None:

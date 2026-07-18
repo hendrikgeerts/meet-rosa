@@ -8,17 +8,21 @@ from __future__ import annotations
 
 import logging
 import sqlite3
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
 from extensions.todoist_sync.schema import (
-    get_link_by_local, get_link_by_remote, insert_link,
-    mark_completed_remote, queue_enqueue_loop, touch_synced,
+    insert_link,
+    mark_completed_remote,
+    queue_enqueue_loop,
+    touch_synced,
 )
 from integrations.todoist import (
-    Project, TodoistClient, TodoistProjectFullError,
+    Project,
+    TodoistClient,
+    TodoistProjectFullError,
 )
 
 log = logging.getLogger(__name__)
@@ -235,7 +239,7 @@ def _loop_label(loop_row: dict[str, Any]) -> str:
 def to_rfc3339(unix_seconds: int) -> str:
     """Todoist verwacht datetime in ISO-8601 UTC (e.g. '2026-04-29T13:00:00Z')
     of met tz-offset. We sturen UTC-Z."""
-    dt = datetime.fromtimestamp(unix_seconds, tz=timezone.utc)
+    dt = datetime.fromtimestamp(unix_seconds, tz=UTC)
     return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
@@ -253,7 +257,7 @@ def with_date_prefix(content: str, due_unix: int | None) -> str:
     prefix = f"[{dt.day} {_NL_MONTHS_SHORT[dt.month - 1]}] "
     # Voorkom dubbele prefix als hij al geprefixt is (idempotent voor
     # re-sync via update-script)
-    if content.startswith("[") and content[3:].startswith(" ") or \
-       content.startswith("[") and "] " in content[:16]:
+    if (content.startswith("[") and content[3:].startswith(" ")) or \
+       (content.startswith("[") and "] " in content[:16]):
         return content
     return prefix + content

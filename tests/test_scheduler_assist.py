@@ -5,26 +5,33 @@ import sqlite3
 import time as _time
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any
 from unittest.mock import MagicMock
 from zoneinfo import ZoneInfo
 
 import pytest
 
+from extensions.comm_intel.schema import CommItem, init_comm_schema, insert_item
 from extensions.scheduler_assist.detect import is_scheduling_request
 from extensions.scheduler_assist.propose import (
-    estimate_duration_minutes, notify_followup_for_item, pick_slots,
-    propose_for_item, _fmt_slot,
+    _fmt_slot,
+    estimate_duration_minutes,
+    notify_followup_for_item,
+    pick_slots,
 )
 from extensions.scheduler_assist.schema import (
-    PendingProposal, find_recent_in_thread, get_proposal,
-    init_scheduler_schema, insert_proposal, list_pending,
-    mark_cancelled, mark_sent,
+    PendingProposal,
+    find_recent_in_thread,
+    get_proposal,
+    init_scheduler_schema,
+    insert_proposal,
+    list_pending,
+    mark_cancelled,
+    mark_sent,
 )
 from extensions.scheduler_assist.tools import (
-    cancel_proposal, proposals_list, send_proposal,
+    cancel_proposal,
+    send_proposal,
 )
-from extensions.comm_intel.schema import init_comm_schema, CommItem, insert_item
 
 TZ = ZoneInfo("Europe/Amsterdam")
 

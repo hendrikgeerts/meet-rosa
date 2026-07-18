@@ -11,16 +11,21 @@ import pytest
 
 from extensions.comm_intel.schema import init_comm_schema
 from extensions.decisions.schema import (
-    init_decisions_schema, insert_decision,
+    init_decisions_schema,
 )
 from extensions.open_loops.schema import init_open_loops_schema
 from extensions.patterns.detector import run_weekly_detection
 from extensions.patterns.schema import (
-    init_patterns_schema, insert_or_replace_pattern,
-    list_patterns, mark_surfaced, pending_patterns, snooze_pattern,
+    init_patterns_schema,
+    insert_or_replace_pattern,
+    list_patterns,
+    mark_surfaced,
+    pending_patterns,
+    snooze_pattern,
 )
 from extensions.patterns.tools import (
-    patterns_recent_handler, patterns_snooze_handler,
+    patterns_recent_handler,
+    patterns_snooze_handler,
 )
 from extensions.plaud_intel.schema import init_plaud_meetings_schema
 from integrations.plaud import init_plaud_schema
@@ -63,10 +68,9 @@ def test_insert_or_replace_idempotent(db: Path) -> None:
 
 
 def test_invalid_kind_rejected(db: Path) -> None:
-    with sqlite3.connect(db) as c:
-        with pytest.raises(ValueError):
-            insert_or_replace_pattern(c, week_start=0, kind="weird",
-                                       severity="info", title="x")
+    with sqlite3.connect(db) as c, pytest.raises(ValueError):
+        insert_or_replace_pattern(c, week_start=0, kind="weird",
+                                   severity="info", title="x")
 
 
 def test_pending_patterns_excludes_surfaced(db: Path) -> None:

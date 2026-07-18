@@ -5,7 +5,7 @@ from __future__ import annotations
 import sqlite3
 import time as _time
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -14,11 +14,14 @@ import pytest
 
 from extensions.open_loops.schema import init_open_loops_schema, list_open
 from extensions.plaud_intel.analyze import (
-    AnalyzeTranscriptError, _due_from_text, _parse_loose_json,
-    analyze_pending, analyze_transcript,
+    AnalyzeTranscriptError,
+    _due_from_text,
+    _parse_loose_json,
+    analyze_pending,
+    analyze_transcript,
 )
 from extensions.plaud_intel.schema import (
-    MeetingAnalysis, find_unanalyzed_transcripts, init_plaud_meetings_schema,
+    init_plaud_meetings_schema,
 )
 
 TZ = ZoneInfo("Europe/Amsterdam")

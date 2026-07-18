@@ -11,8 +11,12 @@ import pytest
 
 from extensions.expenses.extract import _parse_json, classify, parse_date, to_cents
 from extensions.expenses.schema import (
-    already_seen, init_expenses_schema, insert_expense, list_recent,
-    list_for_period, prune_old_expenses,
+    already_seen,
+    init_expenses_schema,
+    insert_expense,
+    list_for_period,
+    list_recent,
+    prune_old_expenses,
 )
 from extensions.expenses.tools import recent_expenses_handler
 

@@ -6,7 +6,8 @@ De ingest-loop deduplicates additioneel via `comm_items` UNIQUE INDEX,
 dus een source mag conservatief zijn (bv. fetch_new mag overlap teruggeven)."""
 from __future__ import annotations
 
-from typing import Iterable, Protocol
+from collections.abc import Iterable
+from typing import Protocol
 
 from extensions.comm_intel.schema import CommItem
 

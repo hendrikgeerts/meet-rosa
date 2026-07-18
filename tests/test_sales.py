@@ -1,32 +1,44 @@
 """Tests voor sales-pipeline: storage + selectie-algoritme + tools."""
 from __future__ import annotations
 
-import json
 import sqlite3
 import time
 from pathlib import Path
 
 import pytest
 
+from extensions.sales.briefing import build_sales_pulse
 from extensions.sales.schema import (
-    DEFAULT_CADENCES, compute_next_touch, init_sales_schema, normalize_naam,
+    DEFAULT_CADENCES,
+    compute_next_touch,
+    init_sales_schema,
+    normalize_naam,
 )
 from extensions.sales.selection import select_top_n
 from extensions.sales.storage import (
-    find_account_by_name, get_account, insert_account, insert_touchpoint,
-    list_accounts, search_accounts, snooze_account, unsnooze_expired,
+    find_account_by_name,
+    get_account,
+    insert_account,
+    insert_touchpoint,
+    search_accounts,
+    snooze_account,
+    unsnooze_expired,
     update_account,
 )
 from extensions.sales.tools import (
-    SALES_HANDLERS, SALES_TOOL_SCHEMAS,
-    sales_account_add_handler, sales_account_list_handler,
-    sales_account_search_handler, sales_account_set_status_handler,
-    sales_account_snooze_handler, sales_account_update_handler,
-    sales_pipeline_status_handler, sales_top3_today_handler,
-    sales_touchpoint_history_handler, sales_touchpoint_log_handler,
+    SALES_HANDLERS,
+    SALES_TOOL_SCHEMAS,
+    sales_account_add_handler,
+    sales_account_list_handler,
+    sales_account_search_handler,
+    sales_account_set_status_handler,
+    sales_account_snooze_handler,
+    sales_pipeline_status_handler,
+    sales_top3_today_handler,
+    sales_touchpoint_history_handler,
+    sales_touchpoint_log_handler,
     sales_why_handler,
 )
-from extensions.sales.briefing import build_sales_pulse
 
 
 @pytest.fixture
@@ -105,15 +117,13 @@ def test_insert_account_basic(db: Path) -> None:
 
 
 def test_insert_account_multi_requires_sub_targets(db: Path) -> None:
-    with sqlite3.connect(db) as conn:
-        with pytest.raises(ValueError, match="sub_targets"):
-            insert_account(conn, naam="X", target="multi")
+    with sqlite3.connect(db) as conn, pytest.raises(ValueError, match="sub_targets"):
+        insert_account(conn, naam="X", target="multi")
 
 
 def test_insert_account_invalid_target(db: Path) -> None:
-    with sqlite3.connect(db) as conn:
-        with pytest.raises(ValueError, match="target"):
-            insert_account(conn, naam="X", target="xyz")
+    with sqlite3.connect(db) as conn, pytest.raises(ValueError, match="target"):
+        insert_account(conn, naam="X", target="xyz")
 
 
 def test_find_account_by_name_dedupes_via_normalization(db: Path) -> None:

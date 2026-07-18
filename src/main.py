@@ -11,48 +11,51 @@ import time
 
 from core import db, orchestrator
 from core.audit import (
-    AdminActionLogger, AuditLogger, PayloadAuditLogger, bind_admin_logger,
+    AdminActionLogger,
+    AuditLogger,
+    PayloadAuditLogger,
+    bind_admin_logger,
 )
-from core.external_audit import bind_audit as _bind_external_audit
 from core.config import Settings, load_settings
+from core.external_audit import bind_audit as _bind_external_audit
 from core.health import HealthMonitor, HealthState, describe_health
 from core.log_scrub import ScrubbingFileHandler, ScrubbingStreamHandler
 from core.perms import secure_dir
 from core.scheduler import Scheduler
+from core.scheduler_state import init_scheduler_state_schema
 from core.tools import ToolContext, ToolExecutor
 from extensions import reminders
+from extensions.comm_intel.embeddings import init_embeddings_schema
 from extensions.comm_intel.ingest import IngestWorker, build_sources
 from extensions.comm_intel.schema import init_comm_schema
 from extensions.config_wishes.schema import init_config_wishes_schema
-from extensions.english_practice.schema import init_english_practice_schema
 from extensions.decisions.schema import init_decisions_schema
+from extensions.english_practice.schema import init_english_practice_schema
 from extensions.expenses.schema import init_expenses_schema
-from extensions.market_intel.schema import init_market_intel_schema
-from extensions.market_intel.worker import MarketIntelWorker
-from extensions.memory.schema import init_memory_schema
-from extensions.tenders.schema import init_tenders_schema
-from extensions.tenders.worker import TenderWorker
 from extensions.insolvencies.schema import init_insolvencies_schema
 from extensions.insolvencies.worker import InsolvenciesWorker
-from extensions.sales.schema import init_sales_schema
+from extensions.market_intel.schema import init_market_intel_schema
+from extensions.market_intel.worker import MarketIntelWorker
 from extensions.meeting_prep.schema import init_meeting_prep_schema
+from extensions.memory.schema import init_memory_schema
 from extensions.open_loops.schema import init_open_loops_schema
 from extensions.patterns.schema import init_patterns_schema
 from extensions.plaud_intel.schema import init_plaud_meetings_schema
 from extensions.projects.schema import init_projects_schema
-from core.scheduler_state import init_scheduler_state_schema
-from extensions.comm_intel.embeddings import init_embeddings_schema
 from extensions.receipt_collector.schema import init_receipt_collector_schema
+from extensions.sales.schema import init_sales_schema
 from extensions.scheduler_assist.schema import init_scheduler_schema
+from extensions.tenders.schema import init_tenders_schema
+from extensions.tenders.worker import TenderWorker
 from extensions.todoist_sync.schema import init_todoist_sync_schema
 from extensions.todoist_sync.worker import TodoistSyncWorker
 from extensions.travel_alerts.schema import init_travel_alerts_schema
-from integrations.here_maps import HereMapsClient
-from integrations.todoist import TodoistClient
 from integrations import imessage, plaud, tts, voice
 from integrations.gcal import CalendarClient
 from integrations.gmail import GmailClient
 from integrations.google_auth import get_credentials
+from integrations.here_maps import HereMapsClient
+from integrations.todoist import TodoistClient
 from models.ollama import OllamaClient
 from privacy.classifier import load_classifier_from_yaml
 from privacy.gateway import Gateway
@@ -65,7 +68,6 @@ log = logging.getLogger(__name__)
 # — zodat rosa simulate + tests het kunnen importeren zonder main.py's
 # module-scope side-effects.
 from core.prompts import SYSTEM_PROMPT_TEMPLATE  # noqa: E402
-
 
 
 class _Shutdown:
@@ -182,9 +184,10 @@ def _start_dashboard_thread(settings: Settings) -> None:
     """Start uvicorn in a daemon thread so the dashboard runs alongside the
     rest of the agent without needing a second process. Bind 127.0.0.1 only."""
     import uvicorn
-    from web.app import create_app
-    from models.ollama import OllamaClient
+
     from core.config import get_rosa_home
+    from models.ollama import OllamaClient
+    from web.app import create_app
     config_dir = get_rosa_home() / "config"
     # Aparte Ollama-client voor dashboard suggest-endpoints (los van
     # gateway local_client) zodat een lange call hier de privacy-routing
@@ -280,7 +283,8 @@ def _user_profile_block(profile_path) -> str:
     als file niet bestaat zodat Rosa zonder profile blijft draaien."""
     try:
         from extensions.user_profile.profile import (
-            load_user_profile, render_for_prompt,
+            load_user_profile,
+            render_for_prompt,
         )
         profile = load_user_profile(profile_path)
         rendered = render_for_prompt(profile)
@@ -531,7 +535,7 @@ def run() -> None:
     # Pak Gmail's eigen 'sendAs' default — nodig voor scheduler_assist
     # om te weten welk From-adres bij Gmail-replies hoort.
     try:
-        _profile = gmail._service.users().getProfile(userId="me").execute()  # noqa: SLF001
+        _profile = gmail._service.users().getProfile(userId="me").execute()
         gmail_address = str(_profile.get("emailAddress") or "")
     except Exception:
         log.exception("kon Gmail profile niet ophalen — gmail_address leeg")
@@ -712,12 +716,14 @@ def run() -> None:
     #   1. Counter-reply op een bekende thread → notify ${user_name} met
     #      vorige proposal-context (multi-turn flow).
     #   2. Nieuwe scheduling-vraag → propose 3 slots (single-turn flow).
+    import sqlite3 as _sql3
+
     from extensions.scheduler_assist.detect import is_scheduling_request
     from extensions.scheduler_assist.propose import (
-        notify_followup_for_item, propose_for_item,
+        notify_followup_for_item,
+        propose_for_item,
     )
     from extensions.scheduler_assist.schema import find_recent_in_thread
-    import sqlite3 as _sql3
 
     def _scheduler_hook(item: dict[str, Any]) -> None:
         # Skip outgoing — alleen reageren op INKOMENDE mails.

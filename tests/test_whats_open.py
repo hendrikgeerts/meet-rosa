@@ -14,7 +14,9 @@ import pytest
 
 from extensions.comm_intel.schema import init_comm_schema
 from extensions.open_loops.schema import (
-    OpenLoop, init_open_loops_schema, insert_loop,
+    OpenLoop,
+    init_open_loops_schema,
+    insert_loop,
 )
 from extensions.reminders import init_reminders_schema
 from extensions.whats_open.aggregator import collect_whats_open
@@ -131,6 +133,7 @@ def test_sent_reminders_not_counted(db: Path) -> None:
 
 def test_todoist_pulse_included_when_client_provided(db: Path) -> None:
     from datetime import datetime
+
     from core.timezone import current_tz
     today_iso = datetime.now(current_tz()).date().isoformat()
     fake = _FakeTodoist(tasks=[

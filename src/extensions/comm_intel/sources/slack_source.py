@@ -12,7 +12,7 @@ Direction: 'out' als sender == auth-user-id, anders 'in'.
 from __future__ import annotations
 
 import logging
-from typing import Iterable
+from collections.abc import Iterable
 
 from extensions.comm_intel.schema import CommItem
 from integrations.slack import SlackClient, SlackWorkspace
@@ -96,8 +96,8 @@ class SlackSource:
         if not uid:
             return "unknown"
         try:
-            api = self._client._api()  # noqa: SLF001
-            names = self._client._user_names(api)  # noqa: SLF001
+            api = self._client._api()
+            names = self._client._user_names(api)
         except Exception:
             return uid
         resolved = names.get(uid)
@@ -107,7 +107,7 @@ class SlackSource:
 
     def _fetch_channel(self, channel_id: str, channel_name: str,
                        oldest_ts: str, limit: int) -> list[CommItem]:
-        api = self._client._api()  # noqa: SLF001 — internal use, single client
+        api = self._client._api()
         r = api.conversations_history(channel=channel_id, oldest=oldest_ts, limit=limit)
         out: list[CommItem] = []
         for m in r.get("messages") or []:

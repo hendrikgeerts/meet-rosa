@@ -14,8 +14,11 @@ from pathlib import Path
 import pytest
 
 from extensions.sales.auto_touchpoint import (
-    _account_id_for_domain, _account_id_for_email,
-    _is_personal_domain, _resolve_channel, maybe_log_touchpoint,
+    _account_id_for_domain,
+    _account_id_for_email,
+    _is_personal_domain,
+    _resolve_channel,
+    maybe_log_touchpoint,
 )
 from extensions.sales.schema import init_sales_schema
 from extensions.sales.storage import insert_account, list_touchpoints

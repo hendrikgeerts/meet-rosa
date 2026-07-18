@@ -117,7 +117,7 @@ def test_user_company_placeholder_substitution() -> None:
     out = render_system_prompt(
         template, _fake_settings("Alex", "Acme"),
     )
-    assert "Reflect on Acme this week." == out
+    assert out == "Reflect on Acme this week."
 
 
 def test_user_company_placeholder_generic_fallback() -> None:

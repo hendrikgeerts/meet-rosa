@@ -258,7 +258,7 @@ class _FakeGateway:
         self.payload = payload
         self.calls = 0
 
-    def complete(self, **kwargs) -> _FakeResp:  # noqa: ANN003
+    def complete(self, **kwargs) -> _FakeResp:
         self.calls += 1
         return _FakeResp(self.payload)
 

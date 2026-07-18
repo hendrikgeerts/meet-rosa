@@ -16,7 +16,9 @@ from core.midday import collect_midday_context
 from extensions import reminders
 from extensions.comm_intel.schema import init_comm_schema
 from extensions.open_loops.schema import (
-    OpenLoop, init_open_loops_schema, insert_loop,
+    OpenLoop,
+    init_open_loops_schema,
+    insert_loop,
 )
 
 TZ = ZoneInfo("Europe/Amsterdam")

@@ -40,6 +40,7 @@ def populated_audit(tmp_path: Path) -> Path:
 @pytest.fixture
 def client(populated_audit: Path):  # type: ignore[no-untyped-def]
     from fastapi.testclient import TestClient
+
     from web.app import create_app
     # base_url must satisfy the Host-allowlist middleware (CRIT-B).
     return TestClient(create_app(populated_audit), base_url="http://127.0.0.1:8080")
@@ -59,6 +60,7 @@ def test_dns_rebind_host_rejected(populated_audit: Path) -> None:
     127.0.0.1 / localhost allowlist must be rejected with 403, even if
     the TCP connection landed on the loopback bind."""
     from fastapi.testclient import TestClient
+
     from web.app import create_app
     cli = TestClient(create_app(populated_audit),
                       base_url="http://attacker.example")
@@ -69,6 +71,7 @@ def test_dns_rebind_host_rejected(populated_audit: Path) -> None:
 
 def test_localhost_host_accepted(populated_audit: Path) -> None:
     from fastapi.testclient import TestClient
+
     from web.app import create_app
     cli = TestClient(create_app(populated_audit),
                       base_url="http://localhost:8080")

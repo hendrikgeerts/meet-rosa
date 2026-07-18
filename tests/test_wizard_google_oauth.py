@@ -12,7 +12,7 @@ import os
 import pytest
 
 pytest.importorskip("fastapi")
-from fastapi.testclient import TestClient  # noqa: E402
+from fastapi.testclient import TestClient
 
 
 @pytest.fixture
@@ -21,7 +21,8 @@ def rosa_home(tmp_path, monkeypatch):
     home.mkdir()
     monkeypatch.setenv("ROSA_HOME", str(home))
     monkeypatch.delenv("ROSA_DEV", raising=False)
-    from wizard import server as srv, google_oauth
+    from wizard import google_oauth
+    from wizard import server as srv
     srv.reset_finish_event()
     google_oauth.clear_pending()
     yield home
@@ -29,7 +30,7 @@ def rosa_home(tmp_path, monkeypatch):
 
 @pytest.fixture
 def client(rosa_home):
-    from wizard.server import build_app, _SESSION_TOKEN
+    from wizard.server import _SESSION_TOKEN, build_app
     app = build_app()
     c = TestClient(app)
     c.headers["X-Wizard-Token"] = _SESSION_TOKEN
@@ -103,8 +104,9 @@ def test_wizard_token_is_refreshable_without_credentials_file(tmp_path):
     zijn — dus zonder aparte credentials.json ernaast. Google's
     Credentials.to_json() moet client_id + client_secret + refresh_token
     allemaal in het token-bestand meebakken."""
-    from google.oauth2.credentials import Credentials
     import json
+
+    from google.oauth2.credentials import Credentials
 
     # Simuleer wat de wizard schrijft na een geslaagde exchange
     tok_path = tmp_path / "google_token.json"
@@ -147,8 +149,9 @@ def test_google_full_flow_via_mock(client, rosa_home, monkeypatch):
 
     # Monkey-patch Flow.fetch_token en credentials-property zodat we
     # geen echte Google-call doen.
-    from google_auth_oauthlib.flow import Flow
     from unittest.mock import MagicMock, patch
+
+    from google_auth_oauthlib.flow import Flow
 
     fake_creds = MagicMock()
     fake_creds.to_json.return_value = json.dumps({

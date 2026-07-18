@@ -1,18 +1,23 @@
 """Claude-tools voor sales-pipeline beheer via iMessage."""
 from __future__ import annotations
 
-import json
 import sqlite3
-import time
 from pathlib import Path
 from typing import Any
 
 from .schema import VALID_PROSPECT_TYPES, VALID_STATUSES, VALID_TARGETS
 from .selection import select_top_n
 from .storage import (
-    find_account_by_name, forget_account, get_account, insert_account,
-    insert_touchpoint, list_accounts, list_touchpoints, search_accounts,
-    snooze_account, update_account,
+    find_account_by_name,
+    forget_account,
+    get_account,
+    insert_account,
+    insert_touchpoint,
+    list_accounts,
+    list_touchpoints,
+    search_accounts,
+    snooze_account,
+    update_account,
 )
 
 
@@ -67,7 +72,7 @@ def sales_account_add_handler(
 
     prospect_type = args.get("prospect_type")
     if prospect_type and prospect_type not in VALID_PROSPECT_TYPES:
-        return {"ok": False, "error": f"prospect_type ongeldig"}
+        return {"ok": False, "error": "prospect_type ongeldig"}
 
     status = args.get("status", "koud")
     if status not in VALID_STATUSES:

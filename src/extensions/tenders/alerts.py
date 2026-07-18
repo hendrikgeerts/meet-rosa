@@ -10,7 +10,6 @@ from typing import Any
 from .feed import overview_url
 from .matcher import MatchResult
 
-
 NL_MONTHS = ["", "jan", "feb", "mrt", "apr", "mei", "jun",
              "jul", "aug", "sep", "okt", "nov", "dec"]
 

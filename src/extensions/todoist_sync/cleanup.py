@@ -23,7 +23,7 @@ import re
 import threading
 import time
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from difflib import SequenceMatcher
 from typing import Any
 
@@ -34,8 +34,7 @@ log = logging.getLogger(__name__)
 _TOKEN_RE = re.compile(r"[A-Za-zÀ-ÿ0-9]+")
 _STOPWORDS = frozenset({
     # Korte fillers in NL/EN die similariteit niet mogen sturen.
-    "de", "het", "een", "en", "of", "the", "a", "an", "to", "for", "of",
-    "in", "op", "met", "te", "aan", "and", "or", "is", "be", "voor",
+    "de", "het", "een", "en", "of", "the", "a", "an", "to", "for", "in", "op", "met", "te", "aan", "and", "or", "is", "be", "voor",
     # Review 27/6 L5: NL/EN imperatives die elke task starten — zonder
     # filter boosten ze seq-similariteit kunstmatig ("Bel Jan" ≈ "Bel Piet"
     # via 'bel'). Content-woorden (Jan, Piet) horen te domineren.
@@ -148,7 +147,7 @@ def find_stale(
     geplanned moet worden. the user krijgt het voorstel; sluiten of
     een due-date erop is zijn keuze.
     """
-    today = today or datetime.now(timezone.utc)
+    today = today or datetime.now(UTC)
     threshold = today - timedelta(days=days_threshold)
     out: list[StaleProposal] = []
     for t in tasks:
@@ -174,7 +173,7 @@ def _parse_created(iso: str | None) -> datetime | None:
         s = iso.replace("Z", "+00:00")
         dt = datetime.fromisoformat(s)
         if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
+            dt = dt.replace(tzinfo=UTC)
         return dt
     except ValueError:
         return None

@@ -235,6 +235,7 @@ def load_targets(yaml_path: Any) -> list[dict[str, Any]]:
     Voorkomt klare-tekst probes en file:// SSRF-vectoren als YAML
     geen owner-verified is."""
     from pathlib import Path as _Path
+
     import yaml
 
     path = _Path(yaml_path)

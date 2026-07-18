@@ -150,7 +150,7 @@ def _match_bucket(text: str, ref: datetime) -> int | None:
         return None
     bucket = m.group(1).lower()
     today = ref.date()
-    if "eod" in bucket or "cob" in bucket or "end of" in bucket and "day" in bucket:
+    if "eod" in bucket or "cob" in bucket or ("end of" in bucket and "day" in bucket):
         return _at(today, 17)
     if "eow" in bucket or "eind" in bucket or "einde week" in bucket or "end of" in bucket:
         # Eind van de week = vrijdag 17u

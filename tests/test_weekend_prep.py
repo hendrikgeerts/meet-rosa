@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import sqlite3
 import time as _time
-from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
@@ -11,12 +10,15 @@ from unittest.mock import MagicMock
 import pytest
 
 from core.weekend_prep import (
-    _build_stale_items, _build_top_priorities,
+    _build_stale_items,
+    _build_top_priorities,
     collect_weekend_prep_context,
 )
 from extensions.comm_intel.schema import init_comm_schema
 from extensions.open_loops.schema import (
-    OpenLoop, init_open_loops_schema, insert_loop,
+    OpenLoop,
+    init_open_loops_schema,
+    insert_loop,
 )
 from extensions.reminders import init_reminders_schema
 

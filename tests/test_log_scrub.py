@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import io
 import logging
-import os
 from pathlib import Path
 
 from core.log_scrub import ScrubbingFileHandler, ScrubbingStreamHandler, scrub

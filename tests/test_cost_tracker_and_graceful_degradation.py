@@ -1,18 +1,16 @@
 """Tests voor cost_tracker + graceful Ollama-fail degradation."""
 from __future__ import annotations
 
-import sqlite3
 from unittest.mock import MagicMock
 
 import pytest
-
 
 # --- Cost tracker ---------------------------------------------------------
 
 
 def test_cost_tracker_records_call(tmp_path):
     db_path = tmp_path / "memory.db"
-    from core.cost_tracker import init_cost_schema, record_call, current_month_cost
+    from core.cost_tracker import current_month_cost, init_cost_schema, record_call
     init_cost_schema(db_path)
 
     usd = record_call(
@@ -46,7 +44,10 @@ def test_cost_tracker_uses_env_price_override(tmp_path, monkeypatch):
 
 def test_budget_exceeded_raises(tmp_path):
     from core.cost_tracker import (
-        init_cost_schema, record_call, check_budget, BudgetExceeded,
+        BudgetExceeded,
+        check_budget,
+        init_cost_schema,
+        record_call,
     )
     db_path = tmp_path / "memory.db"
     init_cost_schema(db_path)
@@ -62,7 +63,9 @@ def test_budget_exceeded_raises(tmp_path):
 
 def test_budget_zero_is_disabled(tmp_path):
     from core.cost_tracker import (
-        init_cost_schema, record_call, check_budget, BudgetExceeded,
+        check_budget,
+        init_cost_schema,
+        record_call,
     )
     db_path = tmp_path / "memory.db"
     init_cost_schema(db_path)
@@ -75,7 +78,7 @@ def test_budget_zero_is_disabled(tmp_path):
 
 
 def test_daily_series_groups_by_date(tmp_path):
-    from core.cost_tracker import init_cost_schema, record_call, daily_series
+    from core.cost_tracker import daily_series, init_cost_schema, record_call
     db_path = tmp_path / "memory.db"
     init_cost_schema(db_path)
     record_call(
@@ -96,10 +99,9 @@ def test_daily_series_groups_by_date(tmp_path):
 
 def test_gateway_records_cost_on_complete(tmp_path):
     """Full integration: Gateway.complete's Claude-call gets logged."""
-    from core.cost_tracker import init_cost_schema, current_month_cost
     from core.audit import AuditLogger
+    from core.cost_tracker import current_month_cost, init_cost_schema
     from privacy.gateway import Gateway
-    from privacy.classifier import Classification
 
     db_path = tmp_path / "memory.db"
     init_cost_schema(db_path)
@@ -139,8 +141,8 @@ def test_graceful_degradation_reraises_without_redactor(tmp_path):
     """M17h — zonder redactor kan niet safe naar Claude fallback,
     dus re-raise the original exception."""
     from core.audit import AuditLogger
-    from privacy.gateway import Gateway
     from privacy.classifier import Classification
+    from privacy.gateway import Gateway
 
     audit = AuditLogger(tmp_path / "audit")
     fake_ollama = MagicMock()
@@ -165,8 +167,8 @@ def test_graceful_degradation_reraises_without_redactor(tmp_path):
 def test_graceful_degradation_falls_through_with_redactor(tmp_path):
     """M17h — met redactor: Ollama-failure valt terug op Claude met redact."""
     from core.audit import AuditLogger
-    from privacy.gateway import Gateway
     from privacy.classifier import Classification
+    from privacy.gateway import Gateway
     from privacy.redactor import Redactor
 
     audit = AuditLogger(tmp_path / "audit")

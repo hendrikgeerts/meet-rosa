@@ -19,8 +19,11 @@ from typing import Any
 
 from .matcher import DEFAULT_FILTER
 from .schema import (
-    add_to_ignored_kvks, add_to_watchlist, list_watchlist,
-    normalize_kvk, remove_from_watchlist,
+    add_to_ignored_kvks,
+    add_to_watchlist,
+    list_watchlist,
+    normalize_kvk,
+    remove_from_watchlist,
 )
 
 log = logging.getLogger(__name__)

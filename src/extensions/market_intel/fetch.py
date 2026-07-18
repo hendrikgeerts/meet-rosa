@@ -9,15 +9,14 @@ from __future__ import annotations
 import logging
 import re
 import sqlite3
-import time
 import urllib.error
 import urllib.request
+from collections.abc import Iterable
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any
 
 from core.external_audit import timed_call
-from datetime import datetime, timezone
-from pathlib import Path
-from typing import Any, Iterable
-
 from extensions.market_intel.schema import MarketItem, insert_item
 from extensions.market_intel.sources import MarketSource
 
@@ -65,7 +64,7 @@ def _fetch_one(src: MarketSource, *, cap: int) -> list[MarketItem]:
     parsed = feedparser.parse(raw)
     out: list[MarketItem] = []
     for entry in parsed.entries[:cap]:
-        title = _clean((getattr(entry, "title", "") or ""))
+        title = _clean(getattr(entry, "title", "") or "")
         url = (getattr(entry, "link", "") or "").strip()
         if not title or not url:
             continue
@@ -101,6 +100,6 @@ def _entry_unix(entry: Any) -> int | None:
     if parsed is None:
         return None
     try:
-        return int(datetime(*parsed[:6], tzinfo=timezone.utc).timestamp())
+        return int(datetime(*parsed[:6], tzinfo=UTC).timestamp())
     except (TypeError, ValueError):
         return None

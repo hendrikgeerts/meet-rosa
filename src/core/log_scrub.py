@@ -14,7 +14,6 @@ geboren via `core.perms.open_secure`.
 from __future__ import annotations
 
 import logging
-import os
 import re
 
 from core.perms import open_secure

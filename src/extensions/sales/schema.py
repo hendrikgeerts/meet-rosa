@@ -12,7 +12,6 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-
 VALID_TARGETS = frozenset({"adl_video", "dst_connect", "ds_templates", "multi"})
 VALID_STATUSES = frozenset({
     "koud", "nurturing", "kansrijk", "offerte", "won", "lost", "snoozed",

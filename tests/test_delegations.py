@@ -9,8 +9,12 @@ from pathlib import Path
 import pytest
 
 from extensions.open_loops.schema import (
-    OpenLoop, delegations_due_for_followup, extend_followup,
-    init_open_loops_schema, insert_loop, mark_followup_pinged,
+    OpenLoop,
+    delegations_due_for_followup,
+    extend_followup,
+    init_open_loops_schema,
+    insert_loop,
+    mark_followup_pinged,
 )
 from extensions.open_loops.tools import LOOPS_HANDLERS
 

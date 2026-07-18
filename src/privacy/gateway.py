@@ -25,14 +25,15 @@ Anywhere outside this file that does `from models.claude import ...` is a bug.
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from core.audit import AuditLogger, PayloadAuditLogger
 from models.claude import ClaudeClient
 from privacy.classifier import Classification, Classifier
-from privacy.preflight import PreflightFailure, scan as preflight_scan
-from privacy.reconstructor import reconstruct, reconstruct_with_info
+from privacy.preflight import PreflightFailure
+from privacy.preflight import scan as preflight_scan
+from privacy.reconstructor import reconstruct_with_info
 from privacy.redactor import Redactor
 
 log = logging.getLogger(__name__)

@@ -12,15 +12,22 @@ import random
 import sqlite3
 import threading
 import time
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from extensions.uptime.alerts import dispatch_alert
 from extensions.uptime.checker import check, load_targets
 from extensions.uptime.schema import (
-    CheckResult, get_target_state, init_uptime_schema, insert_event,
+    CheckResult,
+    get_target_state,
+    init_uptime_schema,
+    insert_event,
     mark_escalated,
-    record_alert_sent, record_check, remove_target, upsert_target,
+    record_alert_sent,
+    record_check,
+    remove_target,
+    upsert_target,
 )
 
 log = logging.getLogger(__name__)

@@ -6,23 +6,23 @@ Guard rail: als iemand een stap toevoegt maar `mark_done` vergeet
 """
 from __future__ import annotations
 
-import json
 import os
 
 import pytest
 
 pytest.importorskip("fastapi")
-from fastapi.testclient import TestClient  # noqa: E402
+from fastapi.testclient import TestClient
 
 
 @pytest.fixture
 def client(tmp_path, monkeypatch):
     monkeypatch.setenv("ROSA_HOME", str(tmp_path))
     monkeypatch.delenv("ROSA_DEV", raising=False)
-    from wizard import server as srv, google_oauth
+    from wizard import google_oauth
+    from wizard import server as srv
     srv.reset_finish_event()
     google_oauth.clear_pending()
-    from wizard.server import build_app, _SESSION_TOKEN
+    from wizard.server import _SESSION_TOKEN, build_app
     c = TestClient(build_app())
     c.headers["X-Wizard-Token"] = _SESSION_TOKEN
     return c, tmp_path

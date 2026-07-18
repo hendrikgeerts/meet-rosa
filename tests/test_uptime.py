@@ -1,18 +1,23 @@
 """Tests voor extensions.uptime — schema, checker, worker, alerts."""
 from __future__ import annotations
 
-import json
 import sqlite3
 import time
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
 from extensions.uptime.checker import check, load_targets
 from extensions.uptime.schema import (
-    CheckResult, get_target_state, init_uptime_schema, insert_event,
-    list_targets_state, recent_events, record_check, set_silence,
+    CheckResult,
+    get_target_state,
+    init_uptime_schema,
+    insert_event,
+    list_targets_state,
+    recent_events,
+    record_check,
+    set_silence,
     upsert_target,
 )
 
@@ -390,6 +395,7 @@ def test_check_wall_clock_timeout_returns_quickly() -> None:
     iets dat oneindig slaapt.
     """
     import time as _t
+
     from extensions.uptime import checker as _checker
 
     def _hanger(**kw):
@@ -422,6 +428,7 @@ def _seed_target_for_worker_test(db_path: Path, name: str = "DST") -> None:
     get_target_state iets teruggeeft (M1 anti-storm guard checkt
     `escalated_at` op die rij)."""
     import sqlite3 as _sql
+
     from extensions.uptime.schema import init_uptime_schema, upsert_target
     init_uptime_schema(db_path)
     with _sql.connect(db_path, isolation_level=None) as conn:
@@ -433,8 +440,9 @@ def test_send_down_alert_escalates_after_threshold(tmp_path: Path) -> None:
     automatisch aan de channels toegevoegd, zelfs als target alleen
     'imessage' heeft."""
     import threading
-    from extensions.uptime.worker import UptimeWorker
     from unittest.mock import patch
+
+    from extensions.uptime.worker import UptimeWorker
 
     db_path = tmp_path / "x.db"
     _seed_target_for_worker_test(db_path, "DST")
@@ -477,8 +485,9 @@ def test_send_down_alert_escalates_after_threshold(tmp_path: Path) -> None:
 def test_send_down_alert_no_escalation_before_threshold(tmp_path: Path) -> None:
     """Onder threshold blijft de channel-set zoals geconfigureerd."""
     import threading
-    from extensions.uptime.worker import UptimeWorker
     from unittest.mock import patch
+
+    from extensions.uptime.worker import UptimeWorker
 
     db_path = tmp_path / "x.db"
     _seed_target_for_worker_test(db_path, "DST")
@@ -515,8 +524,9 @@ def test_send_down_alert_no_escalation_without_topic(tmp_path: Path) -> None:
     duration ruim boven threshold. Voorkomt 'wel willen escaleren maar
     geen plek om naartoe te sturen'-foutje."""
     import threading
-    from extensions.uptime.worker import UptimeWorker
     from unittest.mock import patch
+
+    from extensions.uptime.worker import UptimeWorker
 
     db_path = tmp_path / "x.db"
     _seed_target_for_worker_test(db_path, "DST")
@@ -549,8 +559,9 @@ def test_send_down_alert_per_target_escalation_override(tmp_path: Path) -> None:
     """Per-target `escalate_after_seconds` overschrijft de default —
     kritieke platforms kunnen sneller escaleren dan minder kritieke."""
     import threading
-    from extensions.uptime.worker import UptimeWorker
     from unittest.mock import patch
+
+    from extensions.uptime.worker import UptimeWorker
 
     db_path = tmp_path / "x.db"
     _seed_target_for_worker_test(db_path, "Critical-Platform")
@@ -590,8 +601,9 @@ def test_send_down_alert_escalates_only_once_per_incident(tmp_path: Path) -> Non
     """M1 — escalation moet één keer per incident vuren, niet bij elke
     re-alert. Anders krijgt Hendrik elke 15 min een Critical Ntfy."""
     import threading
-    from extensions.uptime.worker import UptimeWorker
     from unittest.mock import patch
+
+    from extensions.uptime.worker import UptimeWorker
 
     db_path = tmp_path / "x.db"
     _seed_target_for_worker_test(db_path, "DST")
@@ -638,9 +650,10 @@ def test_send_down_alert_re_escalates_after_recovery(tmp_path: Path) -> None:
     leven van het platform uitschakelen."""
     import sqlite3 as _sql
     import threading
-    from extensions.uptime.worker import UptimeWorker
-    from extensions.uptime.schema import record_check
     from unittest.mock import patch
+
+    from extensions.uptime.schema import record_check
+    from extensions.uptime.worker import UptimeWorker
 
     db_path = tmp_path / "x.db"
     _seed_target_for_worker_test(db_path, "DST")
@@ -694,11 +707,12 @@ def test_check_one_full_flow_escalates_on_long_outage(tmp_path: Path) -> None:
     """End-to-end op _check_one: target reeds down sinds 900s →
     nieuwe check fail → duration berekend → escalatie naar ntfy. Bewijst
     dat duration_seconds correct doorgaat naar de escalation-check."""
-    import threading
-    from extensions.uptime.worker import UptimeWorker
-    from extensions.uptime.schema import upsert_target, init_uptime_schema
-    from unittest.mock import patch
     import sqlite3 as _sql
+    import threading
+    from unittest.mock import patch
+
+    from extensions.uptime.schema import init_uptime_schema, upsert_target
+    from extensions.uptime.worker import UptimeWorker
 
     db_path = tmp_path / "x.db"
     init_uptime_schema(db_path)
@@ -762,6 +776,7 @@ def test_check_uses_daemon_thread(tmp_path: Path) -> None:
     nooit-eindigende TLS-stall. Snapshot threads voor/na."""
     import threading as _th
     import time as _t
+
     from extensions.uptime import checker as _checker
 
     def _hanger(**kw):
@@ -794,8 +809,9 @@ def test_send_down_alert_escalation_disabled_when_zero(tmp_path: Path) -> None:
     """escalate_after_seconds=0 → escalation volledig uit, ook na uren
     downtime."""
     import threading
-    from extensions.uptime.worker import UptimeWorker
     from unittest.mock import patch
+
+    from extensions.uptime.worker import UptimeWorker
 
     db_path = tmp_path / "x.db"
     _seed_target_for_worker_test(db_path, "DST")

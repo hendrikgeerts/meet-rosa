@@ -2,21 +2,22 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
 
 from extensions.okrs.loader import (
-    KeyResult, Objective, load_okrs, to_briefing_snapshot,
+    KeyResult,
+    load_okrs,
+    to_briefing_snapshot,
     update_kr_progress,
 )
 from extensions.okrs.tools import (
-    okrs_check_handler, okrs_list_handler, okrs_update_progress_handler,
+    okrs_check_handler,
+    okrs_list_handler,
+    okrs_update_progress_handler,
 )
-
 
 _SAMPLE_YAML = """\
 period: "Q2 2026"

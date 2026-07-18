@@ -13,8 +13,14 @@ import pytest
 
 from extensions.market_intel.digest import _detect_trending, generate_market_digest
 from extensions.market_intel.schema import (
-    MarketItem, init_market_intel_schema, insert_item, mark_digested, recent,
-    search, top_for_digest, update_score,
+    MarketItem,
+    init_market_intel_schema,
+    insert_item,
+    mark_digested,
+    recent,
+    search,
+    top_for_digest,
+    update_score,
 )
 from extensions.market_intel.score import _parse_score, score_pending
 from extensions.market_intel.tools import market_recent, market_search

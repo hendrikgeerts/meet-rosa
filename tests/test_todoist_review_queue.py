@@ -11,11 +11,18 @@ import pytest
 
 from extensions import reminders
 from extensions.open_loops.schema import (
-    OpenLoop, init_open_loops_schema, insert_loop,
+    OpenLoop,
+    init_open_loops_schema,
+    insert_loop,
 )
 from extensions.todoist_sync.schema import (
-    get_link_by_local, init_todoist_sync_schema, queue_enqueue_loop,
-    queue_get, queue_list_pending, queue_mark_approved, queue_mark_rejected,
+    get_link_by_local,
+    init_todoist_sync_schema,
+    queue_enqueue_loop,
+    queue_get,
+    queue_list_pending,
+    queue_mark_approved,
+    queue_mark_rejected,
     queue_pending_count,
 )
 from extensions.todoist_sync.sync import push_pending

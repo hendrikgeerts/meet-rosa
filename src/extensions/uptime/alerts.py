@@ -10,9 +10,10 @@ Tijd-formatting in Europe/Amsterdam.
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 from zoneinfo import ZoneInfo
 
 from extensions.uptime.schema import CheckResult

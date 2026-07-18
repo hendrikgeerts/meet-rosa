@@ -7,7 +7,10 @@ from pathlib import Path
 import pytest
 
 from extensions.birthdays.tracker import (
-    _next_anniversary, _parse_date, describe_today, list_upcoming,
+    _next_anniversary,
+    _parse_date,
+    describe_today,
+    list_upcoming,
 )
 
 

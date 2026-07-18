@@ -30,6 +30,7 @@ def test_gmail_client_archive_uses_modify_endpoint() -> None:
     """De wrapper op GmailClient moet via _execute (audit-wrap) lopen
     zodat elke archive-call in egress-jsonl belandt."""
     from unittest.mock import patch
+
     from integrations.gmail import GmailClient
 
     # Skip __init__ omdat we geen echte credentials hebben

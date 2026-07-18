@@ -4,8 +4,6 @@ from __future__ import annotations
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-import pytest
-
 from extensions.open_loops.deadline import extract_deadline
 
 TZ = ZoneInfo("Europe/Amsterdam")

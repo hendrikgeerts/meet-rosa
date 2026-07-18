@@ -21,7 +21,10 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 from extensions.scheduler_assist.schema import (
-    get_proposal, list_pending, mark_cancelled, mark_sent,
+    get_proposal,
+    list_pending,
+    mark_cancelled,
+    mark_sent,
 )
 from integrations.gcal import CalendarClient
 from integrations.gmail import GmailClient

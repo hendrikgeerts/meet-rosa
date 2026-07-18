@@ -19,14 +19,15 @@ import random
 import sqlite3
 import threading
 import time
-from datetime import datetime, timedelta, timezone
+from collections.abc import Callable
+from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
 from pathlib import Path
-from typing import Callable
 
 from .alerts import format_alert
 from .feed import (
-    FaillissementsFeedError, InsolvencyItem,
+    FaillissementsFeedError,
+    InsolvencyItem,
     fetch_and_parse,
 )
 from .matcher import DEFAULT_FILTER, InsolvencyFilter, match
@@ -199,6 +200,6 @@ def _publication_age_days(pub_date: str | None) -> float:
     if dt is None:
         return 0.0
     if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
-    delta = datetime.now(timezone.utc) - dt
+        dt = dt.replace(tzinfo=UTC)
+    delta = datetime.now(UTC) - dt
     return max(0.0, delta.total_seconds() / 86400.0)

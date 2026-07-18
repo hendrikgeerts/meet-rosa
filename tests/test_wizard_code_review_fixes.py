@@ -11,17 +11,18 @@ from pathlib import Path
 import pytest
 
 pytest.importorskip("fastapi")
-from fastapi.testclient import TestClient  # noqa: E402
+from fastapi.testclient import TestClient
 
 
 @pytest.fixture
 def client(tmp_path, monkeypatch):
     monkeypatch.setenv("ROSA_HOME", str(tmp_path))
     monkeypatch.delenv("ROSA_DEV", raising=False)
-    from wizard import server as srv, google_oauth
+    from wizard import google_oauth
+    from wizard import server as srv
     srv.reset_finish_event()
     google_oauth.clear_pending()
-    from wizard.server import build_app, _SESSION_TOKEN
+    from wizard.server import _SESSION_TOKEN, build_app
     c = TestClient(build_app())
     c.headers["X-Wizard-Token"] = _SESSION_TOKEN
     return c, tmp_path
@@ -72,8 +73,8 @@ def test_h3_pending_expires_after_ttl():
 def test_h2_oauth_finish_rejects_mismatched_session_token(tmp_path):
     """H2 — een callback die met een andere wizard-session-token komt
     moet geweigerd worden."""
+
     from wizard import google_oauth
-    from unittest.mock import patch
 
     google_oauth.clear_pending()
     creds = (
@@ -193,8 +194,9 @@ def test_h5_repo_settings_yaml_triggers_dev_mode(tmp_path, monkeypatch):
     monkeypatch.delenv("ROSA_DEV", raising=False)
     monkeypatch.delenv("ROSA_HOME", raising=False)
 
-    from core import config as cfg_mod
     from unittest.mock import patch
+
+    from core import config as cfg_mod
     with patch.object(cfg_mod, "ROOT", fake_root):
         home = cfg_mod.get_rosa_home()
         assert home == fake_root, (
@@ -210,8 +212,9 @@ def test_h5_no_settings_yaml_uses_default_home(tmp_path, monkeypatch):
     monkeypatch.delenv("ROSA_DEV", raising=False)
     monkeypatch.delenv("ROSA_HOME", raising=False)
 
-    from core import config as cfg_mod
     from unittest.mock import patch
+
+    from core import config as cfg_mod
     with patch.object(cfg_mod, "ROOT", fake_root):
         home = cfg_mod.get_rosa_home()
         assert home == cfg_mod._DEFAULT_ROSA_HOME
@@ -260,7 +263,6 @@ def test_l2_features_ui_covers_all_server_whitelist():
     """L2 — de _FEATURES lijst in wizard.js moet 1-op-1 matchen met
     _ALLOWED_FEATURES in server.py; anders kan de user features niet
     aanzetten via de UI die het backend wel accepteert."""
-    from pathlib import Path
 
     js_path = Path(__file__).resolve().parent.parent / "src" / "wizard" / "static" / "wizard.js"
     js = js_path.read_text()

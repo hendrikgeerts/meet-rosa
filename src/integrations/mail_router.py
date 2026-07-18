@@ -12,12 +12,12 @@ Routing:
 from __future__ import annotations
 
 import logging
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
 
 from integrations.gmail import GmailClient
-from integrations.imap import ImapAccount, all_enabled, load_accounts
+from integrations.imap import ImapAccount, all_enabled
 from integrations.smtp_send import send_via_account as smtp_send
 
 log = logging.getLogger(__name__)

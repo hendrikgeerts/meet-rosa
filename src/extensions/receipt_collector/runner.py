@@ -25,17 +25,27 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 from extensions.receipt_collector.matcher import (
-    MatchCandidate, score_candidate,
-    search_gmail_by_amount, search_gmail_for_transaction,
-    search_imap_by_amount, search_imap_for_transaction,
+    MatchCandidate,
     _clean_vendor_for_search,
+    score_candidate,
+    search_gmail_by_amount,
+    search_gmail_for_transaction,
+    search_imap_by_amount,
+    search_imap_for_transaction,
 )
 from extensions.receipt_collector.parser import (
-    Transaction, derive_date_window, extract_vendor_candidates, parse_excel,
+    Transaction,
+    derive_date_window,
+    extract_vendor_candidates,
+    parse_excel,
 )
 from extensions.receipt_collector.schema import (
-    find_vendor_strategy, insert_run, insert_run_item, mark_vendor_used,
-    update_run_counts, update_run_item,
+    find_vendor_strategy,
+    insert_run,
+    insert_run_item,
+    mark_vendor_used,
+    update_run_counts,
+    update_run_item,
 )
 from integrations.imap import ImapAccount
 

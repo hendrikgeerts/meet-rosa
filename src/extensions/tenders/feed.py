@@ -24,6 +24,7 @@ log = logging.getLogger(__name__)
 _BASE = "https://www.tenderned.nl/papi/tenderned-rs-tns"
 _DEFAULT_TIMEOUT = 20.0
 import os as _os
+
 _OPERATOR_CONTACT = _os.environ.get("UPTIME_OPERATOR_CONTACT", "").strip()
 _USER_AGENT = (
     f"rosa-tenders/1.0 (+mailto:{_OPERATOR_CONTACT})"

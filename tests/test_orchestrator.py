@@ -19,7 +19,6 @@ from privacy.classifier import Classifier
 from privacy.gateway import Gateway
 from privacy.redactor import Redactor
 
-
 # --- fakes ----------------------------------------------------------------
 
 @dataclass
@@ -419,7 +418,6 @@ def test_audit_server_tool_logs_count_to_egress(tmp_path: Path, monkeypatch) -> 
 
 def test_progress_notify_fires_after_threshold_with_tool_use(tmp_path: Path) -> None:
     """Lange tool-chain → één ack-call na threshold met >=1 iteration."""
-    import time as _t
 
     # Twee turns: eerst tool_use, dan final tekst. Sleep tussen turns
     # om threshold te overschrijden.

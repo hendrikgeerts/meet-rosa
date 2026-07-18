@@ -9,15 +9,21 @@ Test-strategie:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import pytest
 
 from extensions.todoist_sync.cleanup import (
-    DuplicateProposal, StaleProposal,
-    find_duplicates, find_stale, get_proposal, register_duplicate_proposal,
-    register_stale_proposal, reset_proposals, text_similarity,
+    DuplicateProposal,
+    StaleProposal,
+    find_duplicates,
+    find_stale,
+    get_proposal,
+    register_duplicate_proposal,
+    register_stale_proposal,
+    reset_proposals,
+    text_similarity,
 )
 from extensions.todoist_sync.tools import TODOIST_HANDLERS
 from integrations.todoist import Task
@@ -121,7 +127,7 @@ def test_find_duplicates_no_self_pair_for_same_id() -> None:
 # ---- find_stale --------------------------------------------------------
 
 def test_find_stale_picks_old_without_due() -> None:
-    today = datetime(2026, 6, 27, tzinfo=timezone.utc)
+    today = datetime(2026, 6, 27, tzinfo=UTC)
     long_ago = (today - timedelta(days=60)).isoformat()
     fresh = (today - timedelta(days=2)).isoformat()
     tasks = [
@@ -135,7 +141,7 @@ def test_find_stale_picks_old_without_due() -> None:
 
 
 def test_find_stale_includes_with_due_when_flag_set() -> None:
-    today = datetime(2026, 6, 27, tzinfo=timezone.utc)
+    today = datetime(2026, 6, 27, tzinfo=UTC)
     long_ago = (today - timedelta(days=60)).isoformat()
     tasks = [
         _t("a", "old no due", created_at=long_ago),
@@ -146,7 +152,7 @@ def test_find_stale_includes_with_due_when_flag_set() -> None:
 
 
 def test_find_stale_sorted_oldest_first() -> None:
-    today = datetime(2026, 6, 27, tzinfo=timezone.utc)
+    today = datetime(2026, 6, 27, tzinfo=UTC)
     tasks = [
         _t("recent", "x", created_at=(today - timedelta(days=35)).isoformat()),
         _t("ancient", "y", created_at=(today - timedelta(days=200)).isoformat()),
@@ -156,7 +162,7 @@ def test_find_stale_sorted_oldest_first() -> None:
 
 
 def test_find_stale_missing_created_at_ignored() -> None:
-    today = datetime(2026, 6, 27, tzinfo=timezone.utc)
+    today = datetime(2026, 6, 27, tzinfo=UTC)
     tasks = [_t("a", "no created_at")]
     assert find_stale(tasks, today=today) == []
 
@@ -203,7 +209,7 @@ def test_cleanup_suggest_returns_proposals_no_execution() -> None:
 
 
 def test_cleanup_apply_closes_only_confirmed_proposals() -> None:
-    today = datetime.now(timezone.utc)
+    today = datetime.now(UTC)
     old = (today - timedelta(days=90)).isoformat()
     fake = _Fake(tasks=[
         _t("a", "Bel verzekering"),
@@ -278,8 +284,11 @@ def test_pick_keep_drop_id_tiebreaker_deterministic() -> None:
 def test_proposal_store_thread_safe_under_contention() -> None:
     """M1: lock voorkomt dict-mutation-RuntimeError onder thread-druk."""
     import threading as _th
+
     from extensions.todoist_sync.cleanup import (
-        StaleProposal, get_proposal, register_stale_proposal,
+        StaleProposal,
+        get_proposal,
+        register_stale_proposal,
     )
 
     errors: list[BaseException] = []

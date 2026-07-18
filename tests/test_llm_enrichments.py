@@ -69,11 +69,12 @@ def test_llm_json_object_parses() -> None:
 
 def test_pattern_narrative_appended_when_ollama_present(tmp_path: Path) -> None:
     from extensions.comm_intel.schema import init_comm_schema
-    from extensions.decisions.schema import init_decisions_schema, insert_decision
+    from extensions.decisions.schema import init_decisions_schema
     from extensions.open_loops.schema import init_open_loops_schema
     from extensions.patterns.detector import run_weekly_detection
     from extensions.patterns.schema import (
-        init_patterns_schema, list_patterns,
+        init_patterns_schema,
+        list_patterns,
     )
     from extensions.plaud_intel.schema import init_plaud_meetings_schema
     from integrations.plaud import init_plaud_schema
@@ -154,6 +155,7 @@ def test_decision_works_without_ollama(tmp_path: Path) -> None:
 @pytest.fixture
 def suggest_client(tmp_path: Path):  # type: ignore[no-untyped-def]
     from fastapi.testclient import TestClient
+
     from web.app import create_app
     audit = tmp_path / "audit"
     audit.mkdir()
@@ -173,6 +175,7 @@ def test_suggest_keywords_endpoint(suggest_client) -> None:  # type: ignore[no-u
 
 def test_suggest_keywords_no_ollama(tmp_path: Path) -> None:
     from fastapi.testclient import TestClient
+
     from web.app import create_app
     audit = tmp_path / "audit"
     audit.mkdir()
@@ -191,6 +194,7 @@ def test_suggest_keywords_requires_title(suggest_client) -> None:  # type: ignor
 
 def test_suggest_vendor_email_hint(tmp_path: Path) -> None:
     from fastapi.testclient import TestClient
+
     from web.app import create_app
     audit = tmp_path / "audit"
     audit.mkdir()
@@ -205,6 +209,7 @@ def test_suggest_vendor_email_hint(tmp_path: Path) -> None:
 
 def test_suggest_vendor_email_unknown(tmp_path: Path) -> None:
     from fastapi.testclient import TestClient
+
     from web.app import create_app
     audit = tmp_path / "audit"
     audit.mkdir()

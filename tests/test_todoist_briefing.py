@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
-from typing import Any
 
 from extensions.todoist_sync.briefing import (
-    build_todoist_midday_pulse, build_todoist_pulse,
+    build_todoist_midday_pulse,
+    build_todoist_pulse,
 )
 from integrations.todoist import Task
 

@@ -4,8 +4,6 @@ from __future__ import annotations
 import urllib.error
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from extensions.morning_extras._http import fetch_with_retry
 
 

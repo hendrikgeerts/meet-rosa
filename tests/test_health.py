@@ -7,8 +7,6 @@ import time
 from typing import Any
 from unittest.mock import patch
 
-import pytest
-
 from core.health import HealthMonitor, HealthState, describe_health
 
 

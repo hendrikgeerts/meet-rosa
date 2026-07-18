@@ -11,7 +11,10 @@ import pytest
 
 from extensions.comm_intel.schema import CommItem, init_comm_schema, insert_item
 from extensions.comm_intel.tools import (
-    comm_about_person, comm_recent, comm_search, comm_thread,
+    comm_about_person,
+    comm_recent,
+    comm_search,
+    comm_thread,
 )
 
 

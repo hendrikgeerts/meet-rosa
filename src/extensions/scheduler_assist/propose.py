@@ -13,13 +13,15 @@ import json
 import logging
 import re
 import sqlite3
+from collections.abc import Callable
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 from zoneinfo import ZoneInfo
 
 from extensions.scheduler_assist.schema import (
-    PendingProposal, find_recent_in_thread, insert_proposal,
+    PendingProposal,
+    insert_proposal,
 )
 from integrations.gcal import CalendarClient
 from integrations.imap import ImapAccount

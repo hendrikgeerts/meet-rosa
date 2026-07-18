@@ -11,7 +11,6 @@ from core.query_safety import QUERY_SCHEMA
 from extensions.person_brief.lookup import build_person_brief
 from integrations.gcal import CalendarClient
 
-
 _SUMMARY_PROMPT = """Je krijgt aggregatie-data over één persoon (recente mails, meetings, open loops, komende agenda). Schrijf 1 zin (max 25 woorden) wat de huidige stand is met deze persoon. Praktisch, geen jargon, Engels.
 
 Geen disclaimers, geen 'er zijn X mails'. Eén concrete inzicht-zin: 'Recently active on X — Y is pending response.'"""

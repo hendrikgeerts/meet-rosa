@@ -9,7 +9,6 @@ import json
 import logging
 import re
 from dataclasses import dataclass
-from typing import Any
 
 from extensions.comm_intel.schema import CommItem
 from models.ollama import OllamaClient

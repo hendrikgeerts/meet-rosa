@@ -1,12 +1,10 @@
 """Tests voor Slack / Todoist / IMAP token-endpoints in de wizard."""
 from __future__ import annotations
 
-import os
-
 import pytest
 
 pytest.importorskip("fastapi")
-from fastapi.testclient import TestClient  # noqa: E402
+from fastapi.testclient import TestClient
 
 
 @pytest.fixture
@@ -22,7 +20,7 @@ def rosa_home(tmp_path, monkeypatch):
 
 @pytest.fixture
 def client(rosa_home):
-    from wizard.server import build_app, _SESSION_TOKEN
+    from wizard.server import _SESSION_TOKEN, build_app
     app = build_app()
     c = TestClient(app)
     c.headers["X-Wizard-Token"] = _SESSION_TOKEN

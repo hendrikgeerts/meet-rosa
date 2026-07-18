@@ -2,24 +2,24 @@
 from __future__ import annotations
 
 import sqlite3
-import time
 from datetime import datetime, timedelta
 from pathlib import Path
-from unittest.mock import patch
 from zoneinfo import ZoneInfo
 
 import pytest
 
 import core.timezone as ctz
 from extensions.sales.nudges import (
-    build_evening_nudge, build_midday_nudge, build_morning_nudge,
+    build_evening_nudge,
+    build_midday_nudge,
+    build_morning_nudge,
     count_outbound_today,
 )
 from extensions.sales.schema import init_sales_schema
 from extensions.sales.storage import (
-    insert_account, insert_touchpoint, update_account,
+    insert_account,
+    insert_touchpoint,
 )
-
 
 TZ = ZoneInfo("Europe/Amsterdam")
 

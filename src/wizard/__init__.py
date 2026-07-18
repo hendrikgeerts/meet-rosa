@@ -8,7 +8,7 @@ Zie src/wizard/server.py voor de app-factory.
 """
 from __future__ import annotations
 
-__all__ = ["build_app", "WIZARD_PORT"]
+__all__ = ["WIZARD_PORT", "build_app"]
 
 WIZARD_PORT = 8765
 

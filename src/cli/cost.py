@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -38,7 +37,7 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(out, indent=2, default=str))
         return 0
 
-    print(f"Anthropic — current month:")
+    print("Anthropic — current month:")
     print(f"  calls           {month.calls}")
     print(f"  input tokens    {month.tokens_in:,}")
     print(f"  output tokens   {month.tokens_out:,}")
@@ -49,8 +48,8 @@ def main(argv: list[str] | None = None) -> int:
         icon = "⚠" if pct > 80 else "✓"
         print(f"  budget          ${budget:.2f}  ({icon} {pct:.1f}% used)")
     else:
-        print(f"  budget          none set (see config.yaml → "
-              f"privacy.monthly_anthropic_budget_usd)")
+        print("  budget          none set (see config.yaml → "
+              "privacy.monthly_anthropic_budget_usd)")
 
     if args.days:
         print(f"\nDaily breakdown (last {args.days} days):")

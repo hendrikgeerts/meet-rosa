@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from privacy.tool_redaction import has_unresolved_placeholders, reconstruct_value
 
-
 MAPPING = {
     "[PERSON_001]": "Piet",
     "[PERSON_002]": "Hendrik",

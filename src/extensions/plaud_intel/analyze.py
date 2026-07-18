@@ -16,7 +16,9 @@ from zoneinfo import ZoneInfo
 
 from extensions.open_loops.schema import OpenLoop, insert_loop
 from extensions.plaud_intel.schema import (
-    MeetingAnalysis, find_unanalyzed_transcripts, insert_meeting,
+    MeetingAnalysis,
+    find_unanalyzed_transcripts,
+    insert_meeting,
 )
 from models.ollama import OllamaClient
 

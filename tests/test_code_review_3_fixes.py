@@ -1,10 +1,7 @@
 """Tests voor code-review-3 fixes (H1, H3, H4, M2, M3, M4)."""
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
-
 import pytest
-
 
 # --- H-3: BudgetExceeded propagates (not swallowed) ------------------------
 
@@ -14,7 +11,9 @@ def test_h3_budget_exceeded_propagates_from_gateway(tmp_path):
     door de outer try/except in _record_cost gegeten worden."""
     from core.audit import AuditLogger
     from core.cost_tracker import (
-        init_cost_schema, record_call, BudgetExceeded,
+        BudgetExceeded,
+        init_cost_schema,
+        record_call,
     )
     from privacy.gateway import Gateway
 
@@ -84,6 +83,7 @@ def test_h4_sonnet_family_price():
 
 def test_h4_unknown_model_logs_warning(caplog):
     import logging
+
     from core.cost_tracker import _price_for
     with caplog.at_level(logging.WARNING):
         _price_for("nonexistent-model")
@@ -138,7 +138,7 @@ def test_h1_reload_skips_stale_pidfile(tmp_path, monkeypatch):
 def test_m2_current_month_uses_local_time(tmp_path):
     """Insert a row and verify it's counted regardless of UTC/local
     difference. Meest belangrijk: geen crashes."""
-    from core.cost_tracker import init_cost_schema, record_call, current_month_cost
+    from core.cost_tracker import current_month_cost, init_cost_schema, record_call
     db_path = tmp_path / "memory.db"
     init_cost_schema(db_path)
     record_call(
@@ -176,6 +176,7 @@ def test_m4_wal_mode_enabled(tmp_path):
     """M-4: init_cost_schema moet WAL journal_mode zetten voor concurrent
     writer safety."""
     import sqlite3
+
     from core.cost_tracker import init_cost_schema
     db_path = tmp_path / "memory.db"
     init_cost_schema(db_path)
@@ -188,8 +189,11 @@ def test_m4_concurrent_writes_dont_lose_data(tmp_path):
     """M-4: Twee threads die tegelijk record_call doen mogen geen rijen
     verliezen (met busy_timeout=30s werkt SQLite fine op WAL)."""
     import threading
+
     from core.cost_tracker import (
-        init_cost_schema, record_call, current_month_cost,
+        current_month_cost,
+        init_cost_schema,
+        record_call,
     )
     db_path = tmp_path / "memory.db"
     init_cost_schema(db_path)

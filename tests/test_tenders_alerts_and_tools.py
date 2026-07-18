@@ -8,21 +8,26 @@ from pathlib import Path
 import pytest
 
 from extensions.tenders.alerts import _fmt_date, format_alert
-from extensions.tenders.matcher import DEFAULT_FILTER, MatchResult, match
+from extensions.tenders.matcher import DEFAULT_FILTER, match
 from extensions.tenders.schema import (
-    init_tenders_schema, kenmerk_already_alerted, prune_old_unmatched,
+    init_tenders_schema,
+    kenmerk_already_alerted,
+    prune_old_unmatched,
     tender_exists,
 )
 from extensions.tenders.tools import (
-    TENDER_HANDLERS, TENDER_TOOL_SCHEMAS,
-    tenders_ignore_handler, tenders_list_recent_handler,
-    tenders_search_handler, tenders_status_handler,
+    TENDER_HANDLERS,
+    TENDER_TOOL_SCHEMAS,
+    tenders_ignore_handler,
+    tenders_list_recent_handler,
+    tenders_search_handler,
+    tenders_status_handler,
 )
-
 
 # fixture identiek aan test_tenders_matcher import patroon
 from tests.test_tenders_matcher import (
-    LEIDEN_AV, NS_RECLAMEDRAGERS, ROC_NARROWCASTING,
+    NS_RECLAMEDRAGERS,
+    ROC_NARROWCASTING,
 )
 
 

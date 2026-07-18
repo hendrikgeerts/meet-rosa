@@ -23,13 +23,17 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from core.config import get_rosa_home
 from wizard import adapters
 from wizard.state import (
-    STEP_IDS, WizardState, load_config, load_secrets, save_secret,
+    STEP_IDS,
+    WizardState,
+    load_config,
+    load_secrets,
+    save_secret,
     update_config,
 )
 
@@ -574,7 +578,7 @@ def build_app() -> FastAPI:
                 f"<p><a href='/'>Back to wizard</a></p>",
                 status_code=400,
             )
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             log.exception("oauth callback failed")
             return HTMLResponse(
                 f"<h1>OAuth exchange failed</h1><pre>{exc}</pre>"
