@@ -13,6 +13,19 @@ from unittest.mock import patch
 
 import pytest
 
+# Memory-schema needs `Connection.enable_load_extension` for sqlite-vec.
+# Python built without --enable-loadable-sqlite-extensions (default
+# python.org installer, GitHub-Actions macos-latest) lacks it. `install.sh`
+# uses Homebrew's python@3.12 where it IS on, so end-users aren't affected.
+_conn = sqlite3.connect(":memory:")
+if not hasattr(_conn, "enable_load_extension"):
+    _conn.close()
+    pytest.skip(
+        "sqlite3 built without --enable-loadable-sqlite-extensions",
+        allow_module_level=True,
+    )
+_conn.close()
+
 from extensions.memory.schema import (
     count_memories,
     delete_memory,
