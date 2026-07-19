@@ -55,12 +55,26 @@ def _normalize_keep_alive(value: str | int) -> str | int:
     return value
 
 
+def _default_ollama_base_url() -> str:
+    """M-2 fix (review-4): respect OLLAMA_HOST env-var. Docker Compose
+    stelt die in op de sidecar-hostname; lokaal blijft localhost."""
+    import os as _os
+    v = _os.environ.get("OLLAMA_HOST", "").strip()
+    if not v:
+        return "http://localhost:11434"
+    # Ollama's daemon zelf accepteert 'host:port' zonder scheme; hier
+    # normaliseren we het naar volledig URL zodat requests werkt.
+    if "://" in v:
+        return v
+    return f"http://{v}"
+
+
 class OllamaClient:
     def __init__(
         self,
         *,
         model: str,
-        base_url: str = "http://localhost:11434",
+        base_url: str | None = None,
         timeout: float = 240.0,   # 4 min — terug naar origineel; scheduler-briefings gaan via force_label='internal' zodat ze niet lokaal draaien
         keep_alive: str | int = "30m",
     ) -> None:
@@ -77,7 +91,7 @@ class OllamaClient:
         string ("30m"/"1h"/"24h"/etc.) en normaliseren naar wat Ollama
         snapt — integer voor `-1`, anders pass-through."""
         self._model = model
-        self._base = base_url.rstrip("/")
+        self._base = (base_url or _default_ollama_base_url()).rstrip("/")
         self._timeout = timeout
         self._keep_alive = _normalize_keep_alive(keep_alive)
 

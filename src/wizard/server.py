@@ -328,6 +328,7 @@ def build_app() -> FastAPI:
         if app_token and not app_token.startswith("xapp-"):
             raise HTTPException(400, "App-level token should start with xapp-")
 
+        owner_team_id = str(payload.get("owner_team_id") or "").strip()
         _, sec_path, _ = _paths()
         if user_token:
             save_secret(sec_path, "SLACK_USER_OAUTH_TOKEN", user_token)
@@ -337,6 +338,8 @@ def build_app() -> FastAPI:
             save_secret(sec_path, "SLACK_APP_TOKEN", app_token)
         if owner_user_id:
             save_secret(sec_path, "SLACK_OWNER_USER_ID", owner_user_id)
+        if owner_team_id:
+            save_secret(sec_path, "SLACK_OWNER_TEAM_ID", owner_team_id)
 
         st = _load_state()
         st.mark_done("slack")

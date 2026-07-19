@@ -32,6 +32,7 @@ class SlackBot:
         app_token: str,
         owner_user_id: str,
         on_message: Callable[[str, str], None],
+        owner_team_id: str = "",
     ) -> None:
         """Args:
             bot_token: xoxb-… Bot User OAuth Token
@@ -41,6 +42,7 @@ class SlackBot:
             on_message: callback(channel_id, text) — main.py wire't deze
                 aan de orchestrator, hetzelfde als iMessage.
         """
+        from collections import deque
         from slack_sdk import WebClient
         from slack_sdk.socket_mode import SocketModeClient
         from slack_sdk.socket_mode.request import SocketModeRequest
@@ -48,34 +50,75 @@ class SlackBot:
         self._web = WebClient(token=bot_token)
         self._sm = SocketModeClient(app_token=app_token, web_client=self._web)
         self._owner = owner_user_id
+        self._owner_team_id = owner_team_id.strip()
         self._on_message = on_message
         self._SMR = SocketModeRequest
         self._thread: threading.Thread | None = None
         self._stop = threading.Event()
+        # H-2 idempotency: bounded queue van recent verwerkte event_ts.
+        # 200 entries dekt ~5 min bij 40 msgs/min piek — genoeg tegen
+        # Slack's retry-window van 60s.
+        self._seen_event_ts: deque[str] = deque(maxlen=200)
 
     def _handle(self, client, req) -> None:  # noqa: ANN001
-        """Ack the event and dispatch to callback if it's a user-DM."""
+        """Ack the event and dispatch to callback if it's a user-DM.
+
+        H-2 fix: ack MOET slagen anders retriggert Slack de envelope
+        binnen 3s → duplicate Claude-calls + dubbele reply. Bij
+        ack-fail: return-early zonder verdere processing. Slack stuurt
+        opnieuw, en de _seen_event_ts dedup laat de tweede door.
+        """
         try:
-            # Slack requires ack within 3 seconds.
             from slack_sdk.socket_mode.response import SocketModeResponse
             client.send_socket_mode_response(
                 SocketModeResponse(envelope_id=req.envelope_id),
             )
         except Exception:
-            log.exception("failed to ack slack event")
+            log.exception(
+                "failed to ack slack event — returning, Slack will "
+                "retry (dedup via event_ts prevents duplicates)",
+            )
+            return
 
         if req.type != "events_api":
             return
         event = req.payload.get("event", {})
         if event.get("type") != "message":
             return
-        # Skip bot's own echoes.
-        if event.get("bot_id") or event.get("subtype"):
+
+        # H-2: idempotency dedup op event_ts. Slack retriggert onack'te
+        # events; onze cache voorkomt dat we een tweede Claude-call doen.
+        event_ts = str(event.get("event_ts") or event.get("ts") or "")
+        if event_ts and event_ts in self._seen_event_ts:
+            log.debug("slack duplicate event skipped: %s", event_ts)
             return
-        # Only respond to owner-DMs.
+        if event_ts:
+            self._seen_event_ts.append(event_ts)
+
+        # M-9: subtype whitelist. Standard user-messages hebben géén
+        # subtype. `me_message` en `file_share` ook doorlaten (user
+        # intent). Alle andere (bot_message, message_changed, thread_broadcast)
+        # negeren.
+        if event.get("bot_id"):
+            return
+        subtype = event.get("subtype")
+        if subtype not in (None, "me_message", "file_share"):
+            return
+
+        # H-3: enforce team_id match zodat een shared-workspace-installatie
+        # met dezelfde U... id niet stiekem meepraat.
+        if self._owner_team_id:
+            actual_team = event.get("team") or req.payload.get("team_id", "")
+            if actual_team != self._owner_team_id:
+                log.warning(
+                    "slack event from unexpected team %s (expected %s) — "
+                    "dropping to prevent cross-workspace impersonation",
+                    actual_team, self._owner_team_id,
+                )
+                return
+
         if event.get("user") != self._owner:
             return
-        # Only in IM channels (starts with 'D').
         channel = event.get("channel", "")
         if not channel.startswith("D"):
             return

@@ -578,7 +578,13 @@ async function refresh() {
   const status = await api('/api/status');
   const { mode, step: forcedStep } = _urlMode();
   if (mode === 'edit') {
-    // In edit-mode: laat step-picker zien of ga naar geforceerde step.
+    // Als we net terugkomen van een save in edit-mode (sessionStorage
+    // markeert dat), toon toast. Wordt gezet door onDone-hook in edit.
+    const savedStep = sessionStorage.getItem('rosa-saved-step');
+    if (savedStep) {
+      _showSaveToast(savedStep);
+      sessionStorage.removeItem('rosa-saved-step');
+    }
     if (forcedStep) {
       const idx = STEPS.findIndex(s => s.id === forcedStep);
       if (idx >= 0) {
@@ -620,6 +626,28 @@ function _renderStepPicker(status) {
   });
 }
 
+// M-8: post-save toast in edit-mode. Roept refresh() aan die de
+// step-picker toont; ondertussen zichtbaar dat opgeslagen is + hint
+// dat `rosa reload` nodig is voor sommige fields (Gateway etc).
+function _showSaveToast(stepId) {
+  const t = document.createElement('div');
+  t.className = 'rosa-callout info';
+  t.style.cssText =
+    'position:fixed;bottom:1rem;right:1rem;max-width:22rem;'
+    + 'box-shadow:0 4px 16px rgba(0,0,0,0.15);z-index:9998;';
+  t.textContent = '';
+  const s = document.createElement('strong');
+  s.textContent = `Saved ${stepId}.`;
+  t.appendChild(s);
+  t.append(' Run ');
+  const c = document.createElement('code');
+  c.textContent = 'rosa reload';
+  t.appendChild(c);
+  t.append(' in a terminal to apply.');
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 6000);
+}
+
 async function markSkip(stepId) {
   try {
     await api('/api/step/skip', { step: stepId });
@@ -643,7 +671,17 @@ function render(stepId, step, status) {
   stage.appendChild(node);
   const root = stage; // template contents mount into #stage
 
-  const onDone = () => refresh();
+  const onDone = () => {
+    // In edit-mode: markeer welk step werd opgeslagen zodat refresh()
+    // de toast toont, en spring terug naar de step-picker (zonder ?step=).
+    const { mode } = _urlMode();
+    if (mode === 'edit') {
+      sessionStorage.setItem('rosa-saved-step', step.id);
+      window.location.href = '?mode=edit';
+      return;
+    }
+    refresh();
+  };
   const onSkip = (id) => markSkip(id);
 
   switch (step.id) {

@@ -83,9 +83,16 @@ _registry: ChannelRegistry | None = None
 
 def _send_proactive(text: str) -> None:
     """Stuur bericht dat Rosa zelf initieert (briefing, welcome,
-    reminder-fire, uptime-alert). Gaat naar main_channel uit config."""
+    reminder-fire, uptime-alert). Gaat naar main_channel uit config.
+
+    M-1 fix: als registry nog niet ge-init is (bootstrap-crash of test
+    die main.py importeert zonder run() te draaien), log een warning
+    i.p.v. silent-skip zodat missing welcomes zichtbaar zijn."""
     if _registry is None:
-        # Not yet initialised (bv. bij bootstrap crashes) — silently skip.
+        log.warning(
+            "channel registry not initialised — proactive message "
+            "dropped: %s", text[:80],
+        )
         return
     _registry.send_proactive(text)
 
@@ -394,11 +401,14 @@ def _dispatch_slack_message(
             settings,
         )
         try:
-            reply_text = orchestrator.converse(
-                gateway=gateway, executor=executor,
-                system=system_prompt,
-                history=history + [{"role": "user", "content": text}],
-                progress_ack=None,
+            reply_text, _messages = orchestrator.converse(
+                gateway=gateway,
+                executor=executor,
+                system_prompt=system_prompt,
+                history=history,
+                user_message=text,
+                progress_notify=None,
+                progress_threshold_seconds=settings.progress_ack_threshold_seconds,
             )
         except Exception:
             log.exception("slack: agent.converse failed")
@@ -1018,6 +1028,9 @@ def run() -> None:
                     bot_token=os.environ["SLACK_BOT_TOKEN"],
                     app_token=os.environ["SLACK_APP_TOKEN"],
                     owner_user_id=owner,
+                    owner_team_id=os.environ.get(
+                        "SLACK_OWNER_TEAM_ID", "",
+                    ),
                     on_message=_slack_on_message,
                 )
                 slack_bot.start()

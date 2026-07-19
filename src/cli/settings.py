@@ -50,7 +50,17 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Settings UI: {url}")
     print("Ctrl-C to close when you're done.")
 
-    if not args.no_browser:
+    # M-7: skip browser-open op remote SSH sessies — daar opent hij VM-
+    # side (of faalt stil), en de user verwacht dat 't op zijn Mac
+    # gebeurt via een SSH-tunnel. Detect via SSH_CONNECTION env-var.
+    import os as _os
+    is_ssh = bool(_os.environ.get("SSH_CONNECTION"))
+    if is_ssh:
+        print("\nRemote SSH session detected — not opening browser.")
+        print("From your local machine, SSH-tunnel + open the URL:")
+        print(f"  ssh -L {port}:localhost:{port} <this-host>")
+        print(f"  # then browse http://localhost:{port}/?mode=edit")
+    elif not args.no_browser:
         def _open():
             time.sleep(0.7)
             try:

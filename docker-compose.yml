@@ -33,11 +33,15 @@ services:
     restart: unless-stopped
     volumes:
       - ollama-data:/root/.ollama
+    # HTTP-based healthcheck: Rosa praat via HTTP:11434, dus meet dát.
+    # `ollama list` CLI kan slagen terwijl de HTTP-poort niet reageert.
+    # Ollama-image heeft geen curl, dus TCP-probe via bash /dev/tcp.
     healthcheck:
-      test: ["CMD", "ollama", "list"]
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/11434 && echo -e \"GET /api/tags HTTP/1.0\\r\\n\\r\\n\" >&3 && head -c 20 <&3 | grep -q HTTP'"]
       interval: 10s
-      timeout: 3s
-      retries: 10
+      timeout: 5s
+      retries: 15
+      start_period: 30s
 
 volumes:
   rosa-home:

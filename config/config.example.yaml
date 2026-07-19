@@ -40,6 +40,13 @@ user:
   # de prompt generic bij een lege waarde.
   company: ""
 
+  # Waar krijg je proactieve messages (briefings, day-close, reminders)?
+  #  "imessage" — Mac users (default). Vereist Full Disk Access.
+  #  "slack"    — voor non-Mac / headless installs. Vereist SLACK_BOT_TOKEN
+  #                + SLACK_APP_TOKEN + SLACK_OWNER_USER_ID in secrets.env.
+  # Replies gaan altijd terug via het kanaal waar het bericht binnenkwam.
+  main_channel: "imessage"
+
   # Home-coördinaten voor travel-alerts fallback. Wizard vult deze
   # automatisch via HERE-Maps geocoding op basis van een adres.
   # Leeg → travel-alerts skippen als er geen recente phone-locatie is.
