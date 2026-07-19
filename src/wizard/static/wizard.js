@@ -24,12 +24,7 @@ const STEPS = [
     token_hint: 'e.g. "personal imap.fastmail.com you@example.com app-password 993"',
     endpoint: '/api/step/imap',
     body: 'Add non-Gmail mailboxes (Outlook, Fastmail, custom IMAP).' },
-  { id: 'slack',        title: 'Slack',           tpl: 'tpl-token-step', required: false,
-    label: 'Slack user OAuth token',
-    token_help: 'Create a Slack app at <a href="https://api.slack.com/apps" target="_blank">api.slack.com/apps</a>, install to your workspace, and paste the <em>User OAuth Token</em> (starts with <code>xoxp-</code>).',
-    token_hint: 'Starts with xoxp-… Stored in secrets.env (0600).',
-    endpoint: '/api/step/slack',
-    body: 'Let Rosa see mentions and DMs in your Slack workspace.' },
+  { id: 'slack',        title: 'Slack',           tpl: 'tpl-slack',    required: false },
   { id: 'todoist',      title: 'Todoist',         tpl: 'tpl-token-step', required: false,
     label: 'Todoist API token',
     token_help: 'Grab your token at <a href="https://todoist.com/prefs/integrations" target="_blank">todoist.com/prefs/integrations</a> → Developer → API token.',
@@ -59,6 +54,7 @@ const STEPS = [
     placeholder: 'legal-firm.com\ntherapist.nl\naccountant.com',
     body: 'Mail from/to these domains stays on your Mac (routed to your local model, never to Claude).' },
   { id: 'features',     title: 'Features',        tpl: 'tpl-features',  required: false },
+  { id: 'main_channel', title: 'Main channel',    tpl: 'tpl-main-channel', required: false },
   { id: 'confirm',      title: 'Confirm',         tpl: 'tpl-confirm',   required: true  },
 ];
 
@@ -397,6 +393,51 @@ const _FEATURES = [
   { id: 'receipt_collector',label: 'Receipt collector',   on: false },
 ];
 
+function wireSlack(root, onDone, onSkip) {
+  const submit = root.querySelector('[data-action="submit"]');
+  const skip = root.querySelector('[data-action="skip"]');
+  submit.addEventListener('click', async () => {
+    const body = {
+      bot_token: root.querySelector('#f-slack-bot').value.trim(),
+      app_token: root.querySelector('#f-slack-app').value.trim(),
+      owner_user_id: root.querySelector('#f-slack-uid').value.trim(),
+    };
+    const userTok = root.querySelector('#f-slack-user').value.trim();
+    if (userTok) body.token = userTok;
+    if (!body.bot_token && !body.token) {
+      showError('At least one token is required — bot token for bidirectional, user token for read-only ingest.');
+      return;
+    }
+    submit.disabled = true;
+    try {
+      await api('/api/step/slack', body);
+      onDone();
+    } catch (e) {
+      showError(e.message);
+      submit.disabled = false;
+    }
+  });
+  skip.addEventListener('click', () => onSkip('slack'));
+}
+
+function wireMainChannel(root, onDone, onSkip) {
+  const submit = root.querySelector('[data-action="submit"]');
+  submit.addEventListener('click', async () => {
+    const choice = root.querySelector('input[name="main-channel"]:checked')?.value || 'imessage';
+    submit.disabled = true;
+    try {
+      await api('/api/step/main_channel', { channel: choice });
+      onDone();
+    } catch (e) {
+      showError(e.message);
+      submit.disabled = false;
+    }
+  });
+  root.querySelector('[data-action="skip"]').addEventListener(
+    'click', () => onSkip('main_channel'),
+  );
+}
+
 function wireFeatures(root, onDone, onSkip) {
   const list = root.querySelector('#features-list');
   list.innerHTML = _FEATURES.map(f => `
@@ -522,8 +563,33 @@ function nextStepIdx(status) {
   return STEPS.length - 1; // confirm
 }
 
+// M19d: edit-mode via ?mode=edit querystring. In edit-mode start je op
+// een step-index gepiked uit ?step=<id>, en Save-buttons zeggen "Save"
+// i.p.v. "Continue". Pre-fill is via /api/existing/<step>.
+function _urlMode() {
+  const p = new URLSearchParams(window.location.search);
+  return {
+    mode: p.get('mode') === 'edit' ? 'edit' : 'setup',
+    step: p.get('step') || null,
+  };
+}
+
 async function refresh() {
   const status = await api('/api/status');
+  const { mode, step: forcedStep } = _urlMode();
+  if (mode === 'edit') {
+    // In edit-mode: laat step-picker zien of ga naar geforceerde step.
+    if (forcedStep) {
+      const idx = STEPS.findIndex(s => s.id === forcedStep);
+      if (idx >= 0) {
+        renderProgress(idx, status.completed, status.skipped);
+        render(STEPS[idx].id, STEPS[idx], status);
+        return;
+      }
+    }
+    _renderStepPicker(status);
+    return;
+  }
   if (status.finished) {
     render('done', null, status);
     return;
@@ -532,6 +598,26 @@ async function refresh() {
   const step = STEPS[idx];
   renderProgress(idx, status.completed, status.skipped);
   render(step.id, step, status);
+}
+
+function _renderStepPicker(status) {
+  const stage = document.getElementById('stage');
+  stage.innerHTML =
+    '<article class="rosa-card">' +
+    '<h2>Edit settings</h2>' +
+    '<p class="lead">Pick a step to edit. Changes are saved to config.yaml immediately; if Rosa is running, send SIGHUP (rosa reload) to apply.</p>' +
+    '<div id="step-list" style="display: grid; gap: 0.5rem;"></div>' +
+    '</article>';
+  const list = stage.querySelector('#step-list');
+  STEPS.forEach(s => {
+    if (s.id === 'welcome' || s.id === 'confirm') return;
+    const a = document.createElement('a');
+    a.href = `?mode=edit&step=${s.id}`;
+    a.textContent = s.title;
+    a.className = 'rosa-btn secondary';
+    a.style.textAlign = 'left';
+    list.appendChild(a);
+  });
 }
 
 async function markSkip(stepId) {
@@ -567,8 +653,8 @@ function render(stepId, step, status) {
     case 'imessage':  wireImessage(root, onDone, onSkip); break;
     case 'google':    wireGoogle(root, onDone, onSkip); break;
     case 'imap':
-    case 'slack':
     case 'todoist':   wireTokenStep(root, step, onDone, onSkip); break;
+    case 'slack':     wireSlack(root, onDone, onSkip); break;
     case 'plaud':     wirePlaud(root, onDone, onSkip); break;
     case 'vips':
     case 'uptime':
@@ -576,6 +662,7 @@ function render(stepId, step, status) {
     case 'confidential': wireListStep(root, step, onDone, onSkip); break;
     case 'notifications': wireNotifications(root, onDone, onSkip); break;
     case 'features':  wireFeatures(root, onDone, onSkip); break;
+    case 'main_channel': wireMainChannel(root, onDone, onSkip); break;
     case 'confirm':   wireConfirm(root, status, onDone); break;
     default:
       wireStub(root, step.id, step.stub || '', onSkip);

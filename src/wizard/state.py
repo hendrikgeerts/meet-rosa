@@ -41,6 +41,7 @@ STEP_IDS = (
     "notifications",
     "confidential",
     "features",
+    "main_channel",   # M19c: welk kanaal krijgt proactieve messages
     "confirm",
 )
 

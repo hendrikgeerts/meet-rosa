@@ -11,7 +11,7 @@ spacy>=3.7
 #   python -m spacy download nl_core_news_md
 keyring>=25.0       # macOS Keychain backend for IMAP/Slack tokens (no plain-text)
 imap-tools>=1.7     # higher-level IMAP client over imaplib
-slack_sdk>=3.30     # Slack Web API client (user-token, read-only use)
+slack_sdk>=3.30     # Slack Web API client + Socket Mode bot (bidirectional)
 feedparser>=6.0     # RSS parser for morning-news
 fastapi>=0.115      # local audit-dashboard
 python-multipart>=0.0.27  # form-data parsing — ISO_AUDIT 2026-05 MED: 0.0.26 had CVE-2026-42561

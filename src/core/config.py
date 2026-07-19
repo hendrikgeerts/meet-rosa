@@ -201,6 +201,13 @@ class Settings:
     # die je credits opeten. 0 = uit (geen cap).
     monthly_anthropic_budget_usd: float = 0.0
 
+    # Welk kanaal ontvangt PROACTIEVE messages (briefings, day-close,
+    # reminders, uptime-alerts). Replies gaan altijd terug via het
+    # kanaal waar de user het bericht stuurde.
+    #   "imessage" — Mac users, default. iMessage bridge vereist.
+    #   "slack"    — voor niet-Mac users of gebruikers zonder FDA.
+    main_channel: str = "imessage"
+
     # Eigen email-domeinen — uitgaande facturen vanuit deze domeinen
     # worden in comm-intel summarize gemarkeerd als `fyi` (geen TODO
     # in briefing). Default leeg.
@@ -517,6 +524,7 @@ def load_settings(*, config_path: Path | None = None) -> Settings:
         user_home_city=str(user.get("home_city") or "").strip(),
         user_home_country=str(user.get("home_country") or "NL").strip(),
         user_company=str(user.get("company") or "").strip(),
+        main_channel=str(user.get("main_channel") or "imessage").lower(),
     )
 
 

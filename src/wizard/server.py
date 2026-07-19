@@ -80,6 +80,58 @@ def _mark_and_save(step_id: str) -> None:
         _save_state(state)
 
 
+def _extract_existing_values(cfg: dict, sec_path: Path) -> dict:
+    """Verzamel per-step de huidige config-waardes voor edit-mode
+    pre-fill. Secrets worden NIET teruggegeven — alleen "present?" flag,
+    zodat we niet per abuis API-keys naar de UI lekken."""
+    user = cfg.get("user") or {}
+    from wizard.state import load_secrets
+    secrets = load_secrets(sec_path)
+    def _mask(k: str) -> str:
+        v = secrets.get(k, "")
+        return "•" * min(len(v), 12) if v else ""
+
+    return {
+        "identity": {
+            "name": user.get("name", ""),
+            "email": user.get("email", ""),
+            "timezone": user.get("timezone", "Europe/Amsterdam"),
+            "preferred_language": user.get("preferred_language", "en"),
+            "home_city": user.get("home_city", ""),
+            "home_country": user.get("home_country", "NL"),
+            "company": user.get("company", ""),
+        },
+        "claude": {
+            "anthropic_api_key_masked": _mask("ANTHROPIC_API_KEY"),
+            "claude_model": (cfg.get("runtime") or {}).get(
+                "claude_model", "claude-sonnet-4-6",
+            ),
+            "local_model_main": (cfg.get("runtime") or {}).get(
+                "local_model_main", "llama3.1:8b-instruct-q4_K_M",
+            ),
+        },
+        "imessage": {
+            "primary_handle_masked": _mask("OWNER_IMESSAGE_HANDLE"),
+        },
+        "main_channel": {
+            "channel": user.get("main_channel", "imessage"),
+        },
+        "features": (cfg.get("features") or {}),
+        "vips": {
+            "items": "\n".join((cfg.get("vips") or {}).get("contacts", [])),
+        },
+        "uptime": {
+            "items": "\n".join((cfg.get("uptime") or {}).get("urls", [])),
+        },
+        "news": {
+            "items": "\n".join((cfg.get("news") or {}).get("feeds", [])),
+        },
+        "confidential": {
+            "items": "\n".join((cfg.get("confidential") or {}).get("domains", [])),
+        },
+    }
+
+
 def _require_token(request: Request) -> None:
     tok = request.headers.get("X-Wizard-Token", "").strip()
     if tok != _SESSION_TOKEN:
@@ -124,6 +176,10 @@ def build_app() -> FastAPI:
         state = _load_state()
         cfg_path, sec_path, _ = _paths()
         cfg = load_config(cfg_path)
+        # M19d: edit-mode retourneert huidige config-waardes zodat de
+        # UI pre-fill't. In initial setup blijft `existing_config`
+        # nagenoeg leeg (alleen defaults).
+        existing = _extract_existing_values(cfg, sec_path)
         return JSONResponse({
             "steps": list(STEP_IDS),
             "completed": sorted(state.completed),
@@ -132,7 +188,18 @@ def build_app() -> FastAPI:
             "has_config": cfg_path.exists(),
             "has_secrets": sec_path.exists(),
             "user_name": ((cfg.get("user") or {}).get("name") or "").strip(),
+            "existing": existing,
         })
+
+    @app.get("/api/existing/{step_id}")
+    def existing_for_step(request: Request, step_id: str) -> JSONResponse:
+        """Return current config values for a specific step (edit-mode)."""
+        _require_token(request)
+        cfg_path, sec_path, _ = _paths()
+        cfg = load_config(cfg_path)
+        return JSONResponse(
+            _extract_existing_values(cfg, sec_path).get(step_id, {}),
+        )
 
     # --------------------------------------------------------- steps ----
 
@@ -238,16 +305,59 @@ def build_app() -> FastAPI:
 
     @app.post("/api/step/slack")
     def step_slack(request: Request, payload: dict[str, Any]) -> JSONResponse:
+        """Slack integratie. Twee modes:
+
+        - ingest-only (user OAuth token `xoxp-…`): Rosa leest mentions/
+          DM's als context; ze antwoordt NIET via Slack.
+        - bidirectional (bot token `xoxb-…` + app token `xapp-…`):
+          Rosa antwoordt in Slack DM's + user kan main_channel op slack
+          zetten voor briefings etc.
+        """
         _require_token(request)
-        token = str(payload.get("token") or "").strip()
-        if not token.startswith("xoxp-") and not token.startswith("xoxb-"):
+        user_token = str(payload.get("token") or "").strip()
+        bot_token = str(payload.get("bot_token") or "").strip()
+        app_token = str(payload.get("app_token") or "").strip()
+        owner_user_id = str(payload.get("owner_user_id") or "").strip()
+
+        if user_token and not user_token.startswith(("xoxp-", "xoxb-")):
             raise HTTPException(
-                400, "Slack token should start with xoxp- or xoxb-",
+                400, "User token should start with xoxp- or xoxb-",
             )
+        if bot_token and not bot_token.startswith("xoxb-"):
+            raise HTTPException(400, "Bot token should start with xoxb-")
+        if app_token and not app_token.startswith("xapp-"):
+            raise HTTPException(400, "App-level token should start with xapp-")
+
         _, sec_path, _ = _paths()
-        save_secret(sec_path, "SLACK_USER_OAUTH_TOKEN", token)
+        if user_token:
+            save_secret(sec_path, "SLACK_USER_OAUTH_TOKEN", user_token)
+        if bot_token:
+            save_secret(sec_path, "SLACK_BOT_TOKEN", bot_token)
+        if app_token:
+            save_secret(sec_path, "SLACK_APP_TOKEN", app_token)
+        if owner_user_id:
+            save_secret(sec_path, "SLACK_OWNER_USER_ID", owner_user_id)
+
         st = _load_state()
         st.mark_done("slack")
+        _save_state(st)
+        return JSONResponse({"ok": True})
+
+    @app.post("/api/step/main_channel")
+    def step_main_channel(
+        request: Request, payload: dict[str, Any],
+    ) -> JSONResponse:
+        """Kies naar welk kanaal Rosa's PROACTIEVE messages gaan
+        (briefings, day-close, reminders). Replies gaan altijd terug via
+        het kanaal waar het bericht binnenkwam."""
+        _require_token(request)
+        choice = str(payload.get("channel") or "imessage").lower()
+        if choice not in ("imessage", "slack"):
+            raise HTTPException(400, f"unknown channel: {choice!r}")
+        cfg_path, _, _ = _paths()
+        update_config(cfg_path, {"user": {"main_channel": choice}})
+        st = _load_state()
+        st.mark_done("main_channel")
         _save_state(st)
         return JSONResponse({"ok": True})
 

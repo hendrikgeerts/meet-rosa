@@ -26,6 +26,7 @@ COMMANDS = {
     "update": "cli.update_cmd",
     "simulate": "cli.simulate",
     "reload": "cli.reload_cmd",
+    "settings": "cli.settings",
 }
 
 
@@ -41,6 +42,7 @@ def _print_help() -> None:
     print("  update          Pull latest from GitHub + re-doctor")
     print("  setup           Re-run the setup wizard")
     print("  reload          Signal running daemon to reload config.yaml")
+    print("  settings        Open the wizard in edit-mode (settings UI)")
     print("  simulate        Feed a synthetic iMessage for testing")
     print("\nRun `rosa <command> --help` for command-specific options.")
 

@@ -10,6 +10,7 @@ import threading
 import time
 
 from core import db, orchestrator
+from core.channels import ChannelRegistry, build_registry
 from core.audit import (
     AdminActionLogger,
     AuditLogger,
@@ -73,6 +74,31 @@ from core.prompts import SYSTEM_PROMPT_TEMPLATE  # noqa: E402
 class _Shutdown:
     flag = False
     reload_flag = False  # SIGHUP → main-loop reloadt Settings
+
+
+# Module-level channel registry. Wordt door run() ge-init na Slack-boot.
+# Voor Mac-only setups blijft dit een iMessage-only registry.
+_registry: ChannelRegistry | None = None
+
+
+def _send_proactive(text: str) -> None:
+    """Stuur bericht dat Rosa zelf initieert (briefing, welcome,
+    reminder-fire, uptime-alert). Gaat naar main_channel uit config."""
+    if _registry is None:
+        # Not yet initialised (bv. bij bootstrap crashes) — silently skip.
+        return
+    _registry.send_proactive(text)
+
+
+def _send_reply(*, origin_channel: str, dest: str, text: str) -> None:
+    """Antwoord terug via HET kanaal waar de user via schreef."""
+    if _registry is None:
+        # Fallback naar directe iMessage-call (safety net voor
+        # tests die main.py importeren zonder run()).
+        from integrations import imessage as _im
+        _im.send_imessage(dest, text)
+        return
+    _registry.send_reply(origin_channel, dest, text)
 
 
 def _install_signal_handlers(stop_event: threading.Event) -> None:
@@ -322,6 +348,70 @@ def _english_practice_state_line(db_path) -> str:
         + "${user_name}'s next message is most "
         + "likely his answer-sentence — call english_practice_evaluate."
     )
+
+
+def _dispatch_slack_message(
+    channel_id: str,
+    text: str,
+    *,
+    settings: Settings,
+    gateway: Gateway,
+    executor: ToolExecutor,
+    health_state: HealthState,
+) -> None:
+    """Wrapper voor Slack-DM's die de orchestrator gebruikt en het
+    antwoord terug naar Slack post. Minimaal — geen quick-commands,
+    geen catchup, geen audio. Uitbreiden zodra ge-testet."""
+    if _registry is None or "slack" not in _registry.channels:
+        log.warning("slack message received but registry not ready")
+        return
+
+    # Simple quick-command dispatch (help/status/test).
+    from core.quick_commands import try_quick_command
+    quick = try_quick_command(text, settings)
+    if quick is not None:
+        _send_reply(origin_channel="slack", dest=channel_id, text=quick)
+        return
+
+    # Full orchestrator flow (borrowed from _handle_message).
+    with db.connect(settings.db_path) as conn:
+        # Slack DM's krijgen een aparte handle-namespace zodat ze niet
+        # met iMessage-history vermengen: "slack:<channel_id>".
+        handle = f"slack:{channel_id}"
+        db.append_turn(conn, handle=handle, role="user", content=text)
+        history = [
+            {"role": t["role"], "content": t["content"]}
+            for t in db.recent_turns(conn, handle, limit=20)[:-1]
+        ]
+        from core.config import get_rosa_home
+        _config_dir = get_rosa_home() / "config"
+        from core.prompt_builder import render_system_prompt
+        system_prompt = render_system_prompt(
+            SYSTEM_PROMPT_TEMPLATE
+            + _current_date_state_line()
+            + _english_practice_state_line(settings.db_path)
+            + _user_profile_block(_config_dir / "user_profile.yaml"),
+            settings,
+        )
+        try:
+            reply_text = orchestrator.converse(
+                gateway=gateway, executor=executor,
+                system=system_prompt,
+                history=history + [{"role": "user", "content": text}],
+                progress_ack=None,
+            )
+        except Exception:
+            log.exception("slack: agent.converse failed")
+            _send_reply(
+                origin_channel="slack", dest=channel_id,
+                text="Sorry, something went wrong on my end.",
+            )
+            return
+
+        if not reply_text.strip():
+            reply_text = "(no reply)"
+        _send_reply(origin_channel="slack", dest=channel_id, text=reply_text)
+        db.append_turn(conn, handle=handle, role="assistant", content=reply_text)
 
 
 def _handle_message(
@@ -895,15 +985,61 @@ def run() -> None:
         settings.plaud_inbox_dir,
     )
 
-    # First-boot welkomstbericht — alleen als de user Rosa net via wizard
-    # heeft geconfigureerd. Zie core/first_boot.py voor detectie via
-    # marker-file. Idempotent bij re-boots.
+    # Slack bidirectional bot — als geconfigureerd, start voor de main
+    # loop begint. Alle proactieve messages gaan naar main_channel; de
+    # bot's on_message hookt op dezelfde _handle_message flow als
+    # iMessage. Zie M19b.
+    global _registry
+    slack_bot = None
+    slack_default_channel = ""
+    slack_send_fn = None
+    if os.environ.get("SLACK_BOT_TOKEN") and os.environ.get("SLACK_APP_TOKEN"):
+        owner = os.environ.get("SLACK_OWNER_USER_ID", "").strip()
+        if not owner:
+            log.warning(
+                "SLACK_BOT_TOKEN + SLACK_APP_TOKEN set but "
+                "SLACK_OWNER_USER_ID missing — bot disabled",
+            )
+        else:
+            try:
+                from integrations.slack_bot import SlackBot
+                slack_default_channel = os.environ.get(
+                    "SLACK_OWNER_DM_CHANNEL", "",
+                ).strip() or owner
+                # on_message callback wire't naar orchestrator via
+                # dezelfde _handle_message flow (see main-loop below).
+                def _slack_on_message(channel_id: str, text: str) -> None:
+                    _dispatch_slack_message(
+                        channel_id, text,
+                        settings=settings, gateway=gateway,
+                        executor=executor, health_state=health_state,
+                    )
+                slack_bot = SlackBot(
+                    bot_token=os.environ["SLACK_BOT_TOKEN"],
+                    app_token=os.environ["SLACK_APP_TOKEN"],
+                    owner_user_id=owner,
+                    on_message=_slack_on_message,
+                )
+                slack_bot.start()
+                slack_send_fn = slack_bot.send
+                log.info("slack bidirectional bot started")
+            except Exception:
+                log.exception("slack bot failed to start (non-fatal)")
+
+    # Wire de channel-registry ná Slack-init.
+    _registry = build_registry(
+        settings,
+        slack_send_fn=slack_send_fn,
+        slack_default_dest=slack_default_channel,
+    )
+
+    # First-boot welkomstbericht — via de registry (respect main_channel).
     from core.first_boot import send_welcome_if_first_boot
     try:
         send_welcome_if_first_boot(
             user_name=settings.user_name,
             handle=settings.primary_handle,
-            sender=imessage.send_imessage,
+            sender=lambda _h, t: _send_proactive(t),
         )
     except Exception:
         log.exception("welcome-message send failed (non-fatal)")

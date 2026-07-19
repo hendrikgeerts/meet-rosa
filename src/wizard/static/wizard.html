@@ -324,6 +324,66 @@
     </article>
   </template>
 
+  <template id="tpl-slack">
+    <article class="rosa-card">
+      <h2>Slack <span class="rosa-status-tag optional">optional</span></h2>
+      <p class="lead">
+        Two modes:
+        <br><strong>Read-only ingest</strong> — Rosa sees mentions +
+        DMs in her briefings.
+        <br><strong>Bidirectional</strong> — talk to Rosa in Slack DMs;
+        she replies there and can send briefings there (see next step).
+      </p>
+
+      <div class="rosa-callout info">
+        <strong>Setting up a Slack app — 5 min:</strong>
+        <ol style="margin: 0.5rem 0 0 1rem; padding-left: 1rem;">
+          <li>Go to <a href="https://api.slack.com/apps" target="_blank" rel="noopener">api.slack.com/apps</a> → Create New App → From scratch.</li>
+          <li>Under <em>OAuth &amp; Permissions</em>, add scopes:
+              <code>chat:write</code>, <code>im:history</code>,
+              <code>im:read</code>, <code>im:write</code>.</li>
+          <li>Under <em>Socket Mode</em>, enable it and generate an app-level token with scope <code>connections:write</code>.</li>
+          <li>Under <em>Event Subscriptions</em>, subscribe to
+              <code>message.im</code>.</li>
+          <li>Install app to your workspace → copy the Bot token
+              (<code>xoxb-…</code>).</li>
+          <li>Find your Slack user-id: Slack profile → three-dot menu → Copy member ID (U…).</li>
+        </ol>
+      </div>
+
+      <div class="rosa-field">
+        <label class="rosa-label" for="f-slack-bot">Bot User OAuth Token</label>
+        <input class="rosa-input" id="f-slack-bot" type="password"
+               placeholder="xoxb-…" autocomplete="off">
+        <small class="rosa-hint">Enables bidirectional chat. Required if you want to talk to Rosa in Slack.</small>
+      </div>
+      <div class="rosa-field">
+        <label class="rosa-label" for="f-slack-app">App-Level Token</label>
+        <input class="rosa-input" id="f-slack-app" type="password"
+               placeholder="xapp-…" autocomplete="off">
+        <small class="rosa-hint">For Socket Mode connection. Needed together with the bot token.</small>
+      </div>
+      <div class="rosa-field">
+        <label class="rosa-label" for="f-slack-uid">Your Slack user-id</label>
+        <input class="rosa-input" id="f-slack-uid" type="text"
+               placeholder="U0123456789">
+        <small class="rosa-hint">Rosa only responds to DMs from this user-id (single-user rule).</small>
+      </div>
+      <div class="rosa-field">
+        <label class="rosa-label" for="f-slack-user">User OAuth Token <span class="rosa-status-tag optional">optional</span></label>
+        <input class="rosa-input" id="f-slack-user" type="password"
+               placeholder="xoxp-…" autocomplete="off">
+        <small class="rosa-hint">Only for read-only ingest of your own messages in channels. Leave blank if you only want bidirectional.</small>
+      </div>
+
+      <div class="rosa-actions">
+        <button class="rosa-btn ghost" data-action="skip">Skip for now</button>
+        <div class="spacer"></div>
+        <button class="rosa-btn primary" data-action="submit">Save &amp; continue</button>
+      </div>
+    </article>
+  </template>
+
   <template id="tpl-token-step">
     <article class="rosa-card">
       <h2 data-slot="title">Connect</h2>
@@ -496,6 +556,41 @@
       <div class="rosa-actions">
         <div class="spacer"></div>
         <button class="rosa-btn primary" data-action="skip">Skip & continue</button>
+      </div>
+    </article>
+  </template>
+
+  <template id="tpl-main-channel">
+    <article class="rosa-card">
+      <h2>Main channel <span class="rosa-status-tag optional">optional</span></h2>
+      <p class="lead">
+        Where does Rosa <em>reach out to you</em>? Proactive messages
+        (morning briefing, day-close, reminders, uptime alerts) go to
+        this channel. Replies to your questions always go back through
+        the channel you asked from — so you can still switch mid-day.
+      </p>
+
+      <div class="rosa-callout info">
+        Default is iMessage. Pick Slack if you're not on macOS, or if
+        Full Disk Access isn't an option for you. Slack requires the
+        bot + app tokens from the Slack step above.
+      </div>
+
+      <div class="rosa-field">
+        <label class="rosa-checkbox">
+          <input type="radio" name="main-channel" value="imessage" checked>
+          <span><strong>iMessage</strong> — Mac-native, quiet, works offline for send/receive.</span>
+        </label>
+        <label class="rosa-checkbox" style="margin-top: 0.5rem;">
+          <input type="radio" name="main-channel" value="slack">
+          <span><strong>Slack</strong> — cross-platform, works on any device that runs Slack.</span>
+        </label>
+      </div>
+
+      <div class="rosa-actions">
+        <button class="rosa-btn ghost" data-action="skip">Skip (use iMessage)</button>
+        <div class="spacer"></div>
+        <button class="rosa-btn primary" data-action="submit">Continue</button>
       </div>
     </article>
   </template>
