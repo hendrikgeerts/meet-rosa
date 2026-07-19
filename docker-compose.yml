@@ -1,0 +1,44 @@
+# docker-compose.yml — Rosa + Ollama sidecar for BYOC self-hosting.
+#
+# One-liner start:
+#     docker compose up -d
+#
+# Then open the wizard on http://localhost:8765/ (or your server's IP:8765
+# behind an SSH tunnel — do NOT expose the wizard publicly).
+#
+# Volumes:
+#   rosa-home   — config, secrets, memory-db, logs
+#   ollama-data — pulled local models (~5GB)
+
+services:
+  rosa:
+    build: .
+    image: rosa:latest
+    container_name: rosa
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8765:8765"       # wizard/settings — loopback ONLY
+    environment:
+      - ROSA_HOME=/data
+      - OLLAMA_HOST=http://ollama:11434
+    volumes:
+      - rosa-home:/data
+    depends_on:
+      ollama:
+        condition: service_healthy
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: rosa-ollama
+    restart: unless-stopped
+    volumes:
+      - ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  rosa-home:
+  ollama-data:
