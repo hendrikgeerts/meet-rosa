@@ -124,6 +124,11 @@ def match(item: dict[str, Any], cfg: TenderFilter) -> MatchResult:
 
 # Default filter — gevalideerd tegen ID 407531/419614 (match) en 229136
 # (vangt via cpv_desc keyword "audiovisuele"). Pas aan via config/tenders.yaml.
+#
+# Sinds 2026-07-21 uitgebreid met kiosk-CPV's en nieuwe categorieën:
+# digitale recepties, toegangskiosken, incheck kiosken. Live-getest
+# tegen laatste 1000 publicaties (Eindhoven Airport CUPPS #433524 =
+# match op check-in kiosk categorie).
 DEFAULT_FILTER = TenderFilter(
     cpv_codes=(
         "32320000",  # Televisie- en audiovisuele uitrusting
@@ -135,14 +140,21 @@ DEFAULT_FILTER = TenderFilter(
         "72212500",  # Communicatie/multimedia software-ontwikkeling
         "50300000",  # Reparatie/onderhoud audiovisuele uitrusting
         "50340000",  # Reparatie audio/video/optisch
+        # M22: kiosk + passagierinformatie
+        "30144100",  # Kiosken (dedicated CPV voor self-service kiosk)
+        "48814200",  # Software voor kiosk-toepassingen
+        "34962200",  # Passagier-informatie-systemen (airport/transit)
     ),
     cpv_description_keywords=(
         "audiovisuele",      # vangt NS Reclamedragers (CPV 50300000)
         "audio-visual",
         "audiovisueel",
         "multimedia",
+        "kiosk",             # CPV-desc voor 30144100 + 48814200
+        "passagier",         # transit + airport passenger info
     ),
     keywords=(
+        # AV / narrowcasting (bestaand)
         "narrowcasting", "narrowcast", "narrowcastingoplossing",
         "digital signage", "digitale signage",
         "av-installatie", "av installatie",
@@ -159,6 +171,33 @@ DEFAULT_FILTER = TenderFilter(
         "outdoor display", "dooh",
         "wayfinding",
         "kiosks",
-        "contentmanagement",  # vangt secundair als gecombineerd met AV-CPV
+        "contentmanagement",
+        # M22: Digitale Recepties
+        "digitale receptie", "digital reception",
+        "receptiezuil", "receptie-zuil", "receptie zuil",
+        "receptiekiosk", "receptie-kiosk", "receptie kiosk",
+        "receptie-app", "receptie applicatie", "receptie-applicatie",
+        "self-service receptie", "self service receptie",
+        "onbemande receptie", "digital host",
+        "onthaalzuil", "onthaalkiosk",
+        # M22: Toegangskiosken
+        "toegangskiosk", "toegang-kiosk", "toegang kiosk",
+        "toegangszuil", "toegang-zuil", "toegang zuil",
+        "access kiosk", "access-kiosk",
+        "visitor management", "visitormanagement",
+        "visitor kiosk", "visitor-kiosk",
+        "bezoekersregistratie", "bezoekersmanagement",
+        "bezoekerszuil", "bezoekerskiosk",
+        "aanmeldzuil", "aanmelddesk", "aanmeldbalie",
+        "gate kiosk", "gatekiosk",
+        # M22: Incheck kiosken
+        "incheck kiosk", "incheckkiosk", "incheck-kiosk",
+        "check-in kiosk", "check in kiosk", "checkin kiosk",
+        "self check-in", "self-check-in", "selfcheck-in", "self check in",
+        "self-service check-in", "self service check-in",
+        "aanmeldkiosk", "aanmeld-kiosk", "aanmeld kiosk",
+        "meldkiosk", "meld-kiosk",
+        "check-in zuil", "checkin zuil", "check in zuil",
+        "cupps",  # airport-industry term: Common Use Passenger Processing
     ),
 )
